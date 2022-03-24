@@ -9,6 +9,8 @@ public class Header {
         this.key = key;
     }
 
+    public Header() {}
+
     public String getKey() {
         return key;
     }

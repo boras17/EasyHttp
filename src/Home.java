@@ -2,6 +2,7 @@ import Headers.CommonHeaders;
 import HttpEnums.Method;
 import Parts.FilePart;
 import Parts.PartType;
+import auth.digestauth.HashAlgorithms;
 import jsonoperations.JsonCreator;
 import jsonoperations.serialization.EasySerialize;
 import jsonoperations.serialization.LocalDateTimeSerializer;
@@ -51,11 +52,7 @@ public class Home {
 
     public static void main(String[] args) throws IOException, IllegalAccessException {
 
-        JsonCreator jsonCreator = new JsonCreator();
-        jsonCreator.generateJson(new Person("adam","kowalski"));
-        String json = jsonCreator.getJson();
 
-        System.out.println(json);
         /*
         MultipartBody multipart = new MultipartBody.MultiPartRequestBuilder()
                 .addPart(new FilePart(new File("plik.txt"),"party"))
