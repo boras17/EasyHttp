@@ -2,6 +2,8 @@ import Headers.CommonHeaders;
 import HttpEnums.Method;
 import Parts.FilePart;
 import Parts.PartType;
+import auth.digestauth.DigestAuthenticationProvider;
+import auth.digestauth.DigestConfiguration;
 import auth.digestauth.HashAlgorithms;
 import jsonoperations.JsonCreator;
 import jsonoperations.serialization.EasySerialize;
@@ -16,6 +18,7 @@ import requests.multirpart.simplerequest.jsonsender.bodysenders.MultiPartBodySen
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -50,7 +53,7 @@ public class Home {
         }
     }
 
-    public static void main(String[] args) throws IOException, IllegalAccessException {
+    public static void main(String[] args) throws IOException, IllegalAccessException, NoSuchAlgorithmException {
 
 
         /*
@@ -76,6 +79,20 @@ public class Home {
         }).join();
 
         */
+        DigestConfiguration digestConfiguration = new DigestConfiguration.DigestConfigBuilder()
+                .setQop("auth")
+                .setRealm("GAURAVBYTES.COM")
+                .setUri("/hello")
+                .setNonce("MTY0ODE2NDcyNjAwMDozOTFlZTAzMjYwZWQ3OTA3MmFmYjU2NTNiZjYzODY4Mg=")
+                .setMethod("GET")
+                .build();
+
+        DigestAuthenticationProvider digestAuthenticationProvider
+                = new DigestAuthenticationProvider("username","password", digestConfiguration);
+        digestAuthenticationProvider.calculate();
+        EasyHttp easyHttp = new EasyHttp.MikoHTTPBuilder()
+                .setAuthenticationProvider(digestAuthenticationProvider)
+                .build();
     }
 
 }

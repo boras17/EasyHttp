@@ -1,28 +1,49 @@
 package auth.digestauth;
 
 public class DigestConfiguration {
-    private final String nonce;
     private final HashAlgorithms hashAlgorithm;
-    private final String realm;
-    private final String qop;
-    private final String nonceCount;
-    private final String clientNonce;
-    private final String opaque;
+    // digest resp part
+    private final String nonce; //
+    private final String realm; //
+    private final String qop; //
+    private int nonceCount = 1;
+    //-----
+    private final String method;
+    private final String entityBody;
+    private final String uri;
+    //
+
+    private final String cnonce;
 
     public DigestConfiguration(String nonce,
                                HashAlgorithms hashAlgorithm,
                                String realm,
                                String qop,
-                               String nonceCount,
-                               String clientNonce,
-                               String opaque) {
+                               String method,
+                               String uri,
+                               String cnonce,
+                               String entityBody) {
         this.nonce = nonce;
         this.hashAlgorithm = hashAlgorithm;
         this.realm = realm;
         this.qop = qop;
-        this.nonceCount = nonceCount;
-        this.clientNonce = clientNonce;
-        this.opaque = opaque;
+        this.method = method;
+        this.uri = uri;
+        this.cnonce = cnonce;
+        this.entityBody = entityBody;
+    }
+
+    public void incrementNonceCounter() {
+        this.nonceCount += 1;
+    }
+
+    public String getNonceCount(){
+            // 00000001
+        String cnonce = String.valueOf(this.nonceCount);
+        int size = cnonce.length();
+        int maxSize = 8;
+        int zeroFill = maxSize - size;
+        return "0".repeat(zeroFill).concat(cnonce);
     }
 
     public static class DigestConfigBuilder{
@@ -30,12 +51,17 @@ public class DigestConfiguration {
         private HashAlgorithms hashAlgorithm = HashAlgorithms.MD5;
         private String realm;
         private String qop;
-        private String nonceCount;
-        private String clientNonce;
-        private String opaque;
+        private String method;
+        private String uri;
+        private String cnonce;
+        private String entityBody;
 
         public DigestConfigBuilder setNonce(String nonce) {
             this.nonce = nonce;
+            return this;
+        }
+        public DigestConfigBuilder setCnonce(String cnonce) {
+            this.cnonce = cnonce;
             return this;
         }
 
@@ -54,24 +80,31 @@ public class DigestConfiguration {
             return this;
         }
 
-        public DigestConfigBuilder setNonceCount(String nonceCount) {
-            this.nonceCount = nonceCount;
+        public DigestConfigBuilder setMethod(String method) {
+            this.method = method;
             return this;
         }
 
-        public DigestConfigBuilder setClientNonce(String clientNonce) {
-            this.clientNonce = clientNonce;
+        public DigestConfigBuilder setUri(String uri) {
+            this.uri = uri;
             return this;
         }
 
-        public DigestConfigBuilder setOpaque(String opaque) {
-            this.opaque = opaque;
+        public DigestConfigBuilder setEntityBody(String entityBody) {
+            this.entityBody = entityBody;
             return this;
         }
+
 
         public DigestConfiguration build() {
-            return new DigestConfiguration(nonce, hashAlgorithm,
-                    realm, qop, nonceCount, clientNonce, opaque);
+            return new DigestConfiguration( nonce,
+                                            hashAlgorithm,
+                                            realm,
+                                            qop,
+                                            method,
+                                            uri,
+                                            cnonce,
+                                            entityBody);
         }
     }
 
@@ -91,15 +124,16 @@ public class DigestConfiguration {
         return qop;
     }
 
-    public String getNonceCount() {
-        return nonceCount;
+    public String getMethod() {
+        return method;
     }
 
-    public String getClientNonce() {
-        return clientNonce;
+    public String getEntityBody() {
+        return entityBody;
     }
 
-    public String getOpaque() {
-        return opaque;
+    public String getUri() {
+        return uri;
     }
+
 }

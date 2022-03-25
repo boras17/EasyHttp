@@ -1,6 +1,7 @@
 import Headers.Header;
 import HttpEnums.HttpStatus;
 import HttpEnums.Method;
+import auth.AuthenticationProvider;
 import requests.bodyhandlers.AbstractBodyHandler;
 import requests.cookies.CookieExtractor;
 import requests.easyrequest.MultipartBody;
@@ -15,9 +16,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.http.HttpRequest;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -27,6 +26,7 @@ public class EasyHttp {
     private HttpURLConnection connection;
     private String userAgent;
     private CookieExtractor cookieExtractor;
+    private AuthenticationProvider authenticationProvider;
 
     public void send(HttpRequest request){
         if(this.cookieExtractor != null){
@@ -54,6 +54,14 @@ public class EasyHttp {
         });
     }
 
+    private void addAuthHeaderIfProviderPresent(EasyHttpRequest easyHttpRequest){
+        Optional<AuthenticationProvider> provider = Optional.ofNullable(this.authenticationProvider);
+        if(provider.isPresent()){
+            AuthenticationProvider authenticationProvider = provider.get();
+            easyHttpRequest.getHeaders().addAll(authenticationProvider.getAuthHeaders());
+        }
+    }
+
     public <T> EasyHttpResponse<T> send(requests.multirpart.simplerequest.EasyHttpRequest request,
                                  AbstractBodyHandler<T> bodyHandler)
             throws IOException, IllegalAccessException {
@@ -68,6 +76,8 @@ public class EasyHttp {
         for(Header header: requestHeaders){
             this.connection.addRequestProperty(header.getKey(), header.getValue());
         }
+
+        this.addAuthHeaderIfProviderPresent(request);
 
         this.connection.setRequestMethod(request.getMethod().name());
 
@@ -119,6 +129,7 @@ public class EasyHttp {
         private Method method;
         private String userAgent;
         private CookieExtractor cookieExtractor;
+        private AuthenticationProvider authenticationProvider;
 
         public MikoHTTPBuilder setURL(URL url){
             this.url = url;
@@ -127,6 +138,11 @@ public class EasyHttp {
 
         public MikoHTTPBuilder setCookieExtractor(CookieExtractor extractor){
             this.cookieExtractor = extractor;
+            return this;
+        }
+
+        public MikoHTTPBuilder setAuthenticationProvider(AuthenticationProvider authenticationProvider){
+            this.authenticationProvider = authenticationProvider;
             return this;
         }
 
@@ -146,9 +162,18 @@ public class EasyHttp {
             http.setMethod(this.method);
             http.setUserAgent(this.userAgent);
             http.setCookieExtractor(cookieExtractor);
+            http.setAuthenticationProvider(this.authenticationProvider);
             return http;
         }
 
+    }
+
+    public AuthenticationProvider getAuthenticationProvider() {
+        return authenticationProvider;
+    }
+
+    public void setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
+        this.authenticationProvider = authenticationProvider;
     }
 
     public String getUserAgent() {
