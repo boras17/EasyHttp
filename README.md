@@ -26,3 +26,13 @@ The question which propably is in yout mind is how can I extract this cookies? A
 ```java 
 List<Cookie> cookies = cookieExtractor.getCookies();
 ```
+Now let me explain you how to use 'Authenticator'. We have three options. First one is basic auth:
+```java
+        AuthenticationProvider authenticationProvider
+                = new BasicAuthenticationProvider("username","password");
+        
+        EasyHttp client = new EasyHttp.EasyHttpBuilder()
+                .setAuthenticationProvider(authenticationProvider)
+                .build();
+```
+I thing it is very clear. There is AuthenticationProvider which is asbtract class and BasicAuthenticationProvider class which inherits from AuthenticationProvider. In AuthenticationProvider abstract class we have two parameters constructors which accepts two paramters. First parameter is username and second one is password.
