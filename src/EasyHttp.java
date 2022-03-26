@@ -115,6 +115,7 @@ public class EasyHttp {
         bodyHandler.setHeaders(headers);
 
         EasyHttpResponse<T> _response = bodyHandler.getCalculatedResponse();
+
         this.interceptor.getResponseHandler().accept(_response, _response.getBody());
         return _response; //bodyHandler.getCalculatedResponse();
     }

@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.stream.Collectors;
 
 public class StringBodyHandler extends AbstractBodyHandler<String>{
 
@@ -14,8 +13,7 @@ public class StringBodyHandler extends AbstractBodyHandler<String>{
 
     }
 
-    @Override
-    protected void calculateBody() throws IOException {
+    private void calculateBody() throws IOException {
         StringBuilder stringContent = new StringBuilder();
         InputStream inputStream = super.getInputStream();
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);

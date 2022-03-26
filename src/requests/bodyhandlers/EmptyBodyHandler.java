@@ -5,10 +5,6 @@ import requests.easyresponse.EasyHttpResponse;
 import java.io.IOException;
 
 public class EmptyBodyHandler extends AbstractBodyHandler<Void>{
-    @Override
-    protected void calculateBody() throws IOException {
-
-    }
 
     @Override
     public EasyHttpResponse<Void> getCalculatedResponse() throws IOException {

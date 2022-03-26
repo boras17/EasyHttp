@@ -17,8 +17,6 @@ public abstract class AbstractBodyHandler<T> {
 
     protected AbstractBodyHandler(){}
 
-    protected abstract void calculateBody() throws IOException;
-
     public abstract EasyHttpResponse<T> getCalculatedResponse() throws IOException;
 
     public T getBody() {
