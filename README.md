@@ -123,6 +123,11 @@ Body handler Allows you extrect body from response but if you for example send s
 EasyHttpResponse<String> response = client.send(request, new StringBodyHandler());
         String body = response.getBody();
 ```
+InpuStream body:
+```java
+EasyHttpResponse<InputStream> response = client.send(request, new StreamBodyHandler());
+        InputStream content = response.getBody();
+```
 With response object you can get response status:
 ```java
 HttpStatus status = response.getResponseStatus();
