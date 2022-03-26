@@ -118,3 +118,19 @@ Now it is time to handle response from server. For handling responses you can us
 ```java
 EasyHttpResponse<Void> response = client.send(request, new EmptyBodyHandler());
 ```
+Body handler Allows you extrect body from response but if you for example send some post request for server and you do not expect any body you can use EmptyBodyHandler and type of response will be Void. I created a few body Handlers. First one is StringBodyHandler which allows you to extract body as a String from server:
+```java
+EasyHttpResponse<String> response = client.send(request, new StringBodyHandler());
+        String body = response.getBody();
+```
+With response object you can get response status:
+```java
+HttpStatus status = response.getResponseStatus();
+```
+and list of headers from server:
+```java
+List<Header> status = response.getResponseHeaders();
+        Header header = status.get(0);
+        String headerKey = header.getKey();
+        String headerValue = header.getValue();
+```
