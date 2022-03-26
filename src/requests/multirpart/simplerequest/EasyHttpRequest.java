@@ -4,21 +4,25 @@ import Headers.Header;
 import HttpEnums.Method;
 import requests.multirpart.simplerequest.jsonsender.BodyConverter;
 
+import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class EasyHttpRequest {
     private final URL url;
     private final Method method;
     private final BodyConverter<?> body;
     private final List<Header> headers;
+    private Proxy proxy;
 
-    public EasyHttpRequest(URL url, Method method, BodyConverter<?> body, List<Header> headers) {
+    public EasyHttpRequest(URL url, Method method, BodyConverter<?> body, List<Header> headers, Proxy proxy) {
         this.url = url;
         this.method = method;
         this.body = body;
         this.headers = headers;
+        this.proxy = proxy;
     }
 
     public static class EasyHttpRequestBuilder{
@@ -26,6 +30,7 @@ public class EasyHttpRequest {
         private Method method;
         private BodyConverter<?> body;
         private final List<Header> headers = new ArrayList<>();
+        private Proxy proxy;
 
         public EasyHttpRequestBuilder setUri(URL url) {
             this.url = url;
@@ -42,6 +47,12 @@ public class EasyHttpRequest {
             return this;
         }
 
+        public EasyHttpRequestBuilder setProxy(Proxy proxy){
+            this.proxy = proxy;
+
+            return this;
+        }
+
         public EasyHttpRequestBuilder setMethod(Method method) {
             this.method = method;
             return this;
@@ -53,7 +64,7 @@ public class EasyHttpRequest {
         }
 
         public EasyHttpRequest build(){
-            return new EasyHttpRequest(url, method, body, headers);
+            return new EasyHttpRequest(url, method, body, headers, proxy);
         }
     }
 
@@ -69,8 +80,15 @@ public class EasyHttpRequest {
         return method;
     }
 
-    public BodyConverter<?> getBody() {
-        return body;
+    public Optional<BodyConverter<?>> getBody() {
+        return Optional.ofNullable(body);
     }
 
+    public Optional<Proxy> getProxy() {
+        return Optional.ofNullable(proxy);
+    }
+
+    public void setProxy(Proxy proxy) {
+        this.proxy = proxy;
+    }
 }

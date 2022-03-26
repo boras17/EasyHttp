@@ -1,27 +1,20 @@
-import Headers.CommonHeaders;
+import Headers.Header;
 import HttpEnums.Method;
-import Parts.FilePart;
-import Parts.PartType;
-import auth.digestauth.DigestAuthenticationProvider;
-import auth.digestauth.DigestConfiguration;
-import auth.digestauth.HashAlgorithms;
-import jsonoperations.JsonCreator;
+import intercepting.Interceptor;
 import jsonoperations.serialization.EasySerialize;
 import jsonoperations.serialization.LocalDateTimeSerializer;
-import requests.easyresponse.EasyHttpResponse;
 import requests.bodyhandlers.StringBodyHandler;
-import requests.easyrequest.MultipartBody;
+import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
-import requests.multirpart.simplerequest.jsonsender.bodysenders.JsonBodySender;
-import requests.multirpart.simplerequest.jsonsender.bodysenders.MultiPartBodySender;
 
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class Home {
 
@@ -79,20 +72,34 @@ public class Home {
         }).join();
 
         */
-        DigestConfiguration digestConfiguration = new DigestConfiguration.DigestConfigBuilder()
-                .setQop("auth")
-                .setRealm("GAURAVBYTES.COM")
-                .setUri("/hello")
-                .setNonce("MTY0ODE2NDcyNjAwMDozOTFlZTAzMjYwZWQ3OTA3MmFmYjU2NTNiZjYzODY4Mg=")
-                .setMethod("GET")
+
+        // Function<EasyHttpRequest, EasyHttpRequest> handleRequest;
+        // Function<EasyHttpResponse<T>, EasyHttpResponse<T>> handleResponse;
+
+        UnaryOperator<String> unaryOperator = (e) -> {
+            return e.concat("");
+        };
+        unaryOperator.apply(")");
+
+
+        EasyHttp client = new EasyHttp.EasyHttpBuilder()
+                .interceptor(new Interceptor(request -> {
+                    System.out.println("requestMethod: " + request.getMethod());
+                    return request;
+                },  (response, payload) -> {
+                    System.out.println("response payload" + payload);
+                }))
                 .build();
 
-        DigestAuthenticationProvider digestAuthenticationProvider
-                = new DigestAuthenticationProvider("username","password", digestConfiguration);
-        digestAuthenticationProvider.calculate();
-        EasyHttp easyHttp = new EasyHttp.MikoHTTPBuilder()
-                .setAuthenticationProvider(digestAuthenticationProvider)
+        EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
+                .setUri(new URL("https://jsonplaceholder.typicode.com/posts/1"))
+                .setMethod(Method.GET)
+                .setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("178.212.54.137",8080)))
+                .addHeader(new Header("Content-Type", "application/json"))
                 .build();
+
+        EasyHttpResponse<String> response = client.send(request, new StringBodyHandler());
+
     }
 
 }

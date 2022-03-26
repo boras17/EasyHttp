@@ -2,22 +2,20 @@ import Headers.Header;
 import HttpEnums.HttpStatus;
 import HttpEnums.Method;
 import auth.AuthenticationProvider;
+import intercepting.Interceptor;
 import requests.bodyhandlers.AbstractBodyHandler;
 import requests.cookies.CookieExtractor;
-import requests.easyrequest.MultipartBody;
 import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
-import requests.multirpart.simplerequest.jsonsender.bodysenders.JsonBodySender;
-import requests.multirpart.simplerequest.jsonsender.bodysenders.MultiPartBodySender;
+import requests.multirpart.simplerequest.jsonsender.BodyConverter;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.*;
 import java.net.http.HttpRequest;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class EasyHttp {
@@ -27,12 +25,7 @@ public class EasyHttp {
     private String userAgent;
     private CookieExtractor cookieExtractor;
     private AuthenticationProvider authenticationProvider;
-
-    public void send(HttpRequest request){
-        if(this.cookieExtractor != null){
-            cookieExtractor.setCookies(this.connection);
-        }
-    }
+    private Interceptor interceptor;
 
     public Map<String, List<String>> extractHeaders(String headerName){
         return this.connection.getHeaderFields().entrySet()
@@ -54,40 +47,62 @@ public class EasyHttp {
         });
     }
 
-    private void addAuthHeaderIfProviderPresent(EasyHttpRequest easyHttpRequest){
+    private void addAuthHeaderIfProviderPresent(EasyHttpRequest easyHttpRequest, HttpURLConnection connection){
         Optional<AuthenticationProvider> provider = Optional.ofNullable(this.authenticationProvider);
         if(provider.isPresent()){
             AuthenticationProvider authenticationProvider = provider.get();
-            easyHttpRequest.getHeaders().addAll(authenticationProvider.getAuthHeaders());
+            for(Header header: authenticationProvider.getAuthHeaders()){
+                System.out.println("auth header -----");
+                System.out.println(header.getValue());
+                System.out.println(header.getKey());
+                connection.setRequestProperty(header.getKey(),header.getValue());
+            }
         }
     }
 
-    public <T> EasyHttpResponse<T> send(requests.multirpart.simplerequest.EasyHttpRequest request,
+    public <T> EasyHttpResponse<T> send(requests.multirpart.simplerequest.EasyHttpRequest _request,
                                  AbstractBodyHandler<T> bodyHandler)
             throws IOException, IllegalAccessException {
-        this.connection = (HttpURLConnection) request.getUrl().openConnection();
+
+        EasyHttpRequest request = interceptor.getRequestHandler().apply(_request);
+
+        if(request.getProxy().isPresent()){
+            Proxy proxy = request.getProxy().get();
+            System.out.println("has proxy");
+            this.connection = (HttpURLConnection) request.getUrl().openConnection(proxy);
+        }
+        else{
+            this.connection = (HttpURLConnection) request.getUrl().openConnection();
+        }
         this.connection.setRequestMethod(request.getMethod().name());
         this.connection.setDoOutput(true);
         this.connection.setDoInput(true);
         this.connection.setUseCaches(false);
 
         List<Header> requestHeaders = request.getHeaders();
-
-        for(Header header: requestHeaders){
-            this.connection.addRequestProperty(header.getKey(), header.getValue());
+        if(requestHeaders.size() > 0){
+            for(Header header: requestHeaders){
+                this.connection.setRequestProperty(header.getKey(), header.getValue());
+            }
         }
 
-        this.addAuthHeaderIfProviderPresent(request);
-
+        this.addAuthHeaderIfProviderPresent(request, connection);
         this.connection.setRequestMethod(request.getMethod().name());
 
-        OutputStream connectionOutputStream = this.connection.getOutputStream();
-        request.getBody().setOutputStream(connectionOutputStream);
-        request.getBody().prepareAndCopyToStream();
+        Optional<BodyConverter<?>> bodyConverter = request.getBody();
+
+        if(bodyConverter.isPresent()){
+            OutputStream connectionOutputStream = this.connection.getOutputStream();
+            BodyConverter<?> converter = bodyConverter.get();
+            converter.setOutputStream(connectionOutputStream);
+            converter.prepareAndCopyToStream();
+            connectionOutputStream.close();
+        }
 
         int responseStatus = this.connection.getResponseCode();
 
         if(responseStatus >= 200 && responseStatus < 400){
+
             bodyHandler.setInputStream(this.connection.getInputStream());
         }
         else{
@@ -100,7 +115,10 @@ public class EasyHttp {
         List<Header> headers = this.calculateHeaders(headersFields);
 
         bodyHandler.setHeaders(headers);
-        return bodyHandler.getCalculatedResponse();
+
+        EasyHttpResponse<T> _response = bodyHandler.getCalculatedResponse();
+        this.interceptor.getResponseHandler().accept(_response, _response.getBody());
+        return _response; //bodyHandler.getCalculatedResponse();
     }
 
     private List<Header> calculateHeaders(Map<String, List<String>> headersFields) {
@@ -124,34 +142,38 @@ public class EasyHttp {
         }
     }
 
-    public static class MikoHTTPBuilder{
+    public static class EasyHttpBuilder{
         private URL url;
         private Method method;
         private String userAgent;
         private CookieExtractor cookieExtractor;
         private AuthenticationProvider authenticationProvider;
+        private Interceptor interceptor;
 
-        public MikoHTTPBuilder setURL(URL url){
+        public EasyHttpBuilder setURL(URL url){
             this.url = url;
             return this;
         }
 
-        public MikoHTTPBuilder setCookieExtractor(CookieExtractor extractor){
+        public EasyHttpBuilder setCookieExtractor(CookieExtractor extractor){
             this.cookieExtractor = extractor;
             return this;
         }
 
-        public MikoHTTPBuilder setAuthenticationProvider(AuthenticationProvider authenticationProvider){
+        public EasyHttpBuilder setAuthenticationProvider(AuthenticationProvider authenticationProvider){
             this.authenticationProvider = authenticationProvider;
             return this;
         }
-
-        public MikoHTTPBuilder setMethod(Method method){
+        public EasyHttpBuilder interceptor(Interceptor interceptor){
+            this.interceptor = interceptor;
+            return this;
+        }
+        public EasyHttpBuilder setMethod(Method method){
             this.method = method;
             return this;
         }
 
-        public MikoHTTPBuilder setUserAgent(String agent){
+        public EasyHttpBuilder setUserAgent(String agent){
             this.userAgent = agent;
             return this;
         }
@@ -163,6 +185,7 @@ public class EasyHttp {
             http.setUserAgent(this.userAgent);
             http.setCookieExtractor(cookieExtractor);
             http.setAuthenticationProvider(this.authenticationProvider);
+            http.setInterceptor(this.interceptor);
             return http;
         }
 
@@ -172,9 +195,18 @@ public class EasyHttp {
         return authenticationProvider;
     }
 
+    public Interceptor getInterceptor() {
+        return interceptor;
+    }
+
+    public void setInterceptor(Interceptor interceptor) {
+        this.interceptor = interceptor;
+    }
+
     public void setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
         this.authenticationProvider = authenticationProvider;
     }
+
 
     public String getUserAgent() {
         return userAgent;
