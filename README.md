@@ -143,3 +143,16 @@ sendAsync method sending request asynchronously and returns CompleteableFuture:
 ```java
 CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request, new StringBodyHandler());
 ```
+Request/response interceptor:
+```java
+Interceptor interceptor = new Interceptor(request -> {
+    // modify request here
+    return request;
+}, (response, responseBody) -> {
+    // modify response
+});
+
+EasyHttp client = new EasyHttp.EasyHttpBuilder()
+        .interceptor(interceptor)
+        .build();
+```
