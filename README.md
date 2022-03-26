@@ -53,4 +53,38 @@ Let's move on to Digest Authentication support for this purpose you can use Dige
         .setAuthenticationProvider(authenticationProvider)
         .build();
 ```
-Ok when we have configured Client the next step is creating requests. 
+Ok when we have configured Client the next step is creating requests. If you want create new request you can use EasyHttpRequest class and her bulder just like below:
+```java
+        EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
+                .setUri(new URL("someurl"))
+                .setMethod(Method.POST)
+                .setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("178.212.54.137",8080)))
+                .addHeader(new Header("name","value"))
+                .build();
+```
+the builder make it possible to set Proxy, URL, Headers (yes you can invoke add header a lot of times or pass List of Header's), Http method which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
+```java
+    public class Person{
+        String name;
+        String surname;
+
+        public Person(String name, String surname){
+            this.name = name;
+            this.surname = surname;
+        }
+    }
+```
+now let's create instance of this class:
+```java
+    Person person = new Person("Ben","Surname");
+```
+now when you have your body it is time to create instance of JsonBodyProvider and give him our body as a paramaeter of his constructor:
+```java
+    JsonBodyProvider jsonBodyProvider = new JsonBodyProvider(person);
+```
+and the final step is passing jsonBodyProvider to our Request:
+```java
+EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
+                .setBodyProvider(jsonBodyProvider)
+                .build();
+```
