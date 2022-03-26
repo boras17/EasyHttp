@@ -36,3 +36,21 @@ Now let me explain you how to use 'Authenticator'. We have three options. First 
                 .build();
 ```
 I thing it is very clear. There is AuthenticationProvider which is asbtract class and BasicAuthenticationProvider class which inherits from AuthenticationProvider. In AuthenticationProvider abstract class we have two parameters constructors which accepts two paramters. First parameter is username and second one is password.
+Let's move on to Digest Authentication support for this purpose you can use DigestAuthenticaionProvider which have constructor with three parameters. First and second parameter wroks as same as in BasicAuthenticationProvider but the third parameter is pointer for instance of DigestConfigurationClass which provide extra data for this type of authentication.
+```java
+    DigestConfiguration digestConfiguration = new DigestConfiguration.DigestConfigBuilder()
+        .setQop(qop)
+        .setNonce(none)
+        .setMethod(method) 
+        .setRealm(realm)
+        .setHashAlgorithm(alg)
+        .setCnonce(cnonce)
+        .build();
+
+    AuthenticationProvider authenticationProvider = new DigestAuthenticationProvider("username","password", digestConfiguration);
+
+    EasyHttp client = new EasyHttp.EasyHttpBuilder()
+        .setAuthenticationProvider(authenticationProvider)
+        .build();
+```
+Ok when we have configured Client the next step is creating requests. 
