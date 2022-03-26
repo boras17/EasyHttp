@@ -102,3 +102,19 @@ When you create MultipartBody it is time to pass it to MultipartBodyProvider as 
 ```java
 MultipartBodyProvider multipartBodyProvider = new MultipartBodyProvider(multipartBody);
 ```
+As you already guessed the final step is handover multipartBodyProvider to EasyHttpRequest:
+```java
+EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
+                .setBodyProvider(multipartBodyProvider)
+                .build();
+```
+If you want you can send text with simple TextBodyProvider:
+```java
+TextBodyProvider textBodyProvider = new TextBodyProvider("some text");
+```
+When you create request you can send it to server by calling send or sendAsync method which is provided by EasyClient. First parameter of method send/sendAsync is EasyHttpRequest object and second one is BodyHandler:
+
+Now it is time to handle response from server. For handling responses you can use EasyHttpResponse class: 
+```java
+EasyHttpResponse<Void> response = client.send(request, new EmptyBodyHandler());
+```
