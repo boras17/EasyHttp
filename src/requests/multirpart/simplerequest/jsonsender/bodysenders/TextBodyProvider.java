@@ -1,14 +1,13 @@
 package requests.multirpart.simplerequest.jsonsender.bodysenders;
 
 
-import requests.multirpart.simplerequest.jsonsender.BodyConverter;
+import requests.multirpart.simplerequest.jsonsender.BodyProvider;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 
-public class TextBodySender extends BodyConverter<String> {
+public class TextBodyProvider extends BodyProvider<String> {
 
-    protected TextBodySender(String request) {
+    protected TextBodyProvider(String request) {
         super(request);
     }
 

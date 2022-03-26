@@ -1,6 +1,6 @@
 package requests.multirpart.simplerequest.jsonsender.bodysenders;
 
-import requests.multirpart.simplerequest.jsonsender.BodyConverter;
+import requests.multirpart.simplerequest.jsonsender.BodyProvider;
 import jsonoperations.JsonCreator;
 
 import java.io.IOException;
@@ -8,9 +8,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
-public class JsonBodySender extends BodyConverter<Object> {
+public class JsonBodyProvider extends BodyProvider<Object> {
 
-    public JsonBodySender(Object request) {
+    public JsonBodyProvider(Object request) {
         super(request);
     }
 

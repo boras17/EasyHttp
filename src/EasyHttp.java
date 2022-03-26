@@ -7,15 +7,13 @@ import requests.bodyhandlers.AbstractBodyHandler;
 import requests.cookies.CookieExtractor;
 import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
-import requests.multirpart.simplerequest.jsonsender.BodyConverter;
+import requests.multirpart.simplerequest.jsonsender.BodyProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.*;
-import java.net.http.HttpRequest;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class EasyHttp {
@@ -89,11 +87,11 @@ public class EasyHttp {
         this.addAuthHeaderIfProviderPresent(request, connection);
         this.connection.setRequestMethod(request.getMethod().name());
 
-        Optional<BodyConverter<?>> bodyConverter = request.getBody();
+        Optional<BodyProvider<?>> bodyConverter = request.getBody();
 
         if(bodyConverter.isPresent()){
             OutputStream connectionOutputStream = this.connection.getOutputStream();
-            BodyConverter<?> converter = bodyConverter.get();
+            BodyProvider<?> converter = bodyConverter.get();
             converter.setOutputStream(connectionOutputStream);
             converter.prepareAndCopyToStream();
             connectionOutputStream.close();

@@ -3,11 +3,11 @@ package requests.multirpart.simplerequest.jsonsender;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public abstract class BodyConverter<T>{
+public abstract class BodyProvider<T>{
     private T request;
     private OutputStream outputStream;
 
-    protected BodyConverter(T request){
+    protected BodyProvider(T request){
         this.request = request;
     }
 

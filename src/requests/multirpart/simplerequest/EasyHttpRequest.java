@@ -2,7 +2,7 @@ package requests.multirpart.simplerequest;
 
 import Headers.Header;
 import HttpEnums.Method;
-import requests.multirpart.simplerequest.jsonsender.BodyConverter;
+import requests.multirpart.simplerequest.jsonsender.BodyProvider;
 
 import java.net.Proxy;
 import java.net.URL;
@@ -13,11 +13,11 @@ import java.util.Optional;
 public class EasyHttpRequest {
     private final URL url;
     private final Method method;
-    private final BodyConverter<?> body;
+    private final BodyProvider<?> body;
     private final List<Header> headers;
     private Proxy proxy;
 
-    public EasyHttpRequest(URL url, Method method, BodyConverter<?> body, List<Header> headers, Proxy proxy) {
+    public EasyHttpRequest(URL url, Method method, BodyProvider<?> body, List<Header> headers, Proxy proxy) {
         this.url = url;
         this.method = method;
         this.body = body;
@@ -28,7 +28,7 @@ public class EasyHttpRequest {
     public static class EasyHttpRequestBuilder{
         private URL url;
         private Method method;
-        private BodyConverter<?> body;
+        private BodyProvider<?> body;
         private final List<Header> headers = new ArrayList<>();
         private Proxy proxy;
 
@@ -58,7 +58,7 @@ public class EasyHttpRequest {
             return this;
         }
 
-        public EasyHttpRequestBuilder setBodyConverter(BodyConverter<?> body) {
+        public EasyHttpRequestBuilder setBodyProvider(BodyProvider<?> body) {
             this.body = body;
             return this;
         }
@@ -80,7 +80,7 @@ public class EasyHttpRequest {
         return method;
     }
 
-    public Optional<BodyConverter<?>> getBody() {
+    public Optional<BodyProvider<?>> getBody() {
         return Optional.ofNullable(body);
     }
 

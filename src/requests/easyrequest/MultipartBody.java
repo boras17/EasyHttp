@@ -16,23 +16,23 @@ public class MultipartBody extends EasyHttpRequest {
 
     public MultipartBody() {}
 
-    public static class MultiPartRequestBuilder{
+    public static class MultiPartBodyBuilder{
 
         private List<Part> parts = new ArrayList<>();
         private String encoding;
         private PartType partType;
 
-        public MultiPartRequestBuilder addPart(Part part){
+        public MultiPartBodyBuilder addPart(Part part){
             parts.add(part);
             return this;
         }
 
-        public MultiPartRequestBuilder setPartType(PartType partType){
+        public MultiPartBodyBuilder setPartType(PartType partType){
             this.partType = partType;
             return this;
         }
 
-        public MultiPartRequestBuilder encoding(String encoding){
+        public MultiPartBodyBuilder encoding(String encoding){
             this.encoding = encoding;
             return this;
         }

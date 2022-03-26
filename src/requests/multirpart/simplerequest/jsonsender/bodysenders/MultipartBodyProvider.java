@@ -4,14 +4,14 @@ import Parts.FilePart;
 import Parts.PartType;
 import Parts.TextPart;
 import requests.easyrequest.MultipartBody;
-import requests.multirpart.simplerequest.jsonsender.BodyConverter;
+import requests.multirpart.simplerequest.jsonsender.BodyProvider;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 
-public class MultiPartBodySender extends BodyConverter<MultipartBody> {
+public class MultipartBodyProvider extends BodyProvider<MultipartBody> {
 
-    public MultiPartBodySender(MultipartBody request) {
+    public MultipartBodyProvider(MultipartBody request) {
         super(request);
     }
 

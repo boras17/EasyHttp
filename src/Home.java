@@ -4,8 +4,10 @@ import intercepting.Interceptor;
 import jsonoperations.serialization.EasySerialize;
 import jsonoperations.serialization.LocalDateTimeSerializer;
 import requests.bodyhandlers.StringBodyHandler;
+import requests.easyrequest.MultipartBody;
 import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
+import requests.multirpart.simplerequest.jsonsender.bodysenders.MultipartBodyProvider;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -13,7 +15,6 @@ import java.net.Proxy;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class Home {
@@ -91,9 +92,13 @@ public class Home {
                 }))
                 .build();
 
+
         EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
                 .setUri(new URL("https://jsonplaceholder.typicode.com/posts/1"))
                 .setMethod(Method.GET)
+                .setBodyProvider(new MultipartBodyProvider(new MultipartBody.MultiPartBodyBuilder()
+
+                        .build()))
                 .setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("178.212.54.137",8080)))
                 .addHeader(new Header("Content-Type", "application/json"))
                 .build();
