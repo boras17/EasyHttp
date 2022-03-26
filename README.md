@@ -88,3 +88,17 @@ EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
                 .setBodyProvider(jsonBodyProvider)
                 .build();
 ```
+You can very easly send multipart request. Firstly you need to create MultipartBody class instance. Method addPart takes as parameter FilePart or TextPart. FilePart allows you sending files and TextPart allows sending text part:
+```java
+MultipartBody multipartBody = new MultipartBody.MultiPartBodyBuilder()
+                .addPart(new FilePart(new File("file.txt"),"partName"))
+                .build();
+                
+MultipartBody multipartBody = new MultipartBody.MultiPartBodyBuilder()
+                .addPart(new TextPart("Hello world","partName"))
+                .build();
+```
+When you create MultipartBody it is time to pass it to MultipartBodyProvider as a constructor parameter:
+```java
+MultipartBodyProvider multipartBodyProvider = new MultipartBodyProvider(multipartBody);
+```
