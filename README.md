@@ -134,3 +134,7 @@ List<Header> status = response.getResponseHeaders();
         String headerKey = header.getKey();
         String headerValue = header.getValue();
 ```
+sendAsync method sending request asynchronously and returns CompleteableFuture:
+```java
+CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request, new StringBodyHandler());
+```
