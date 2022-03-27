@@ -25,6 +25,9 @@ public class EasyHttp {
     private AuthenticationProvider authenticationProvider;
     private Interceptor interceptor;
 
+    private Interceptor<EasyHttpResponse<?>> responseInterceptor;
+    private Interceptor<EasyHttpRequest> requestIInterceptor;
+
     public Map<String, List<String>> extractHeaders(String headerName){
         return this.connection.getHeaderFields().entrySet()
                 .stream()
@@ -50,19 +53,20 @@ public class EasyHttp {
         if(provider.isPresent()){
             AuthenticationProvider authenticationProvider = provider.get();
             for(Header header: authenticationProvider.getAuthHeaders()){
-                System.out.println("auth header -----");
-                System.out.println(header.getValue());
-                System.out.println(header.getKey());
                 connection.setRequestProperty(header.getKey(),header.getValue());
             }
         }
     }
 
-    public <T> EasyHttpResponse<T> send(requests.multirpart.simplerequest.EasyHttpRequest _request,
+    public <T> EasyHttpResponse<T> send(requests.multirpart.simplerequest.EasyHttpRequest request,
                                  AbstractBodyHandler<T> bodyHandler)
             throws IOException, IllegalAccessException {
 
-        EasyHttpRequest request = interceptor.getRequestHandler().apply(_request);
+        this.getRequestIInterceptor().ifPresent(interceptor -> {
+            System.out.println("present");
+            interceptor.handle(request);
+        });
+
 
         if(request.getProxy().isPresent()){
             Proxy proxy = request.getProxy().get();
@@ -115,8 +119,10 @@ public class EasyHttp {
         bodyHandler.setHeaders(headers);
 
         EasyHttpResponse<T> _response = bodyHandler.getCalculatedResponse();
+        this.getResponseInterceptor().ifPresent(interceptor -> {
+            interceptor.handle(_response);
+        });
 
-        this.interceptor.getResponseHandler().accept(_response, _response.getBody());
         return _response; //bodyHandler.getCalculatedResponse();
     }
 
@@ -148,6 +154,9 @@ public class EasyHttp {
         private CookieExtractor cookieExtractor;
         private AuthenticationProvider authenticationProvider;
         private Interceptor interceptor;
+        private Interceptor<?> iInterceptor;
+        private Interceptor<EasyHttpResponse<?>> responseInterceptor;
+        private Interceptor<EasyHttpRequest> requestIInterceptor;
 
         public EasyHttpBuilder setURL(URL url){
             this.url = url;
@@ -158,7 +167,14 @@ public class EasyHttp {
             this.cookieExtractor = extractor;
             return this;
         }
-
+        public EasyHttpBuilder setResponseInterceptor(Interceptor<EasyHttpResponse<?>> responseInterceptor){
+            this.responseInterceptor = responseInterceptor;
+            return this;
+        }
+        public EasyHttpBuilder setRequestInterceptor(Interceptor<EasyHttpRequest> requestIInterceptor){
+            this.requestIInterceptor = requestIInterceptor;
+            return this;
+        }
         public EasyHttpBuilder setAuthenticationProvider(AuthenticationProvider authenticationProvider){
             this.authenticationProvider = authenticationProvider;
             return this;
@@ -184,7 +200,8 @@ public class EasyHttp {
             http.setUserAgent(this.userAgent);
             http.setCookieExtractor(cookieExtractor);
             http.setAuthenticationProvider(this.authenticationProvider);
-            http.setInterceptor(this.interceptor);
+            http.setRequestIInterceptor(this.requestIInterceptor);
+            http.setResponseInterceptor(this.responseInterceptor);
             return http;
         }
 
@@ -245,5 +262,21 @@ public class EasyHttp {
 
     public void setUrl(URL url) {
         this.url = url;
+    }
+
+    public Optional<Interceptor<EasyHttpResponse<?>>> getResponseInterceptor() {
+        return Optional.ofNullable(responseInterceptor);
+    }
+
+    public void setResponseInterceptor(Interceptor<EasyHttpResponse<?>> responseInterceptor) {
+        this.responseInterceptor = responseInterceptor;
+    }
+
+    public void setRequestIInterceptor(Interceptor<EasyHttpRequest> requestIInterceptor) {
+        this.requestIInterceptor = requestIInterceptor;
+    }
+
+    public Optional<Interceptor<EasyHttpRequest>> getRequestIInterceptor() {
+        return Optional.ofNullable(this.requestIInterceptor);
     }
 }
