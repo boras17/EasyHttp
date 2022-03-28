@@ -156,3 +156,4 @@ EasyHttp easyHttp
         .build();
 ```
 TODO: redirect strategy handler
+TODO: better digest authentication support and oauth2 authentication provider
