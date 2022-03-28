@@ -155,7 +155,7 @@ EasyHttp easyHttp
         })
         .build();
 ```
-TODO: redirect strategy handler
+TODO: add redirect strategy safe list
 TODO: better digest authentication support and oauth2 authentication provider
 
 DIgest authentication 401 response handler and params extractor for next auth request. Digest scheme
