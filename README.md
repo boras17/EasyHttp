@@ -155,3 +155,4 @@ EasyHttp easyHttp
         })
         .build();
 ```
+TODO: redirect strategy handler
