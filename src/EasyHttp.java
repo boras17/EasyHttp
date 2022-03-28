@@ -23,7 +23,7 @@ public class EasyHttp {
     private String userAgent;
     private CookieExtractor cookieExtractor;
     private AuthenticationProvider authenticationProvider;
-    private Interceptor interceptor;
+    private Interceptor<?> interceptor;
 
     private Interceptor<EasyHttpResponse<?>> responseInterceptor;
     private Interceptor<EasyHttpRequest> requestIInterceptor;
@@ -115,14 +115,13 @@ public class EasyHttp {
 
         Map<String, List<String>> headersFields = this.connection.getHeaderFields();
         List<Header> headers = this.calculateHeaders(headersFields);
-
         bodyHandler.setHeaders(headers);
 
         EasyHttpResponse<T> _response = bodyHandler.getCalculatedResponse();
         this.getResponseInterceptor().ifPresent(interceptor -> {
             interceptor.handle(_response);
         });
-
+        _response.setStatus(responseStatus);
         return _response; //bodyHandler.getCalculatedResponse();
     }
 
@@ -130,8 +129,12 @@ public class EasyHttp {
         return headersFields
                 .entrySet()
                 .stream()
+                .filter(entry -> {
+                    return entry.getKey()!=null;
+                })
                 .map((entry) -> {
                     return new Header(entry.getKey(), entry.getValue().get(0));
+
                 }).collect(Collectors.toList());
     }
 
@@ -279,4 +282,6 @@ public class EasyHttp {
     public Optional<Interceptor<EasyHttpRequest>> getRequestIInterceptor() {
         return Optional.ofNullable(this.requestIInterceptor);
     }
+
+
 }

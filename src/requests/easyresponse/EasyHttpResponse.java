@@ -7,6 +7,7 @@ import java.util.List;
 
 public class EasyHttpResponse<T> {
     private HttpStatus responseStatus;
+    private int status;
     private T body;
     private List<Header> responseHeaders;
 
@@ -24,6 +25,14 @@ public class EasyHttpResponse<T> {
 
     public void setBody(T body) {
         this.body = body;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public List<Header> getResponseHeaders() {

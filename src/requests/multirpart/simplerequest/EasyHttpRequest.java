@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class EasyHttpRequest {
-    private final URL url;
+    private URL url;
     private final Method method;
     private final BodyProvider<?> body;
     private final List<Header> headers;
@@ -90,5 +90,9 @@ public class EasyHttpRequest {
 
     public void setProxy(Proxy proxy) {
         this.proxy = proxy;
+    }
+
+    public void setUrl(URL url) {
+        this.url = url;
     }
 }
