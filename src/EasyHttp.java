@@ -3,6 +3,9 @@ import HttpEnums.HttpStatus;
 import HttpEnums.Method;
 import auth.AuthenticationProvider;
 import intercepting.Interceptor;
+import publishsubscribe.Channels;
+import publishsubscribe.Event;
+import publishsubscribe.errorsubscriberimpl.Subscriber;
 import redirect.*;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.RedirectionUnhandled;
@@ -30,7 +33,7 @@ public class EasyHttp {
     private AuthenticationProvider authenticationProvider;
     private RedirectionHandler redirectionHandler;
     private Duration connectionTimeout;
-    private Set<GenericError> errors =new HashSet<>();
+    private Map<String, Subscriber> subscribedChannels;
 
     private Interceptor<EasyHttpResponse<?>> responseInterceptor;
     private Interceptor<EasyHttpRequest> requestIInterceptor;
@@ -49,7 +52,7 @@ public class EasyHttp {
             try {
                 return this.send(request, bodyHandler);
             } catch (RedirectionUnhandled redirectionUnhandled){
-                this.errors.add(redirectionUnhandled.getGenericError());
+                Event.operation.publish(Channels.ERROR_CHANNEL,redirectionUnhandled.getGenericError());
                 redirectionUnhandled.printStackTrace();
                 return new EasyHttpResponse<>();
             }
@@ -129,7 +132,7 @@ public class EasyHttp {
         else if(responseStatus >= 400 && responseStatus < 500){
             bodyHandler.setInputStream(this.connection.getErrorStream());
             GenericError genericError = new GenericError(responseStatus,headers, "Server responded with client error status: " +responseStatus);
-            this.errors.add(genericError);
+            Event.operation.publish(Channels.ERROR_CHANNEL, genericError);
         }
 
         bodyHandler.setResponseStatus(getHttpStatus(responseStatus));
@@ -152,10 +155,10 @@ public class EasyHttp {
             try{
                 redirectionHandler.modifyRequest(request, _response);
             }catch (UnsafeRedirectionException  e) {
-                this.errors.add(e.getGenericError());
+                Event.operation.publish(Channels.ERROR_CHANNEL, e.getGenericError());
                 e.printStackTrace();
             }catch (RedirectionCanNotBeHandledException e) {
-                this.errors.add(e.getGenericError());
+                Event.operation.publish(Channels.ERROR_CHANNEL, e.getGenericError());
                 e.printStackTrace();
             }
         }
@@ -197,6 +200,7 @@ public class EasyHttp {
         private Interceptor<EasyHttpRequest> requestIInterceptor;
         private RedirectionHandler redirectionHandler;
         private Duration connectionTimeout;
+        private Map<String, Subscriber> subscribedChannels;
 
         public EasyHttpBuilder setURL(URL url){
             this.url = url;
@@ -236,6 +240,12 @@ public class EasyHttp {
             return this;
         }
 
+        public EasyHttpBuilder subscribeForChannels(Map<String, Subscriber> channelSubscriber){
+            this.subscribedChannels = channelSubscriber;
+            channelSubscriber.forEach((key, value) -> Event.operation.subscribe(key, value));
+            return this;
+        }
+
         public EasyHttp build() throws IOException {
             EasyHttp http = new EasyHttp();
             http.setUrl(this.url);
@@ -245,8 +255,9 @@ public class EasyHttp {
             http.setAuthenticationProvider(this.authenticationProvider);
             http.setRequestIInterceptor(this.requestIInterceptor);
             http.setResponseInterceptor(this.responseInterceptor);
-            http.setRedirectionHandler(redirectionHandler);
+            http.setRedirectionHandler(this.redirectionHandler);
             http.setConnectionTimeout(this.connectionTimeout);
+            http.setSubscribedChannels(this.subscribedChannels);
             return http;
         }
 
@@ -261,6 +272,13 @@ public class EasyHttp {
         this.authenticationProvider = authenticationProvider;
     }
 
+    public Map<String, Subscriber> getSubscribedChannels() {
+        return subscribedChannels;
+    }
+
+    public void setSubscribedChannels(Map<String, Subscriber> subscribedChannels) {
+        this.subscribedChannels = subscribedChannels;
+    }
 
     public String getUserAgent() {
         return userAgent;

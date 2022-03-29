@@ -1,10 +1,11 @@
 package redirect;
 
 import Headers.Header;
+import publishsubscribe.Post;
 
 import java.util.List;
 
-public class GenericError {
+public class GenericError extends Post {
     private int status;
     private String msg;
     private List<Header> responseHeaders;

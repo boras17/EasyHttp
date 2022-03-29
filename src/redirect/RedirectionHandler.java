@@ -2,6 +2,10 @@ package redirect;
 
 import Headers.Header;
 import HttpEnums.Method;
+import publishsubscribe.Channels;
+import publishsubscribe.Event;
+import publishsubscribe.Post;
+import publishsubscribe.errorsubscriberimpl.Message;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.UnsafeRedirectionException;
 import requests.easyresponse.EasyHttpResponse;
@@ -46,7 +50,7 @@ public class RedirectionHandler {
                     this.redirectSafety.equals(RedirectSafety.ALWAYS)){
                 String msg = "Redirection blocked because switching to http from https occurred";
                 GenericError error = new GenericError(responseStatus,response.getResponseHeaders(),msg);
-
+                Event.operation.publish(Channels.ERROR_CHANNEL, error);
                 throw new UnsafeRedirectionException(error);
             }
 
@@ -65,7 +69,7 @@ public class RedirectionHandler {
                         response.getResponseHeaders(),"Unsuccessful attempting to handle redirect"));
             }
         }catch (MalformedURLException e){
-            e.printStackTrace();
+            Event.operation.publish(Channels.ERROR_CHANNEL, new Message(e.getMessage()));
         }
     }
 
