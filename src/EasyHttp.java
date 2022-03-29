@@ -3,6 +3,10 @@ import HttpEnums.HttpStatus;
 import HttpEnums.Method;
 import auth.AuthenticationProvider;
 import intercepting.Interceptor;
+import redirect.*;
+import redirect.redirectexception.RedirectionCanNotBeHandledException;
+import redirect.redirectexception.RedirectionUnhandled;
+import redirect.redirectexception.UnsafeRedirectionException;
 import requests.bodyhandlers.AbstractBodyHandler;
 import requests.cookies.CookieExtractor;
 import requests.easyresponse.EasyHttpResponse;
@@ -12,6 +16,7 @@ import requests.multirpart.simplerequest.jsonsender.BodyProvider;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.*;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -23,7 +28,9 @@ public class EasyHttp {
     private String userAgent;
     private CookieExtractor cookieExtractor;
     private AuthenticationProvider authenticationProvider;
-    private Interceptor<?> interceptor;
+    private RedirectionHandler redirectionHandler;
+    private Duration connectionTimeout;
+    private Set<GenericError> errors =new HashSet<>();
 
     private Interceptor<EasyHttpResponse<?>> responseInterceptor;
     private Interceptor<EasyHttpRequest> requestIInterceptor;
@@ -41,7 +48,12 @@ public class EasyHttp {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return this.send(request, bodyHandler);
-            } catch (IOException | IllegalAccessException e) {
+            } catch (RedirectionUnhandled redirectionUnhandled){
+                this.errors.add(redirectionUnhandled.getGenericError());
+                redirectionUnhandled.printStackTrace();
+                return new EasyHttpResponse<>();
+            }
+            catch (IOException | IllegalAccessException e) {
                 e.printStackTrace();
                 return new EasyHttpResponse<>();
             }
@@ -60,7 +72,7 @@ public class EasyHttp {
 
     public <T> EasyHttpResponse<T> send(requests.multirpart.simplerequest.EasyHttpRequest request,
                                  AbstractBodyHandler<T> bodyHandler)
-            throws IOException, IllegalAccessException {
+            throws IOException, IllegalAccessException, RedirectionUnhandled {
 
         this.getRequestIInterceptor().ifPresent(interceptor -> {
             System.out.println("present");
@@ -70,16 +82,21 @@ public class EasyHttp {
 
         if(request.getProxy().isPresent()){
             Proxy proxy = request.getProxy().get();
-            System.out.println("has proxy");
             this.connection = (HttpURLConnection) request.getUrl().openConnection(proxy);
         }
         else{
             this.connection = (HttpURLConnection) request.getUrl().openConnection();
         }
+
         this.connection.setRequestMethod(request.getMethod().name());
         this.connection.setDoOutput(true);
         this.connection.setDoInput(true);
         this.connection.setUseCaches(false);
+
+        this.getConnectionTimeout().ifPresent(timeout -> {
+            int timeoutInMillis = (int)timeout.toMillis();
+            this.connection.setConnectTimeout(timeoutInMillis);
+        });
 
         List<Header> requestHeaders = request.getHeaders();
         if(requestHeaders.size() > 0){
@@ -103,25 +120,45 @@ public class EasyHttp {
 
         int responseStatus = this.connection.getResponseCode();
 
-        if(responseStatus >= 200 && responseStatus < 400){
+        Map<String, List<String>> headersFields = this.connection.getHeaderFields();
+        List<Header> headers = this.calculateHeaders(headersFields);
 
+        if(responseStatus >= 200 && responseStatus < 300){
             bodyHandler.setInputStream(this.connection.getInputStream());
         }
-        else{
+        else if(responseStatus >= 400 && responseStatus < 500){
             bodyHandler.setInputStream(this.connection.getErrorStream());
+            GenericError genericError = new GenericError(responseStatus,headers, "Server responded with client error status: " +responseStatus);
+            this.errors.add(genericError);
         }
 
         bodyHandler.setResponseStatus(getHttpStatus(responseStatus));
-
-        Map<String, List<String>> headersFields = this.connection.getHeaderFields();
-        List<Header> headers = this.calculateHeaders(headersFields);
         bodyHandler.setHeaders(headers);
 
         EasyHttpResponse<T> _response = bodyHandler.getCalculatedResponse();
+
         this.getResponseInterceptor().ifPresent(interceptor -> {
             interceptor.handle(_response);
         });
+
         _response.setStatus(responseStatus);
+        if(responseStatus >= 300 && responseStatus < 400){
+            RedirectionHandler redirectionHandler
+                    = this.getRedirectionHandler()
+                    .orElseThrow(() -> {
+                        GenericError error = new GenericError(responseStatus, headers, "Server respond with redirect status: " + responseStatus + "and you did not provide redirection handler");
+                        return new RedirectionUnhandled(error);
+                    });
+            try{
+                redirectionHandler.modifyRequest(request, _response);
+            }catch (UnsafeRedirectionException  e) {
+                this.errors.add(e.getGenericError());
+                e.printStackTrace();
+            }catch (RedirectionCanNotBeHandledException e) {
+                this.errors.add(e.getGenericError());
+                e.printStackTrace();
+            }
+        }
         return _response; //bodyHandler.getCalculatedResponse();
     }
 
@@ -156,18 +193,25 @@ public class EasyHttp {
         private String userAgent;
         private CookieExtractor cookieExtractor;
         private AuthenticationProvider authenticationProvider;
-        private Interceptor interceptor;
-        private Interceptor<?> iInterceptor;
         private Interceptor<EasyHttpResponse<?>> responseInterceptor;
         private Interceptor<EasyHttpRequest> requestIInterceptor;
+        private RedirectionHandler redirectionHandler;
+        private Duration connectionTimeout;
 
         public EasyHttpBuilder setURL(URL url){
             this.url = url;
             return this;
         }
-
+        public EasyHttpBuilder setConnectionTimeout(Duration connectionTimeout){
+            this.connectionTimeout = connectionTimeout;
+            return this;
+        }
         public EasyHttpBuilder setCookieExtractor(CookieExtractor extractor){
             this.cookieExtractor = extractor;
+            return this;
+        }
+        public EasyHttpBuilder redirectionHandler(RedirectionHandler redirectionHandler){
+            this.redirectionHandler = redirectionHandler;
             return this;
         }
         public EasyHttpBuilder setResponseInterceptor(Interceptor<EasyHttpResponse<?>> responseInterceptor){
@@ -180,10 +224,6 @@ public class EasyHttp {
         }
         public EasyHttpBuilder setAuthenticationProvider(AuthenticationProvider authenticationProvider){
             this.authenticationProvider = authenticationProvider;
-            return this;
-        }
-        public EasyHttpBuilder interceptor(Interceptor interceptor){
-            this.interceptor = interceptor;
             return this;
         }
         public EasyHttpBuilder setMethod(Method method){
@@ -205,6 +245,8 @@ public class EasyHttp {
             http.setAuthenticationProvider(this.authenticationProvider);
             http.setRequestIInterceptor(this.requestIInterceptor);
             http.setResponseInterceptor(this.responseInterceptor);
+            http.setRedirectionHandler(redirectionHandler);
+            http.setConnectionTimeout(this.connectionTimeout);
             return http;
         }
 
@@ -214,13 +256,6 @@ public class EasyHttp {
         return authenticationProvider;
     }
 
-    public Interceptor getInterceptor() {
-        return interceptor;
-    }
-
-    public void setInterceptor(Interceptor interceptor) {
-        this.interceptor = interceptor;
-    }
 
     public void setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
         this.authenticationProvider = authenticationProvider;
@@ -284,4 +319,19 @@ public class EasyHttp {
     }
 
 
+    public Optional<RedirectionHandler> getRedirectionHandler() {
+        return Optional.ofNullable(redirectionHandler);
+    }
+
+    public void setRedirectionHandler(RedirectionHandler redirectionHandler) {
+        this.redirectionHandler = redirectionHandler;
+    }
+
+    public Optional<Duration> getConnectionTimeout() {
+        return Optional.ofNullable(connectionTimeout);
+    }
+
+    public void setConnectionTimeout(Duration connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
 }

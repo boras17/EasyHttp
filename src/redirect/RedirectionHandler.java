@@ -2,73 +2,70 @@ package redirect;
 
 import Headers.Header;
 import HttpEnums.Method;
+import redirect.redirectexception.RedirectionCanNotBeHandledException;
+import redirect.redirectexception.UnsafeRedirectionException;
 import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.Collection;
+import java.net.*;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 public class RedirectionHandler {
-
-    private final Map<Integer, List<Method>> saveMethodsForRedirect = null;
-
+    private final Set<Method> redirectableMethods;
     private final RedirectSafety redirectSafety;
 
-    public RedirectionHandler(RedirectSafety redirectSafety) {
+    public RedirectionHandler(final Set<Method> redirectableMethods, RedirectSafety redirectSafety){
+        this.redirectableMethods = redirectableMethods;
         this.redirectSafety = redirectSafety;
     }
 
-    public void modifyRequest(EasyHttpRequest request, EasyHttpResponse<?> response) throws MalformedURLException {
-        int redirectStatus = response.getStatus();
+    public RedirectionHandler(final Set<Method> redirectableMethods){
+        this(redirectableMethods, RedirectSafety.ALWAYS);
+    }
 
-        final List<Header> redirectHeaders = this.extractRedirectHeaders(response.getResponseHeaders());
-
+    public void modifyRequest(final EasyHttpRequest request,
+                              final EasyHttpResponse<?> response) throws
+            UnsafeRedirectionException, RedirectionCanNotBeHandledException {
+        int responseStatus = response.getStatus();
         final Header locationHeader = response.getResponseHeaders()
                 .stream()
                 .filter(header -> header.getKey().equalsIgnoreCase("location"))
                 .findFirst()
                 .orElseThrow();
-
-        final String resourceLocation = locationHeader.getValue();
-        boolean isLocationURLAbsolute = URI.create(resourceLocation).isAbsolute();
-
-        URL locationURL = new URL(resourceLocation);
-
-        if(!isLocationURLAbsolute){
-            locationURL = this.createLocationURL(request);
-        }
-
-        final Set<Method> saveMethods = this.getSaveMethodsForRedirect(redirectStatus);
-
         final Method requestMethod = request.getMethod();
 
-        switch (this.redirectSafety){
-            case SAFE -> {
-                if(saveMethods.contains(requestMethod)){
-                    request.setUrl(locationURL);
-                }
+        final String resourceLocation = locationHeader.getValue();
+        final boolean isLocationURLAbsolute = URI.create(resourceLocation).isAbsolute();
+
+        try{
+            URL locationURL = new URL(resourceLocation);
+
+            if(locationURL.getProtocol().equals("http") &&
+                    this.redirectSafety.equals(RedirectSafety.ALWAYS)){
+                String msg = "Redirection blocked because switching to http from https occurred";
+                GenericError error = new GenericError(responseStatus,response.getResponseHeaders(),msg);
+
+                throw new UnsafeRedirectionException(error);
             }
-            case UN_SAFE -> {
+
+            if(!isLocationURLAbsolute){
+                locationURL = this.createLocationURL(request);
+
+            }
+
+            boolean isRedirectdable = this.checkIfRedirectCanBeHandled(response, request) &&
+                    this.redirectSafety.equals(RedirectSafety.ALWAYS);
+
+            if(isRedirectdable){
                 request.setUrl(locationURL);
+            }else{
+                throw new RedirectionCanNotBeHandledException(new GenericError(responseStatus,
+                        response.getResponseHeaders(),"Unsuccessful attempting to handle redirect"));
             }
-            case UN_SAFE_FOR_POST -> {
-                if(requestMethod.equals(Method.POST) && saveMethods.contains(requestMethod)){
-                    request.setUrl(locationURL);
-                }
-            }
-            case UN_SAFE_FOR_GET -> {
-                if(requestMethod.equals(Method.GET)){
-                    request.setUrl(locationURL);
-                }
-            }
+        }catch (MalformedURLException e){
+            e.printStackTrace();
         }
     }
 
@@ -79,7 +76,8 @@ public class RedirectionHandler {
      * @param request - client request
      * @return return true if server sent redirect status otherwise returns false
      */
-    public boolean checkIfCanBeRedirected(EasyHttpResponse<?> response, EasyHttpRequest request) {
+    private boolean checkIfRedirectCanBeHandled(final EasyHttpResponse<?> response,
+                                     final EasyHttpRequest request) {
         final int statusCode = response.getStatus();
         final Method method = request.getMethod();
 
@@ -89,39 +87,28 @@ public class RedirectionHandler {
                 .findFirst()
                 .orElse(null);
 
-        switch (statusCode) {
-            case HttpURLConnection.HTTP_MOVED_TEMP -> {
-                return canBeRedirected(method) && locationHeader != null;
-            }
-            case HttpURLConnection.HTTP_MOVED_PERM ->  {
-                return canBeRedirected(method);
-            }
-            case HttpURLConnection.HTTP_SEE_OTHER -> {
-                return true;
-            }
-            default ->{
-                return false;
-            }
-        }
+        return switch (statusCode){
+            case HttpURLConnection.HTTP_MOVED_PERM, 307,
+                 HttpURLConnection.HTTP_MOVED_TEMP -> isRedirectable(method) && locationHeader!=null;
+            case HttpURLConnection.HTTP_SEE_OTHER -> isRedirectable(method) && method.equals(Method.GET);
+            default -> false;
+        };
     }
 
-    private boolean canBeRedirected(Method method){
-        final Set<Method> redirectableMethods = RedirectUtils.getRedirectableMethods();
-
-        for (final Method _method: redirectableMethods) {
-            if (method.equals(method)) {
-                return true;
-            }
-        }
-        return false;
+    public boolean checkIfProxyRequiredForRedirection(final EasyHttpResponse<?> response){
+        return response.getStatus() == HttpURLConnection.HTTP_USE_PROXY;
     }
 
-    private URL createLocationURL(EasyHttpRequest request) throws MalformedURLException {
+    private boolean isRedirectable(final Method method) {
+        return this.redirectableMethods.contains(method);
+    }
+
+    private URL createLocationURL(final EasyHttpRequest request) throws MalformedURLException {
         URL resourceUrl = request.getUrl();
 
-        String host = resourceUrl.getHost();
-        String path = resourceUrl.getPath();
-        String protocol = resourceUrl.getProtocol();
+        final String host = resourceUrl.getHost();
+        final String path = resourceUrl.getPath();
+        final String protocol = resourceUrl.getProtocol();
 
         int port = resourceUrl.getPort();
 
@@ -134,22 +121,5 @@ public class RedirectionHandler {
         locationStr = locationStr.concat(path);
 
         return new URL(locationStr);
-    }
-
-    private Set<Method> getSaveMethodsForRedirect(int responseStatus){
-        return this.saveMethodsForRedirect
-                .entrySet()
-                .stream()
-                .filter(integerListEntry -> {
-                    return integerListEntry.getKey() == responseStatus;
-                })
-                .map(Map.Entry::getValue)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-    }
-
-    private List<Header> extractRedirectHeaders(List<Header> headers){
-        return headers.stream()
-                .toList();
     }
 }
