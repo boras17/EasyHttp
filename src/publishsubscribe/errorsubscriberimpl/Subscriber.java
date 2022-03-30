@@ -1,12 +1,21 @@
 package publishsubscribe.errorsubscriberimpl;
 
-import publishsubscribe.OnMessage;
+import publishsubscribe.annotations.OnClientError;
+import publishsubscribe.annotations.OnRedirectError;
+import publishsubscribe.annotations.OnServerError;
+import publishsubscribe.communcates.ErrorCommunicate;
 
 public abstract class Subscriber {
 
     public Subscriber() {
     }
 
-    @OnMessage
-    public abstract void onMessage(Message message);
+    @OnRedirectError
+    public abstract void onRedirectErrorCommunicate(ErrorCommunicate redirectError);
+
+    @OnClientError
+    public abstract void onClientErrorCommunicate(ErrorCommunicate clientError);
+
+    @OnServerError
+    public abstract void onServerErrorCommunicate(ErrorCommunicate serverError);
 }

@@ -1,5 +1,5 @@
 import publishsubscribe.Channels;
-import publishsubscribe.errorsubscriberimpl.SaveSubscriber;
+import publishsubscribe.errorsubscriberimpl.ErrorSubscriber;
 import publishsubscribe.errorsubscriberimpl.Subscriber;
 import redirect.redirectexception.RedirectionUnhandled;
 
@@ -11,7 +11,8 @@ import java.util.Map;
 public class Home {
     public static void main(String[] args) throws IOException, IllegalAccessException, RedirectionUnhandled {
 
-        Map<String, Subscriber> map = Collections.singletonMap(Channels.ERROR_CHANNEL,new SaveSubscriber(Paths.get("")));
+        Map<String, Subscriber> map = Collections.singletonMap(Channels.ERROR_CHANNEL,
+                new ErrorSubscriber(Paths.get("")));
 
         EasyHttp easyHttp = new EasyHttp.EasyHttpBuilder()
                 .subscribeForChannels(map)

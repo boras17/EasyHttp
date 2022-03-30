@@ -10,7 +10,7 @@ public class Event {
 
     public static Operation operation;
 
-    public static ConcurrentHashMap<String, ConcurrentHashMap<Integer, WeakReference<Object>>> channels;
+    public static ConcurrentHashMap<String,  WeakReference<Object>> channels;
 
     static void init() {
         channels = new ConcurrentHashMap<>();

@@ -1,39 +1,33 @@
 package publishsubscribe;
 
+import publishsubscribe.annotations.OnRedirectError;
+
 import java.lang.annotation.Annotation;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Operation extends Event {
-    public void subscribe(String channelName, Object subscriber) {
-        if (!channels.containsKey(channelName)) {
-            channels.put(channelName, new ConcurrentHashMap<>());
-        }
 
-        channels.get(channelName).put(subscriber.hashCode(), new WeakReference<>(subscriber));
+    public void subscribe(String channelName, Object subscriber) {
+        channels.put(channelName, new WeakReference<>(subscriber));
     }
 
-    public void publish(String channelName, Post message) {
-        for(Map.Entry<Integer, WeakReference<Object>> subs : channels.get(channelName).entrySet()) {
-            WeakReference<Object> subscriberRef = subs.getValue();
+    public void publish(String channelName, GenericCommunicate<?> message) {
+        WeakReference<?> subscriberRef = channels.get(channelName);
+        Object subscriberObj = subscriberRef.get();
 
-            Object subscriberObj = subscriberRef.get();
-
-            for (final Method method : subscriberObj.getClass().getDeclaredMethods()) {
-                Annotation annotation = method.getAnnotation(OnMessage.class);
-                if (annotation != null) {
-                    deliverMessage(subscriberObj, method, message);
-                }
+        for (final Method method : subscriberObj.getClass().getDeclaredMethods()) {
+            Annotation annotation = method.getAnnotation(OnRedirectError.class);
+            if (annotation != null) {
+                deliverMessage(subscriberObj, method, message);
             }
         }
     }
 
-    public  <T, P extends Post> boolean deliverMessage(T subscriber, Method method, Post message) {
+    private  <T, P extends GenericCommunicate<?>> boolean deliverMessage(T subscriber, Method method, GenericCommunicate<?> message) {
         try {
             boolean methodFound = false;
-            for (final Class paramClass : method.getParameterTypes()) {
+            for (final Class<?> paramClass : method.getParameterTypes()) {
                 if (paramClass.equals(message.getClass())) {
                     methodFound = true;
                     break;

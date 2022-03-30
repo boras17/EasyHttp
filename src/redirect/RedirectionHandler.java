@@ -4,8 +4,7 @@ import Headers.Header;
 import HttpEnums.Method;
 import publishsubscribe.Channels;
 import publishsubscribe.Event;
-import publishsubscribe.Post;
-import publishsubscribe.errorsubscriberimpl.Message;
+import publishsubscribe.communcates.ErrorCommunicate;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.UnsafeRedirectionException;
 import requests.easyresponse.EasyHttpResponse;
@@ -69,7 +68,8 @@ public class RedirectionHandler {
                         response.getResponseHeaders(),"Unsuccessful attempting to handle redirect"));
             }
         }catch (MalformedURLException e){
-            Event.operation.publish(Channels.ERROR_CHANNEL, new Message(e.getMessage()));
+            GenericError genericError = new GenericError(responseStatus, response.getResponseHeaders(), e.getMessage());
+            Event.operation.publish(Channels.ERROR_CHANNEL, new ErrorCommunicate(genericError));
         }
     }
 
