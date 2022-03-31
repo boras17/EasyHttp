@@ -48,7 +48,7 @@ public class RedirectionHandler {
             if(locationURL.getProtocol().equals("http") &&
                     this.redirectSafety.equals(RedirectSafety.ALWAYS)){
                 String msg = "Redirection blocked because switching to http from https occurred";
-                GenericError error = new GenericError(responseStatus,response.getResponseHeaders(),msg);
+                GenericError error = new GenericError(responseStatus,response.getResponseHeaders(),msg, ErrorType.APP);
                 Event.operation.publish(Channels.ERROR_CHANNEL, error);
                 throw new UnsafeRedirectionException(error);
             }
@@ -64,11 +64,13 @@ public class RedirectionHandler {
             if(isRedirectdable){
                 request.setUrl(locationURL);
             }else{
-                throw new RedirectionCanNotBeHandledException(new GenericError(responseStatus,
-                        response.getResponseHeaders(),"Unsuccessful attempting to handle redirect"));
+                GenericError genericError = new GenericError(responseStatus,
+                        response.getResponseHeaders(),"Unsuccessful attempting to handle redirect", ErrorType.REDIRECT);
+                Event.operation.publish(Channels.ERROR_CHANNEL, genericError);
+                throw new RedirectionCanNotBeHandledException(genericError);
             }
         }catch (MalformedURLException e){
-            GenericError genericError = new GenericError(responseStatus, response.getResponseHeaders(), e.getMessage());
+            GenericError genericError = new GenericError(responseStatus, response.getResponseHeaders(), e.getMessage(), ErrorType.APP);
             Event.operation.publish(Channels.ERROR_CHANNEL, new ErrorCommunicate(genericError));
         }
     }

@@ -10,12 +10,9 @@ public abstract class Subscriber {
     public Subscriber() {
     }
 
-    @OnRedirectError
     public abstract void onRedirectErrorCommunicate(ErrorCommunicate redirectError);
 
-    @OnClientError
     public abstract void onClientErrorCommunicate(ErrorCommunicate clientError);
 
-    @OnServerError
     public abstract void onServerErrorCommunicate(ErrorCommunicate serverError);
 }

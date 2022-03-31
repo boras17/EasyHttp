@@ -5,6 +5,7 @@ import auth.AuthenticationProvider;
 import intercepting.Interceptor;
 import publishsubscribe.Channels;
 import publishsubscribe.Event;
+import publishsubscribe.communcates.ErrorCommunicate;
 import publishsubscribe.errorsubscriberimpl.Subscriber;
 import redirect.*;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
@@ -131,8 +132,8 @@ public class EasyHttp {
         }
         else if(responseStatus >= 400 && responseStatus < 500){
             bodyHandler.setInputStream(this.connection.getErrorStream());
-            GenericError genericError = new GenericError(responseStatus,headers, "Server responded with client error status: " +responseStatus);
-            Event.operation.publish(Channels.ERROR_CHANNEL, genericError);
+            GenericError genericError = new GenericError(responseStatus,headers, "Server responded with client error status: " +responseStatus, ErrorType.CLIENT);
+            Event.operation.publish(Channels.ERROR_CHANNEL, new ErrorCommunicate(genericError));
         }
 
         bodyHandler.setResponseStatus(getHttpStatus(responseStatus));
@@ -149,7 +150,7 @@ public class EasyHttp {
             RedirectionHandler redirectionHandler
                     = this.getRedirectionHandler()
                     .orElseThrow(() -> {
-                        GenericError error = new GenericError(responseStatus, headers, "Server respond with redirect status: " + responseStatus + "and you did not provide redirection handler");
+                        GenericError error = new GenericError(responseStatus, headers, "Server respond with redirect status: " + responseStatus + "and you did not provide redirection handler", ErrorType.REDIRECT);
                         return new RedirectionUnhandled(error);
                     });
             try{
