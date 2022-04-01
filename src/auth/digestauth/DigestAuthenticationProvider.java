@@ -2,6 +2,7 @@ package auth.digestauth;
 
 import Headers.Header;
 import auth.AuthenticationProvider;
+import requests.multirpart.simplerequest.EasyHttpRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -44,9 +45,17 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
 
         String HA2 = Optional.ofNullable(this.digestConfiguration.getQop())
                 .map(qop -> {
-                    if(qop.equals("auth-int")){
-                        md.reset();
-                        md.update(this.digestConfiguration.getEntityBody().getBytes(StandardCharsets.UTF_8));
+                    md.reset();
+                    if(qop.equals("auth")){
+                        String ha2_auth = this.digestConfiguration.getMethod().concat(":").concat(this.digestConfiguration.getUri());
+                        byte[] ha2_auth_bytes = ha2_auth.getBytes(StandardCharsets.UTF_8);
+                        md.update(ha2_auth_bytes);
+                        return new String(md.digest());
+                    }
+                    else if(qop.equals("auth-int")){
+                        EasyHttpRequest request = this.digestConfiguration.getEntityBody();
+                        md.update(this.digestConfiguration.getEntityBody().getBody().get().getInputStream());
+                        // TODO
                         String entityBodyHash = null;
                         try {
                             entityBodyHash = MD5Util.getMD5Hash(md.digest());

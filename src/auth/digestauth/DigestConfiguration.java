@@ -1,19 +1,17 @@
 package auth.digestauth;
 
-public class DigestConfiguration {
-    private final HashAlgorithms hashAlgorithm;
-    // digest resp part
-    private final String nonce; //
-    private final String realm; //
-    private final String qop; //
-    private int nonceCount = 1;
-    //-----
-    private final String method;
-    private final String entityBody;
-    private final String uri;
-    //
+import requests.multirpart.simplerequest.EasyHttpRequest;
 
+public class DigestConfiguration {
+    private final HashAlgorithms hashAlgorithm;//
+    private final String nonce;
+    private final String realm; //
+    private final String qop;
+    private int nonceCount = 1;
+    private final String method;
+    private final String uri; //
     private final String cnonce;
+    private EasyHttpRequest request;
 
     public DigestConfiguration(String nonce,
                                HashAlgorithms hashAlgorithm,
@@ -22,7 +20,7 @@ public class DigestConfiguration {
                                String method,
                                String uri,
                                String cnonce,
-                               String entityBody) {
+                               EasyHttpRequest easyHttpRequest) {
         this.nonce = nonce;
         this.hashAlgorithm = hashAlgorithm;
         this.realm = realm;
@@ -30,7 +28,7 @@ public class DigestConfiguration {
         this.method = method;
         this.uri = uri;
         this.cnonce = cnonce;
-        this.entityBody = entityBody;
+        this.request = easyHttpRequest;
     }
 
     public void incrementNonceCounter() {
@@ -54,12 +52,13 @@ public class DigestConfiguration {
         private String method;
         private String uri;
         private String cnonce;
-        private String entityBody;
+        private EasyHttpRequest easyHttpRequest;
 
         public DigestConfigBuilder setNonce(String nonce) {
             this.nonce = nonce;
             return this;
         }
+
         public DigestConfigBuilder setCnonce(String cnonce) {
             this.cnonce = cnonce;
             return this;
@@ -90,10 +89,11 @@ public class DigestConfiguration {
             return this;
         }
 
-        public DigestConfigBuilder setEntityBody(String entityBody) {
-            this.entityBody = entityBody;
+        public DigestConfigBuilder setEntityBody(EasyHttpRequest easyHttpRequest) {
+            this.easyHttpRequest = easyHttpRequest;
             return this;
         }
+
 
 
         public DigestConfiguration build() {
@@ -104,7 +104,7 @@ public class DigestConfiguration {
                                             method,
                                             uri,
                                             cnonce,
-                                            entityBody);
+                                            easyHttpRequest);
         }
     }
 
@@ -128,8 +128,8 @@ public class DigestConfiguration {
         return method;
     }
 
-    public String getEntityBody() {
-        return entityBody;
+    public EasyHttpRequest getEntityBody() {
+        return this.request;
     }
 
     public String getUri() {

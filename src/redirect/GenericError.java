@@ -4,21 +4,39 @@ import Headers.Header;
 import publishsubscribe.GenericCommunicate;
 
 import java.util.List;
+import java.util.Optional;
 
 public class GenericError extends GenericCommunicate {
     private int status;
-    private String msg;
+    private String exceptionMg;
     private ErrorType errorType;
+    private String serverMsg;
     private List<Header> responseHeaders;
 
     public GenericError(int status,
                         List<Header> responseHeaders,
-                        String errorMsg,
+                        String exceptionMg,
                         ErrorType errorType) {
         this.status = status;
         this.responseHeaders = responseHeaders;
-        this.msg = errorMsg;
+        this.exceptionMg = exceptionMg;
         this.errorType = errorType;
+    }
+    public GenericError(int status,
+                        List<Header> responseHeaders,
+                        String exceptionMg,
+                        ErrorType errorType,
+                        String serverMsg) {
+        this.status = status;
+        this.responseHeaders = responseHeaders;
+        this.exceptionMg = exceptionMg;
+        this.errorType = errorType;
+        this.serverMsg = serverMsg;
+    }
+
+
+    public Optional<String> getServerMessage(){
+        return Optional.ofNullable(this.serverMsg);
     }
 
     public int getStatus() {
@@ -38,7 +56,7 @@ public class GenericError extends GenericCommunicate {
     }
 
     public String getMsg() {
-        return msg;
+        return exceptionMg;
     }
 
     public ErrorType getErrorType() {
@@ -50,14 +68,16 @@ public class GenericError extends GenericCommunicate {
     }
 
     public void setMsg(String msg) {
-        this.msg = msg;
+        this.exceptionMg = msg;
     }
-
+    public void setServerMsg(String serverMsg){
+        this.serverMsg = serverMsg;
+    }
     @Override
     public String toString() {
         return "GenericError{" +
                 "status=" + status +
-                ", msg='" + msg + '\'' +
+                ", msg='" + exceptionMg + '\'' +
                 ", errorType=" + errorType +
                 ", responseHeaders=" + responseHeaders +
                 '}';

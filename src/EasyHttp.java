@@ -5,7 +5,7 @@ import auth.AuthenticationProvider;
 import intercepting.Interceptor;
 import publishsubscribe.Channels;
 import publishsubscribe.Event;
-import publishsubscribe.communcates.ErrorCommunicate;
+import publishsubscribe.communcates.Communicate;
 import publishsubscribe.errorsubscriberimpl.Subscriber;
 import redirect.*;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
@@ -18,6 +18,7 @@ import requests.multirpart.simplerequest.EasyHttpRequest;
 import requests.multirpart.simplerequest.jsonsender.BodyProvider;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.*;
 import java.time.Duration;
@@ -131,9 +132,14 @@ public class EasyHttp {
             bodyHandler.setInputStream(this.connection.getInputStream());
         }
         else if(responseStatus >= 400 && responseStatus < 500){
-            bodyHandler.setInputStream(this.connection.getErrorStream());
-            GenericError genericError = new GenericError(responseStatus,headers, "Server responded with client error status: " +responseStatus, ErrorType.CLIENT);
-            Event.operation.publish(Channels.ERROR_CHANNEL, new ErrorCommunicate(genericError));
+            InputStream errorStream = this.connection.getErrorStream();
+            bodyHandler.setInputStream(errorStream);
+            GenericError genericError = new GenericError(responseStatus,
+                    headers,
+                    "Server responded with client error status: " +responseStatus,
+                    ErrorType.CLIENT,
+                    new String(errorStream.readAllBytes()));
+            Event.operation.publish(Channels.ERROR_CHANNEL, new Communicate(genericError));
         }
 
         bodyHandler.setResponseStatus(getHttpStatus(responseStatus));
@@ -150,8 +156,17 @@ public class EasyHttp {
             RedirectionHandler redirectionHandler
                     = this.getRedirectionHandler()
                     .orElseThrow(() -> {
-                        GenericError error = new GenericError(responseStatus, headers, "Server respond with redirect status: " + responseStatus + "and you did not provide redirection handler", ErrorType.REDIRECT);
-                        return new RedirectionUnhandled(error);
+                        GenericError genericError = new GenericError(responseStatus,
+                                headers, "Server respond with redirect status: " + responseStatus + "and you did not provide redirection handler",
+                                ErrorType.REDIRECT,
+                                null);
+                        try{
+                            genericError.setServerMsg(new String(bodyHandler.getInputStream().readAllBytes()));
+                        }catch (java.io.IOException e){
+                            e.printStackTrace();
+                        }
+
+                        return new RedirectionUnhandled(genericError);
                     });
             try{
                 redirectionHandler.modifyRequest(request, _response);

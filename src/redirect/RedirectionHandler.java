@@ -4,7 +4,7 @@ import Headers.Header;
 import HttpEnums.Method;
 import publishsubscribe.Channels;
 import publishsubscribe.Event;
-import publishsubscribe.communcates.ErrorCommunicate;
+import publishsubscribe.communcates.Communicate;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.UnsafeRedirectionException;
 import requests.easyresponse.EasyHttpResponse;
@@ -71,7 +71,7 @@ public class RedirectionHandler {
             }
         }catch (MalformedURLException e){
             GenericError genericError = new GenericError(responseStatus, response.getResponseHeaders(), e.getMessage(), ErrorType.APP);
-            Event.operation.publish(Channels.ERROR_CHANNEL, new ErrorCommunicate(genericError));
+            Event.operation.publish(Channels.ERROR_CHANNEL, new Communicate(genericError));
         }
     }
 

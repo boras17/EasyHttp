@@ -4,7 +4,7 @@ import publishsubscribe.annotations.OnAppError;
 import publishsubscribe.annotations.OnClientError;
 import publishsubscribe.annotations.OnRedirectError;
 import publishsubscribe.annotations.OnServerError;
-import publishsubscribe.communcates.ErrorCommunicate;
+import publishsubscribe.communcates.Communicate;
 import redirect.ErrorType;
 import redirect.GenericError;
 
@@ -16,17 +16,17 @@ import java.util.stream.Stream;
 public class Operation extends Event {
 
     public void subscribe(String channelName, Object subscriber) {
-        channels.put(channelName, new WeakReference<>(subscriber));
+        Event.channels.put(channelName, new WeakReference<>(subscriber));
     }
 
     public void publish(String channelName, GenericCommunicate<?> message) {
-        WeakReference<?> subscriberRef = channels.get(channelName);
+        WeakReference<?> subscriberRef = Event.channels.get(channelName);
         Object subscriberObj = subscriberRef.get();
 
-            GenericError genericError =  ((ErrorCommunicate)message).getCommunicate();
+            GenericError genericError =  ((Communicate)message).getCommunicate();
             ErrorType errorType = genericError.getErrorType();
             final Method[] methods = subscriberObj.getClass().getDeclaredMethods();
-            System.out.println("error type: " + errorType.name());
+
             Method method = Stream.of(methods)
                     .filter(_method -> {
                         return switch (errorType) {
@@ -36,6 +36,7 @@ public class Operation extends Event {
                             case APP -> _method.isAnnotationPresent(OnAppError.class);
                         };
                     }).findFirst().orElseThrow();
+
             Annotation annotation = null;
 
             switch (errorType){
