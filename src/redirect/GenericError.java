@@ -3,7 +3,12 @@ package redirect;
 import Headers.Header;
 import publishsubscribe.GenericCommunicate;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.TextStyle;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class GenericError extends GenericCommunicate {
@@ -32,6 +37,29 @@ public class GenericError extends GenericCommunicate {
         this.exceptionMg = exceptionMg;
         this.errorType = errorType;
         this.serverMsg = serverMsg;
+    }
+
+    public static String formattedGenericError(GenericError genericError){
+        StringBuilder content = new StringBuilder();
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+
+        DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder()
+                .appendChronologyText(TextStyle.FULL)
+                .appendPattern("yyyy L E HH:mm:ss")
+                .toFormatter(Locale.ENGLISH);
+
+        String date = localDateTime.format(dateTimeFormatter);
+
+        char newLine = '\n';
+
+        content.append("Log date time: ").append(date).append(newLine);
+        content.append("Server response: ").append(genericError.getServerMessage().orElse("")).append(newLine);
+        content.append("Exception msg: ").append(genericError.getMsg()).append(newLine);
+        content.append("Response status: ").append(genericError.getStatus()).append(newLine);
+        content.append("Response headers: ").append(genericError.getResponseHeaders()).append(newLine).append(newLine);
+
+        return content.toString();
     }
 
 
