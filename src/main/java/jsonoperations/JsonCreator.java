@@ -31,60 +31,80 @@ public class JsonCreator {
     }
 
     public void generateJson(Object object) throws IllegalAccessException {
-        json.append("{");
-        List<Object> nestedObjecte = new ArrayList<>();
+
+        if(object instanceof Collection<?>){
+            json.append("[");
+            List<Object> list = (List<Object>)object;
+            int a = 0;
+            for(Object o: list){
+                if(o.getClass().isPrimitive() && !o.getClass().equals(String.class)){
+                    generateJson(o);
+                }{
+                    Class<?> obClazz = o.getClass();
+                    if(obClazz.equals(String.class) || obClazz.equals(Character.class)){
+                        json.append("\"").append(o).append("\"").append(a < list.size()-1 ? ",": "");
+                    }else{
+                        json.append(o);
+                    }
+                }
+                a += 1;
+            }
+            json.append("]");
+        }else{
+            serializeObject(object);
+        }
+
+    }
+
+    private void serializeObject(Object object) throws IllegalAccessException {
         Class<?> clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
-
+        System.out.println(fields.length);
         Class<?> fieldType = null;
         Object fieldValue = null;
         Field field = null;
 
-        for(int i = 0; i < fields.length; ++i){
+        json.append("{");
+        for (int i = 0; i < fields.length; ++i) {
             field = fields[i];
             fieldType = field.getType();
             fieldValue = ReflectionUtils.getValueForField(field, object);
             json.append("\"").append(field.getName()).append("\":");
-            if(fieldValue == null){
+            if (fieldValue == null) {
                 json.append("null");
-            }else if(field.isAnnotationPresent(EasySerialize.class)){
-                try{
-                      this.json.append(this.getJsonValueForCustomSerializer(fieldValue, field));
-                }catch (NoSuchMethodException ignored){
+            } else if (field.isAnnotationPresent(EasySerialize.class)) {
+                try {
+                    this.json.append(this.getJsonValueForCustomSerializer(fieldValue, field));
+                } catch (NoSuchMethodException ignored) {
 
-                } catch (InvocationTargetException | InstantiationException e) {
+                } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
-            }
-            else if(fieldType.equals(String.class) || fieldType.equals(Character.class)){
+            } else if (fieldType.equals(String.class) || fieldType.equals(Character.class)) {
                 serializeToText(fieldValue);
-            }else if(fieldType.equals(Integer.class) ||
-                    fieldType.equals(Double.class) ||
-                    fieldType.equals(Float.class)){
+            } else if (fieldType.equals(Integer.class) || fieldType.equals(float.class) ||
+                    fieldType.equals(Double.class) || fieldType.equals(double.class)
+                    ||fieldType.equals(Float.class) || fieldType.equals(int.class)) {
                 serializeToNums(fieldValue);
-            }else if(isJavaCollection(fieldType)){
-                Object[] objects = ((Collection<Object>)field.get(object)).toArray();
+            } else if (isJavaCollection(fieldType)) {
+                Object[] objects = ((Collection<Object>) field.get(object)).toArray();
                 serializeToArray(objects);
-            }
-            else if(fieldType.isArray()){
-                Object[] arr = (Object[])field.get(object);
+            } else if (fieldType.isArray()) {
+                Object[] arr = (Object[]) field.get(object);
                 serializeToArray(arr);
-            } else if(fieldType.equals(Boolean.class)) {
+            } else if (fieldType.equals(Boolean.class)) {
                 json.append(fieldValue);
-            }else{
+            } else {
                 generateJson(field.get(object));
             }
-            if(i < (fields.length -1)) json.append(",").append("\n");
+            if (i < (fields.length - 1)) json.append(",");
         }
-
         json.append("}");
     }
-
     private void serializeToArray(Object[] arr) throws IllegalAccessException {
         json.append("[");
         Object arrElem = null;
         for(int j = 0; j < arr.length; ++j){
-            System.out.println("j: " + j);
             arrElem = arr[j];
             if(!arrElem.getClass().isPrimitive() && !arrElem.getClass().isAssignableFrom(String.class)){
                 generateJson(arrElem);
@@ -97,6 +117,13 @@ public class JsonCreator {
         json.append("]");
     }
 
+    private boolean isPrimitive(Object o) {
+        Class<?> oClass = o.getClass();
+        return oClass.isAssignableFrom(Integer.class) ||
+                oClass.isAssignableFrom(Double.class) ||
+                oClass.isAssignableFrom(Float.class) || oClass.isAssignableFrom(Boolean.class);
+    }
+
     private void serializeToText(Object fieldValue){
         json.append("\"").append(fieldValue).append("\"");
     }
@@ -106,6 +133,6 @@ public class JsonCreator {
     }
 
     private boolean isJavaCollection(Class<?> clazz){
-        return Collection.class.isAssignableFrom(clazz);
+        return Collection.class.isAssignableFrom(clazz) || clazz.isArray();
     }
 }

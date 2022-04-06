@@ -18,7 +18,7 @@ public class BasicAuthenticationProvider extends AuthenticationProvider{
         byte[] usernamePasswordBytes = usernamePassword.getBytes(StandardCharsets.UTF_8);
         String base64EncodedCredentials = base64Encoder.encodeToString(usernamePasswordBytes);
         String headerValue = "Basic ".concat(base64EncodedCredentials);
-        Header authHeader = new Header("Authorization ", headerValue);
+        Header authHeader = new Header("Authorization", headerValue);
         super.addAuthHeader(authHeader);
     }
 }

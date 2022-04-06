@@ -3,6 +3,8 @@ package requests.multirpart.simplerequest.jsonsender.bodysenders;
 import Parts.FilePart;
 import Parts.PartType;
 import Parts.TextPart;
+import publishsubscribe.Channels;
+import publishsubscribe.Event;
 import requests.easyrequest.MultipartBody;
 import requests.multirpart.simplerequest.jsonsender.BodyProvider;
 
@@ -46,7 +48,6 @@ public class MultipartBodyProvider extends BodyProvider<MultipartBody> {
                     printWriter.writeBytes(textPart.getContent());
                     printWriter.writeBytes(lineSeparator);
                 }catch (IOException e){
-
                 }
 
 
