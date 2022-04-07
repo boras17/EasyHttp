@@ -4,6 +4,7 @@ import Headers.Header;
 import HttpEnums.HttpStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 public class EasyHttpResponse<T> {
     private HttpStatus responseStatus;
@@ -39,6 +40,12 @@ public class EasyHttpResponse<T> {
         return responseHeaders;
     }
 
+    public Optional<Header> getHeaderByName(String headerName){
+        return this.getResponseHeaders()
+                .stream()
+                .filter(header-> header.getKey().equals(headerName))
+                .findFirst();
+    }
     public void setResponseHeaders(List<Header> responseHeaders) {
         this.responseHeaders = responseHeaders;
     }

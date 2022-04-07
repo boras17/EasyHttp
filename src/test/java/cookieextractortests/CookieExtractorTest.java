@@ -1,20 +1,13 @@
 package cookieextractortests;
 
 import Headers.Header;
-import client.EasyHttp;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import redirect.redirectexception.RedirectionUnhandled;
-import requests.bodyhandlers.AbstractBodyHandler;
-import requests.bodyhandlers.StringBodyHandler;
 import requests.cookies.Cookie;
 import requests.cookies.CookieExtractor;
 import requests.easyresponse.EasyHttpResponse;
-import requests.multirpart.simplerequest.EasyHttpRequest;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
