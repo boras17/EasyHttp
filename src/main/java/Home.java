@@ -5,6 +5,9 @@ import publishsubscribe.Channels;
 import publishsubscribe.errorsubscriberimpl.ErrorSubscriber;
 import publishsubscribe.errorsubscriberimpl.Subscriber;
 import redirect.redirectexception.RedirectionUnhandled;
+import requests.bodyhandlers.EmptyBodyHandler;
+import requests.cookies.CookieExtractor;
+import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
 import java.io.IOException;
@@ -68,21 +71,19 @@ public class Home {
 
         Map<String, Subscriber> map = Collections.singletonMap(Channels.ERROR_CHANNEL,
                 subscriber);
+        CookieExtractor cookieExtractor = new CookieExtractor();
 
         EasyHttp easyHttp = new EasyHttp.EasyHttpBuilder()
                 .subscribeForChannels(map)
+                .setCookieExtractor(cookieExtractor)
                 .build();
         EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
-                .setUri(new URL("http://localhost:3232/cookie"))
-                .setMethod(Method.POST)
+                .setUri(new URL("http://localhost:7777/data"))
+                .setMethod(Method.GET)
                 .build();
-        //EasyHttpResponse<Void> response = easyHttp.send(request, new EmptyBodyHandler());
+        EasyHttpResponse<Void> response = easyHttp.send(request, new EmptyBodyHandler());
 
-
-        User user = new User(123,"Ben",List.of("One","Two"),true);
-        JsonCreator jsonCreator = new JsonCreator();
-        jsonCreator.generateJson(user);
-        System.out.println(jsonCreator.getJson());
+        System.out.println(cookieExtractor.getCookies().get(0).getCookieValue());
 
 
     }

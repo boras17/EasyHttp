@@ -188,6 +188,9 @@ public class EasyHttp {
                 e.printStackTrace();
             }
         }
+        this.getCookieExtractor().ifPresent(cookieExtractor -> {
+            cookieExtractor.setCookies(_response);
+        });
         return _response; //bodyHandler.getCalculatedResponse();
     }
 
@@ -314,8 +317,8 @@ public class EasyHttp {
         this.userAgent = userAgent;
     }
 
-    public CookieExtractor getCookieExtractor() {
-        return cookieExtractor;
+    public Optional<CookieExtractor> getCookieExtractor() {
+        return Optional.ofNullable(cookieExtractor);
     }
 
     public void setCookieExtractor(CookieExtractor cookieExtractor) {

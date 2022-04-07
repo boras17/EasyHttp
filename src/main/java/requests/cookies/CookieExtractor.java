@@ -1,5 +1,8 @@
 package requests.cookies;
 
+import Headers.Header;
+import requests.easyresponse.EasyHttpResponse;
+
 import java.net.HttpURLConnection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,14 +21,14 @@ public class CookieExtractor {
         return this.cookies;
     }
 
-    public void setCookies(HttpURLConnection connection) {
-        this.cookies = connection.getHeaderFields().entrySet()
+    public void setCookies(EasyHttpResponse<?> response) {
+        List<Header> responseHeaders = response.getResponseHeaders();
+        this.cookies = responseHeaders
                 .stream()
                 .filter(x -> Optional.ofNullable(x.getKey()).orElse("").equals("Set-Cookie"))
-                .map(Map.Entry::getValue)
-                .flatMap(Collection::stream)
-                .map((entry) -> {
-                    String[] cookieParts = entry.split("; ");
+                .map((cookie) -> {
+                    System.out.println(cookie);
+                    String[] cookieParts = cookie.getValue().split(";[ ]?");
                     Map<String, String> cookiePartsMap = new LinkedHashMap<>();
                     for(String cookiePart: cookieParts) {
                         String[] equalsSplit = cookiePart.split("=");
@@ -49,8 +52,9 @@ public class CookieExtractor {
                             .ifPresent(cookieExpires -> {
                                 //Mon, 21-Mar-2022 06:39:21 GMT
                                 DateTimeFormatter dateFormat = new DateTimeFormatterBuilder()
-                                        .appendPattern("E, dd-MMM-yyyy HH:mm:ss 'GMT'")
+                                        .appendPattern("E, dd MMM yyyy HH:mm:ss 'GMT'")
                                         .toFormatter(Locale.ENGLISH);
+                                System.out.println("cookie expires"+ cookieExpires);
                                 cookie.setExpiresAt(LocalDateTime.parse(cookieExpires,dateFormat));
                             });
                     // setting domain
@@ -62,9 +66,10 @@ public class CookieExtractor {
                     // http secure
                     Optional<?> secured = Optional.ofNullable(cookiePartsMap.get("Secure"));
                     cookie.setSecured(secured.isPresent());
+                    System.out.println("secured: " + secured.isPresent());
                     // http only
                     Optional<?> httpOnly = Optional.ofNullable(cookiePartsMap.get("HttpOnly"));
-                    cookie.setHttpOnly(secured.isPresent());
+                    cookie.setHttpOnly(httpOnly.isPresent());
                     return cookie;
                 }).collect(Collectors.toList());
     }
