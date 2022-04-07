@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class CookieExtractor {
 
@@ -18,7 +19,7 @@ public class CookieExtractor {
     }
 
     public void setCookies(HttpURLConnection connection) {
-        List<Cookie> cookies = connection.getHeaderFields().entrySet()
+        this.cookies = connection.getHeaderFields().entrySet()
                 .stream()
                 .filter(x -> Optional.ofNullable(x.getKey()).orElse("").equals("Set-Cookie"))
                 .map(Map.Entry::getValue)
@@ -65,8 +66,7 @@ public class CookieExtractor {
                     Optional<?> httpOnly = Optional.ofNullable(cookiePartsMap.get("HttpOnly"));
                     cookie.setHttpOnly(secured.isPresent());
                     return cookie;
-                }).toList();
-        this.cookies = cookies;
+                }).collect(Collectors.toList());
     }
     /**
      * key: Set-Cookie

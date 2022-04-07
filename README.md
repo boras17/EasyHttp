@@ -1,13 +1,13 @@
-# EasyHttp
+# client.EasyHttp
 How to use?
 Firstly you must create new instance of EasyHtpp. You can do this with EasyHttpBuilder. Example how to create new instance with builder:
 ```java 
-    EasyHttp client = new EasyHttp.EasyHttpBuilder()
+    client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
                 .build();
 ```
 EasyHTtpBuilder makes it possible among others to set user agent and authenticator for requests:
 ```java 
-EasyHttp client = new EasyHttp.EasyHttpBuilder()
+client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
                 .setAuthenticationProvider(someAuthenticationProvider)
                 .setUserAgent(someUserAgent)
                 .setCookieExtractor(cookie extractor)
@@ -17,7 +17,7 @@ As you can see, EasyHttpBuilder provide mechanism for easy extracting cookies fr
 How to create cookie extractor? 
 ```java 
 CookieExtractor cookieExtractor = new CookieExtractor();
-        EasyHttp client = new EasyHttp.EasyHttpBuilder()
+        client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
                 .setCookieExtractor(cookieExtractor)
                 .build();
 ```
@@ -31,7 +31,7 @@ Now let me explain you how to use 'Authenticator'. We have three options. First 
         AuthenticationProvider authenticationProvider
                 = new BasicAuthenticationProvider("username","password");
         
-        EasyHttp client = new EasyHttp.EasyHttpBuilder()
+        client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
                 .setAuthenticationProvider(authenticationProvider)
                 .build();
 ```
@@ -49,7 +49,7 @@ Let's move on to Digest Authentication support for this purpose you can use Dige
 
     AuthenticationProvider authenticationProvider = new DigestAuthenticationProvider("username","password", digestConfiguration);
 
-    EasyHttp client = new EasyHttp.EasyHttpBuilder()
+    client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
         .setAuthenticationProvider(authenticationProvider)
         .build();
 ```
@@ -145,8 +145,8 @@ CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request,
 ```
 Response and request interceptors can by provided via functional interface Interceptor
 ```java
-EasyHttp easyHttp
-        = new EasyHttp.EasyHttpBuilder()
+client.EasyHttp easyHttp
+        = new client.EasyHttp.EasyHttpBuilder()
         .setRequestInterceptor(request -> {
             System.out.println("request: " + request.getUrl());
         })

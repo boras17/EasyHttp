@@ -1,3 +1,5 @@
+package client;
+
 import Headers.Header;
 import HttpEnums.HttpStatus;
 import HttpEnums.Method;
@@ -84,14 +86,22 @@ public class EasyHttp {
             interceptor.handle(request);
         });
 
+        request.getProxy()
+                .ifPresentOrElse(_proxy ->{
+                    Proxy proxy = request.getProxy().get();
+                    try {
+                        this.connection = (HttpURLConnection) request.getUrl().openConnection(proxy);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
-        if(request.getProxy().isPresent()){
-            Proxy proxy = request.getProxy().get();
-            this.connection = (HttpURLConnection) request.getUrl().openConnection(proxy);
-        }
-        else{
-            this.connection = (HttpURLConnection) request.getUrl().openConnection();
-        }
+                }, () -> {
+                    try {
+                        this.connection = (HttpURLConnection) request.getUrl().openConnection();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
 
         this.connection.setRequestMethod(request.getMethod().name());
         this.connection.setDoOutput(true);
