@@ -6,6 +6,7 @@ import client.ConnectionInitializr;
 import client.EasyHttp;
 import intercepting.EasyRequestInterceptor;
 import intercepting.EasyResponseInterceptor;
+import interceptingtests.httpurlconnections.DumbConnection;
 import org.assertj.core.api.Condition;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,12 +40,13 @@ public class EasyInterceptorTests {
     @Before
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
-        this.emptyRequest = new EasyHttpRequest.EasyHttpRequestBuilder()
-                .build();
+        this.emptyRequest = new EasyHttpRequest.EasyHttpRequestBuilder().build();
     }
 
     @Test
-    public void da() throws IOException, RedirectionUnhandled, IllegalAccessException {
+    public void da() throws IOException,
+                            RedirectionUnhandled,
+                            IllegalAccessException {
 
         Mockito.when(connectionInitializr.openConnection(Mockito.any())).thenReturn(new DumbConnection());
 
@@ -78,7 +80,9 @@ public class EasyInterceptorTests {
     }
 
     @Test
-    public void givenRequestInterceptorToEasyHttpShouldAddJwtHeaderToRequest() throws IOException, RedirectionUnhandled, IllegalAccessException {
+    public void givenRequestInterceptorToEasyHttpShouldAddJwtHeaderToRequest() throws IOException,
+                                                                                      RedirectionUnhandled,
+                                                                                      IllegalAccessException {
         Mockito.when(connectionInitializr.openConnection(Mockito.any())).thenReturn(new DumbConnection());
         Header authHeader = new Header();
         authHeader.setKey("Authorization");

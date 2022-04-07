@@ -1,4 +1,4 @@
-package interceptingtests;
+package interceptingtests.httpurlconnections;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -8,10 +8,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-public class DumbConnection extends HttpURLConnection {
-
-    public DumbConnection() throws MalformedURLException {
-        super(new URL("http://localhost:2323/any"));
+public class ClientErrorConnection extends HttpURLConnection {
+     public ClientErrorConnection() throws MalformedURLException {
+        super(new URL("http://empty/asd"));
     }
 
     @Override
@@ -30,12 +29,12 @@ public class DumbConnection extends HttpURLConnection {
     }
 
     @Override
-    public InputStream getInputStream() throws IOException {
-        return new ByteArrayInputStream("1984-11-12 11:45".getBytes(StandardCharsets.UTF_8));
+    public int getResponseCode() throws IOException {
+        return 400;
     }
 
     @Override
-    public int getResponseCode() throws IOException {
-        return 200;
+    public InputStream getErrorStream() {
+        return new ByteArrayInputStream("An client error occurred".getBytes(StandardCharsets.UTF_8));
     }
 }

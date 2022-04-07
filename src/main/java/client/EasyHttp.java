@@ -193,8 +193,6 @@ public class EasyHttp {
         }
     }
 
-
-
     public AuthenticationProvider getAuthenticationProvider() {
         return authenticationProvider;
     }
