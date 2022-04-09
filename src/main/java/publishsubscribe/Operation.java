@@ -7,22 +7,31 @@ import publishsubscribe.annotations.OnServerError;
 import publishsubscribe.communcates.ErrorCommunicate;
 import redirect.ErrorType;
 import redirect.GenericError;
-import redirect.GenericNotification;
-import redirect.NotificationTypes;
 
 import java.lang.annotation.Annotation;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class Operation extends Event {
 
+    ConcurrentHashMap<String, WeakReference<Object>> channels;
+
+    public Operation() {
+        this(new ConcurrentHashMap<>());
+    }
+
+    public Operation(ConcurrentHashMap<String, WeakReference<Object>> channels) {
+        this.channels = channels;
+    }
+
     public void subscribe(String channelName, Object subscriber) {
-        Event.channels.put(channelName, new WeakReference<>(subscriber));
+        this.channels.put(channelName, new WeakReference<>(subscriber));
     }
 
     private void publishErrors(Object subscriberObj, GenericCommunicate<?> message){
-        GenericError genericError =  ((ErrorCommunicate)message).getCommunicate();
+        GenericError genericError =  ((GenericError)message);
         ErrorType errorType = genericError.getErrorType();
         final Method[] methods = subscriberObj.getClass().getDeclaredMethods();
 
@@ -58,7 +67,7 @@ public class Operation extends Event {
     }
 
     public void publish(String channelName, GenericCommunicate<?> message) {
-        WeakReference<?> subscriberRef = Event.channels.get(channelName);
+        WeakReference<?> subscriberRef = this.channels.get(channelName);
         Object subscriberObj = subscriberRef.get();
 
         if(message instanceof GenericError && subscriberObj != null) {
@@ -68,7 +77,7 @@ public class Operation extends Event {
         }
     }
 
-    private  <T, P extends GenericCommunicate<?>> boolean deliverMessage(T subscriber, Method method, GenericCommunicate<?> message) {
+    private  <T> void deliverMessage(T subscriber, Method method, GenericCommunicate<?> message) {
         try {
             boolean methodFound = false;
             for (final Class<?> paramClass : method.getParameterTypes()) {
@@ -82,11 +91,9 @@ public class Operation extends Event {
                 method.invoke(subscriber, message);
             }
 
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return false;
     }
 }
