@@ -5,6 +5,7 @@ import HttpEnums.Method;
 import publishsubscribe.Channels;
 import publishsubscribe.Event;
 import publishsubscribe.communcates.ErrorCommunicate;
+import redirect.redirectexception.RedirectWithoutLocationException;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.UnsafeRedirectionException;
 import requests.easyresponse.EasyHttpResponse;
@@ -36,8 +37,7 @@ public class RedirectionHandler {
                 .stream()
                 .filter(header -> header.getKey().equalsIgnoreCase("location"))
                 .findFirst()
-                .orElseThrow();
-        final Method requestMethod = request.getMethod();
+                .orElseThrow(() -> new RedirectWithoutLocationException("Redirection occurred but there is no Location"));
 
         final String resourceLocation = locationHeader.getValue();
         final boolean isLocationURLAbsolute = URI.create(resourceLocation).isAbsolute();
@@ -106,9 +106,7 @@ public class RedirectionHandler {
     }
 
     private URL createLocationURL(final URL requestUrl, final String resourceLocation) throws MalformedURLException {
-
         final String host = requestUrl.getHost();
-        final String path = requestUrl.getPath();
         final String protocol = requestUrl.getProtocol();
 
         int port = requestUrl.getPort();
@@ -119,7 +117,7 @@ public class RedirectionHandler {
             locationStr+=locationStr.concat(":").concat(String.valueOf(port));
         }
 
-        locationStr = locationStr.concat(path).concat("/").concat(resourceLocation);
+        locationStr = locationStr.concat(resourceLocation.startsWith("/") ? "" : "/").concat(resourceLocation);
 
         return new URL(locationStr);
     }
