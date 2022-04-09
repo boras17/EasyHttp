@@ -54,8 +54,8 @@ public class RedirectionHandler {
             }
 
             if(!isLocationURLAbsolute){
-                locationURL = this.createLocationURL(request);
-
+                URL requestUrl = request.getUrl();
+                locationURL = this.createLocationURL(requestUrl, resourceLocation);
             }
 
             boolean isRedirectdable = this.checkIfRedirectCanBeHandled(response, request) &&
@@ -101,22 +101,17 @@ public class RedirectionHandler {
         };
     }
 
-    public boolean checkIfProxyRequiredForRedirection(final EasyHttpResponse<?> response){
-        return response.getStatus() == HttpURLConnection.HTTP_USE_PROXY;
-    }
-
     private boolean isRedirectable(final Method method) {
         return this.redirectableMethods.contains(method);
     }
 
-    private URL createLocationURL(final EasyHttpRequest request) throws MalformedURLException {
-        URL resourceUrl = request.getUrl();
+    private URL createLocationURL(final URL requestUrl, final String resourceLocation) throws MalformedURLException {
 
-        final String host = resourceUrl.getHost();
-        final String path = resourceUrl.getPath();
-        final String protocol = resourceUrl.getProtocol();
+        final String host = requestUrl.getHost();
+        final String path = requestUrl.getPath();
+        final String protocol = requestUrl.getProtocol();
 
-        int port = resourceUrl.getPort();
+        int port = requestUrl.getPort();
 
         String locationStr = protocol.concat("://").concat(host);
 
@@ -124,7 +119,7 @@ public class RedirectionHandler {
             locationStr+=locationStr.concat(":").concat(String.valueOf(port));
         }
 
-        locationStr = locationStr.concat(path);
+        locationStr = locationStr.concat(path).concat("/").concat(resourceLocation);
 
         return new URL(locationStr);
     }
