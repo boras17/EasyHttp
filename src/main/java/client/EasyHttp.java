@@ -3,13 +3,15 @@ package client;
 import Headers.Header;
 import HttpEnums.HttpStatus;
 import auth.AuthenticationProvider;
-import com.sun.source.tree.Tree;
+import exceptions.RequestObjectRequiredException;
+import exceptions.ResponseHandlerRequired;
 import intercepting.EasyRequestInterceptor;
 import intercepting.EasyResponseInterceptor;
 import intercepting.Interceptor;
 import publishsubscribe.Channels;
 import publishsubscribe.Event;
-import publishsubscribe.communcates.Communicate;
+import publishsubscribe.Operation;
+import publishsubscribe.communcates.ErrorCommunicate;
 import publishsubscribe.errorsubscriberimpl.Subscriber;
 import redirect.*;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
@@ -26,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.*;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -38,7 +41,7 @@ public class EasyHttp {
     private Duration connectionTimeout;
     private Map<String, Subscriber> subscribedChannels;
     private ConnectionInitializr connectionInitializr;
-
+    private Operation operation;
     private Map<Integer, EasyResponseInterceptor<?>> responseInterceptors = new TreeMap<>();
     private EasyRequestInterceptor requestIInterceptor;
 
@@ -47,7 +50,7 @@ public class EasyHttp {
             try {
                 return this.send(request, bodyHandler);
             } catch (RedirectionUnhandled redirectionUnhandled){
-                Event.operation.publish(Channels.ERROR_CHANNEL,redirectionUnhandled.getGenericError());
+                Event.operation.publish(Channels.REDIRECT_ERROR_CHANNEL,redirectionUnhandled.getGenericError());
                 redirectionUnhandled.printStackTrace();
                 return new EasyHttpResponse<>();
             }
@@ -71,12 +74,18 @@ public class EasyHttp {
     public <T> EasyHttpResponse<T> send(requests.multirpart.simplerequest.EasyHttpRequest request,
                                  AbstractBodyHandler<T> bodyHandler)
             throws IOException, IllegalAccessException, RedirectionUnhandled {
+        if(request == null) {
+            throw new RequestObjectRequiredException("Request object can not be null");
+        }
+        if(bodyHandler == null){
+            throw new ResponseHandlerRequired("Response handler can not be null");
+        }
 
         this.getRequestIInterceptor().ifPresent(interceptor -> {
             interceptor.handle(request);
         });
 
-        HttpURLConnection connection = connectionInitializr.openConnection(request);
+        HttpURLConnection connection = this.connectionInitializr.openConnection(request);
 
         this.getConnectionTimeout().ifPresentOrElse(timeout -> {
             int timeoutMillis = (int)timeout.toMillis();
@@ -119,7 +128,16 @@ public class EasyHttp {
                     "Server responded with client error status: " +responseStatus,
                     ErrorType.CLIENT,
                     new String(errorStream.readAllBytes()));
-            Event.operation.publish(Channels.ERROR_CHANNEL, new Communicate(genericError));
+            this.operation.publish(Channels.CLIENT_ERROR_CHANNEL, new ErrorCommunicate(genericError));
+        }else if(responseStatus >= 500){
+            InputStream errorStream = connection.getErrorStream();
+            bodyHandler.setInputStream(errorStream);
+            GenericError genericError = new GenericError(responseStatus,
+                    headers,
+                    "Server responded with server error status: " +responseStatus,
+                    ErrorType.SERVER,
+                    new String(errorStream.readAllBytes()));
+            this.operation.publish(Channels.SERVER_ERROR_CHANNEL, new ErrorCommunicate(genericError));
         }
 
         bodyHandler.setResponseStatus(getHttpStatus(responseStatus));
@@ -137,6 +155,12 @@ public class EasyHttp {
 
         _response.setStatus(responseStatus);
         if(responseStatus >= 300 && responseStatus < 400){
+
+            this.operation.publish(Channels.REDIRECT_NOTIFICATION, new GenericNotification(LocalDateTime.now(),
+                    "An redirection occured",
+                    _response.getResponseHeaders(),
+                    request.getUrl().toString()));
+
             RedirectionHandler redirectionHandler
                     = this.getRedirectionHandler()
                     .orElseThrow(() -> {
@@ -144,8 +168,9 @@ public class EasyHttp {
                                 headers, "Server respond with redirect status: " + responseStatus + "and you did not provide redirection handler",
                                 ErrorType.REDIRECT,
                                 null);
+                        this.operation.publish(Channels.REDIRECT_ERROR_CHANNEL, genericError);
                         try{
-                            genericError.setServerMsg(new String(bodyHandler.getInputStream().readAllBytes()));
+                            genericError.setServerMsg(new String(connection.getErrorStream().readAllBytes()));
                         }catch (java.io.IOException e){
                             e.printStackTrace();
                         }
@@ -155,10 +180,10 @@ public class EasyHttp {
             try{
                 redirectionHandler.modifyRequest(request, _response);
             }catch (UnsafeRedirectionException  e) {
-                Event.operation.publish(Channels.ERROR_CHANNEL, e.getGenericError());
+                this.operation.publish(Channels.REDIRECT_ERROR_CHANNEL, e.getGenericError());
                 e.printStackTrace();
             }catch (RedirectionCanNotBeHandledException e) {
-                Event.operation.publish(Channels.ERROR_CHANNEL, e.getGenericError());
+                this.operation.publish(Channels.REDIRECT_ERROR_CHANNEL, e.getGenericError());
                 e.printStackTrace();
             }
         }
@@ -208,6 +233,9 @@ public class EasyHttp {
 
     public void setSubscribedChannels(Map<String, Subscriber> subscribedChannels) {
         this.subscribedChannels = subscribedChannels;
+        subscribedChannels.forEach((key, value) -> {
+            this.operation.subscribe(key, value);
+        });
     }
 
     public String getUserAgent() {
@@ -269,6 +297,10 @@ public class EasyHttp {
     public void setRequestInterceptor(EasyRequestInterceptor easyRequestInterceptor){
         this.requestIInterceptor = easyRequestInterceptor;
     }
-
-    public EasyHttp(){}
+    public EasyHttp(Operation operation, ConnectionInitializr connectionInitializr) {
+        this.operation = operation;
+        this.connectionInitializr = connectionInitializr;
+    }
+    public EasyHttp(){
+    }
 }

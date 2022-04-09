@@ -1,15 +1,15 @@
 package publishsubscribe.errorsubscriberimpl;
 
-import publishsubscribe.communcates.Communicate;
+import publishsubscribe.communcates.ErrorCommunicate;
 
-public abstract class Subscriber {
+public class Subscriber<T> {
 
     public Subscriber() {
     }
 
-    public abstract void onRedirectErrorCommunicate(Communicate redirectError);
+    public void onRedirectErrorCommunicate(T redirectError){}
 
-    public abstract void onClientErrorCommunicate(Communicate clientError);
+    public void onClientErrorCommunicate(T clientError){}
 
-    public abstract void onServerErrorCommunicate(Communicate serverError);
+    public void onServerErrorCommunicate(T serverError){}
 }

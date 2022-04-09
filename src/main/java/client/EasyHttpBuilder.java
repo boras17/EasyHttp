@@ -16,7 +16,6 @@ public class EasyHttpBuilder{
     private AuthenticationProvider authenticationProvider;
     private RedirectionHandler redirectionHandler;
     private Duration connectionTimeout;
-    private Map<String, Subscriber> subscribedChannels;
 
 
     public EasyHttpBuilder setConnectionTimeout(Duration connectionTimeout){
@@ -41,11 +40,7 @@ public class EasyHttpBuilder{
         return this;
     }
 
-    public EasyHttpBuilder subscribeForChannels(Map<String, Subscriber> channelSubscriber){
-        this.subscribedChannels = channelSubscriber;
-        channelSubscriber.forEach((key, value) -> Event.operation.subscribe(key, value));
-        return this;
-    }
+
 
     public EasyHttp build() throws IOException {
         EasyHttp http = new EasyHttp();
@@ -54,7 +49,6 @@ public class EasyHttpBuilder{
         http.setAuthenticationProvider(this.authenticationProvider);
         http.setRedirectionHandler(this.redirectionHandler);
         http.setConnectionTimeout(this.connectionTimeout);
-        http.setSubscribedChannels(this.subscribedChannels);
         http.setConnectionInitializr(new ConnectionInitializr());
         return http;
     }

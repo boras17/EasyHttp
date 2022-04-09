@@ -9,8 +9,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class ClientErrorConnection extends HttpURLConnection {
-     public ClientErrorConnection() throws MalformedURLException {
+    private final int responseStatus;
+     public ClientErrorConnection(int responseStatus) throws MalformedURLException {
         super(new URL("http://empty/asd"));
+        this.responseStatus = responseStatus;
     }
 
     @Override
@@ -30,7 +32,12 @@ public class ClientErrorConnection extends HttpURLConnection {
 
     @Override
     public int getResponseCode() throws IOException {
-        return 400;
+        return this.responseStatus;
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

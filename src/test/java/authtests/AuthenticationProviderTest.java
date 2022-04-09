@@ -3,8 +3,8 @@ package authtests;
 import Headers.Header;
 import auth.AuthenticationProvider;
 import auth.BasicAuthenticationProvider;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;

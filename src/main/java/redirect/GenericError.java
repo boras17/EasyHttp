@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-public class GenericError extends GenericCommunicate {
+public class GenericError extends GenericCommunicate<GenericError> {
     private int status;
     private String exceptionMg;
     private ErrorType errorType;
@@ -39,6 +39,7 @@ public class GenericError extends GenericCommunicate {
         this.serverMsg = serverMsg;
     }
 
+
     public static String formattedGenericError(GenericError genericError){
         StringBuilder content = new StringBuilder();
 
@@ -57,7 +58,17 @@ public class GenericError extends GenericCommunicate {
         content.append("Server response: ").append(genericError.getServerMessage().orElse("")).append(newLine);
         content.append("Exception msg: ").append(genericError.getMsg()).append(newLine);
         content.append("Response status: ").append(genericError.getStatus()).append(newLine);
-        content.append("Response headers: ").append(genericError.getResponseHeaders()).append(newLine).append(newLine);
+        content.append("Response headers: ").append(newLine).append(newLine);
+        for(Header header: genericError.getResponseHeaders()){
+            content.append("header key: ")
+                    .append(header.getKey())
+                    .append("\n")
+                    .append("header value: ")
+                    .append(header.getValue())
+                    .append("\n")
+                    .append("------------------------------")
+                    .append("\n");
+        }
 
         return content.toString();
     }
