@@ -16,14 +16,16 @@ public class GenericNotification extends GenericCommunicate<GenericNotification>
     private String msg;
     private List<Header> responseHeaders;
     private String resourceAddress;
+    private NotificationTypes notificationType;
 
 
-    public GenericNotification(LocalDateTime dateTime, String msg, List<Header> responseHeaders, String resourceAddress){
+    public GenericNotification(LocalDateTime dateTime, String msg, List<Header> responseHeaders, String resourceAddress, NotificationTypes notificationType){
         super();
         this.dateTime = dateTime;
         this.msg = msg;
         this.resourceAddress = resourceAddress;
         this.responseHeaders = responseHeaders;
+        this.notificationType = notificationType;
     }
 
     public static String formattedGenericNotification(GenericNotification genericNotification){
@@ -53,6 +55,14 @@ public class GenericNotification extends GenericCommunicate<GenericNotification>
         }
 
         return content.toString();
+    }
+
+    public NotificationTypes getNotificationType() {
+        return notificationType;
+    }
+
+    public void setNotificationType(NotificationTypes notificationType) {
+        this.notificationType = notificationType;
     }
 
     public List<Header> getResponseHeaders() {

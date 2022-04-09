@@ -159,7 +159,7 @@ public class EasyHttp {
             this.operation.publish(Channels.REDIRECT_NOTIFICATION, new GenericNotification(LocalDateTime.now(),
                     "An redirection occured",
                     _response.getResponseHeaders(),
-                    request.getUrl().toString()));
+                    request.getUrl().toString(), NotificationTypes.REDIRECT));
 
             RedirectionHandler redirectionHandler
                     = this.getRedirectionHandler()

@@ -8,6 +8,7 @@ import publishsubscribe.communcates.ErrorCommunicate;
 import redirect.ErrorType;
 import redirect.GenericError;
 import redirect.GenericNotification;
+import redirect.NotificationTypes;
 
 import java.lang.annotation.Annotation;
 import java.lang.ref.WeakReference;
@@ -55,20 +56,15 @@ public class Operation extends Event {
             deliverMessage(subscriberObj, method, message);
         }
     }
-    private void publishNotification(Object subscriberObject, GenericCommunicate<?> communicate) {
-        GenericNotification genericNotification = (GenericNotification)communicate.getCommunicate();
 
-
-        // TODO
-    }
     public void publish(String channelName, GenericCommunicate<?> message) {
         WeakReference<?> subscriberRef = Event.channels.get(channelName);
         Object subscriberObj = subscriberRef.get();
 
-        if(message instanceof GenericError){
+        if(message instanceof GenericError && subscriberObj != null) {
             this.publishErrors(subscriberObj, message);
-        }else if(message instanceof GenericNotification){
-            //this.publishNotification();
+        }else{
+            System.err.println("An attempt to publish error occured but you did not register any related Subscriber");
         }
     }
 

@@ -2,7 +2,7 @@ import Headers.Header;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.junit.Test;
-import org.mockito.MockedStatic;
+
 import org.mockito.Mockito;
 import redirect.ErrorType;
 import redirect.GenericError;

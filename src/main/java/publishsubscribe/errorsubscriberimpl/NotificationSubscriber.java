@@ -1,8 +1,5 @@
 package publishsubscribe.errorsubscriberimpl;
 
-import publishsubscribe.annotations.redirectannotations.OnRedirectNotification;
-import publishsubscribe.communcates.ErrorCommunicate;
-import redirect.GenericError;
 import redirect.GenericNotification;
 
 import java.io.FileNotFoundException;
@@ -35,12 +32,6 @@ public class NotificationSubscriber extends Subscriber<GenericNotification>{
         }catch (FileNotFoundException fileNotFoundException) {
             fileNotFoundException.printStackTrace();
         }
-    }
-
-    @OnRedirectNotification
-    @Override
-    public void onRedirectErrorCommunicate(GenericNotification message) {
-        this.writeToFile(message);
     }
 
 }
