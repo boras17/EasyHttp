@@ -11,7 +11,7 @@ public class DigestConfiguration {
     private final String method;
     private final String uri; //
     private final String cnonce;
-    private EasyHttpRequest request;
+    private String entity;
 
     public DigestConfiguration(String nonce,
                                HashAlgorithms hashAlgorithm,
@@ -20,7 +20,7 @@ public class DigestConfiguration {
                                String method,
                                String uri,
                                String cnonce,
-                               EasyHttpRequest easyHttpRequest) {
+                               String entity) {
         this.nonce = nonce;
         this.hashAlgorithm = hashAlgorithm;
         this.realm = realm;
@@ -28,7 +28,7 @@ public class DigestConfiguration {
         this.method = method;
         this.uri = uri;
         this.cnonce = cnonce;
-        this.request = easyHttpRequest;
+        this.entity = entity;
     }
 
     public void incrementNonceCounter() {
@@ -52,7 +52,7 @@ public class DigestConfiguration {
         private String method;
         private String uri;
         private String cnonce;
-        private EasyHttpRequest easyHttpRequest;
+        private String entity;
 
         public DigestConfigBuilder setNonce(String nonce) {
             this.nonce = nonce;
@@ -89,8 +89,8 @@ public class DigestConfiguration {
             return this;
         }
 
-        public DigestConfigBuilder setEntityBody(EasyHttpRequest easyHttpRequest) {
-            this.easyHttpRequest = easyHttpRequest;
+        public DigestConfigBuilder setEntityBody(String entity) {
+            this.entity = entity;
             return this;
         }
 
@@ -104,7 +104,7 @@ public class DigestConfiguration {
                                             method,
                                             uri,
                                             cnonce,
-                                            easyHttpRequest);
+                                            entity);
         }
     }
 
@@ -128,12 +128,15 @@ public class DigestConfiguration {
         return method;
     }
 
-    public EasyHttpRequest getEntityBody() {
-        return this.request;
+    public String getEntity() {
+        return this.entity;
     }
 
     public String getUri() {
         return uri;
     }
 
+    public String getCnonce() {
+        return cnonce;
+    }
 }

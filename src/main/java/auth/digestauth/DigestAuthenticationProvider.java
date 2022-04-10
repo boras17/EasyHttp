@@ -4,6 +4,7 @@ import Headers.Header;
 import auth.AuthenticationProvider;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -43,58 +44,60 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
                 .concat(":")
                 .concat(this.createCnonce()).getBytes(StandardCharsets.UTF_8));
 
-        String HA2 = Optional.ofNullable(this.digestConfiguration.getQop())
-                .map(qop -> {
-                    md.reset();
-                    if(qop.equals("auth")){
-                        String ha2_auth = this.digestConfiguration.getMethod().concat(":").concat(this.digestConfiguration.getUri());
-                        byte[] ha2_auth_bytes = ha2_auth.getBytes(StandardCharsets.UTF_8);
-                        md.update(ha2_auth_bytes);
-                        return new String(md.digest());
-                    }
-                    else if(qop.equals("auth-int")){
-                        EasyHttpRequest request = this.digestConfiguration.getEntityBody();
-                        md.update(this.digestConfiguration.getEntityBody().getBody().get().getInputStream());
-                        // TODO
-                        String entityBodyHash = null;
-                        try {
-                            entityBodyHash = MD5Util.getMD5Hash(md.digest());
-                        } catch (NoSuchAlgorithmException e) {
-                            e.printStackTrace();
-                        }
-                        return HA2_forQopAuthOrUnspecified();
-                    }else{
-                        return HA2_forQopAuthOrUnspecified();
-                    }
-                })
-                .orElse(HA2_forQopAuthOrUnspecified());
+        String HA2 = null;
+        String qop = this.digestConfiguration.getQop();
+
+        if(qop == null || qop.equals("auth")) {
+            md.reset();
+            String ha2_auth = this.digestConfiguration
+                    .getMethod()
+                    .concat(":")
+                    .concat(this.digestConfiguration.getUri());
+            byte[] ha2_auth_bytes = ha2_auth.getBytes(StandardCharsets.UTF_8);
+            md.update(ha2_auth_bytes);
+            HA2 =  new String(md.digest());
+        }
+        if(qop != null && qop.equals("auth-int")) {
+            String entity = this.digestConfiguration.getEntity();
+            byte[] entity_bytes = entity.getBytes(StandardCharsets.UTF_8);
+            md.update(entity_bytes);
+            String entityBodyHash = null;
+            try {
+                entityBodyHash = MD5Util.getMD5Hash(md.digest());
+                HA2 = this.digestConfiguration.getMethod()
+                        .concat(":")
+                        .concat(this.digestConfiguration.getUri())
+                        .concat(":")
+                        .concat(entityBodyHash);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        }
+
         md.reset();
         md.update(HA2.getBytes(StandardCharsets.UTF_8));
         byte[] HA2_hash_bytes = md.digest();
 
         String HA2_hash = MD5Util.getMD5Hash(HA2_hash_bytes);
 
-        Optional<String> qopOptional =
-                Optional.ofNullable(this.digestConfiguration.getQop());
-
         String response = null;
 
-        if(qopOptional.isPresent()){
-            String qop = qopOptional.get();
-            if(qop.equals("auth-int") || qop.equals("auth")){
-                md.reset();
-                response = HA1_hash.concat(":")
-                        .concat(this.digestConfiguration.getNonce())
-                        .concat(":")
-                       // .concat(this.digestConfiguration.getNonceCount())
-                       // .concat(":")
-                       // .concat(qop)
-                       // .concat(":")
-                        .concat(HA2_hash);
-            }
+        if(qop == null){
+            md.reset();
+            response = HA1_hash.concat(":")
+                    .concat(this.digestConfiguration.getNonce())
+                    .concat(":")
+                    .concat(HA2_hash);
+
         }else{
             response = HA1_hash.concat(":")
                     .concat(this.digestConfiguration.getNonce())
+                    .concat(":")
+                    .concat(this.digestConfiguration.getNonceCount())
+                    .concat(":")
+                    .concat(this.digestConfiguration.getCnonce())
+                    .concat(":")
+                    .concat(digestConfiguration.getQop())
                     .concat(":").concat(HA2_hash);
         }
         md.reset();
@@ -103,7 +106,6 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
         String response_hash = MD5Util.getMD5Hash(response_hash_bytes);
 
         Header digestAuthHeader = this.generateDigestAuthHeader(response_hash);
-
         super.addAuthHeader(digestAuthHeader);
     }
 
@@ -152,13 +154,6 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
                 "response=\"" + response + "\"");
         System.out.println(headerValue.toString());
         return digestAuthHeader;
-    }
-
-
-    private String HA2_forQopAuthOrUnspecified(){
-        return this.digestConfiguration.getMethod()
-                .concat(":")
-                .concat(this.digestConfiguration.getUri());
     }
 
      String encode(final byte[] binaryData) {
