@@ -3,6 +3,7 @@ package jsonoperations;
 import Utils.ReflectionUtils;
 import jsonoperations.serialization.EasySerialize;
 import jsonoperations.serialization.EasySerializer;
+import jsonoperations.serialization.SerializedName;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -56,6 +57,12 @@ public class JsonCreator {
 
     }
 
+    public String getSerializeNameValueFromAnnotation(Field field) {
+        SerializedName serializedName = field.getAnnotation(SerializedName.class);
+        String serializedNameValue = serializedName.name();
+        return (serializedNameValue.isEmpty() || serializedNameValue.isBlank()) ? field.getName() : serializedNameValue;
+    }
+
     private void serializeObject(Object object) throws IllegalAccessException {
         Class<?> clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
@@ -69,7 +76,16 @@ public class JsonCreator {
             field = fields[i];
             fieldType = field.getType();
             fieldValue = ReflectionUtils.getValueForField(field, object);
-            json.append("\"").append(field.getName()).append("\":");
+            // serialize json property name
+            json.append("\"");
+            if(field.isAnnotationPresent(SerializedName.class)) {
+                json.append(this.getSerializeNameValueFromAnnotation(field));
+            }else{
+                json.append(field.getName());
+            }
+            json.append("\":");
+            // serialize json property name
+
             if (fieldValue == null) {
                 json.append("null");
             } else if (field.isAnnotationPresent(EasySerialize.class)) {
@@ -92,7 +108,7 @@ public class JsonCreator {
             } else if (fieldType.isArray()) {
                 Object[] arr = (Object[]) field.get(object);
                 serializeToArray(arr);
-            } else if (fieldType.equals(Boolean.class)) {
+            } else if (fieldType.equals(Boolean.class) || fieldType.equals(boolean.class)) {
                 json.append(fieldValue);
             } else {
                 generateJson(field.get(object));

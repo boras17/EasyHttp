@@ -4,6 +4,9 @@ import jsonoperations.JsonCreator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -19,10 +22,23 @@ public class JsonCreatorTests {
     }
 
     @Test
+    public void givenObjectWithSerializedNameAnnotation() throws IllegalAccessException {
+        UserWithSerializedNameAnnotation user = new UserWithSerializedNameAnnotation(1,
+                "Ben",
+                Arrays.asList("Python", "Bash"),
+                true);
+        this.jsonCreator.generateJson(user);
+        String result = this.jsonCreator.getJson();
+        String expected = "{\"user_id\":1,\"name\":\"Ben\",\"user_skills\":[\"Python\",\"Bash\"],\"is_user_alive\":true}";
+        Assertions.assertEquals(result, expected);
+    }
+
+    @Test
     public void givenSimpleUserShouldReturnJsonSerialized() throws IllegalAccessException, IOException {
         User user = new User(1, "Adam", Arrays.asList("Java", "Python"),true);
         jsonCreator.generateJson(user);
         String serializedUser = jsonCreator.getJson();
+
         String expectedJson = "{\"id\":1,\"username\":\"Adam\",\"userSkills\":[\"Java\",\"Python\"],\"alive\":true}";
         Assertions.assertEquals(serializedUser, expectedJson);
     }
