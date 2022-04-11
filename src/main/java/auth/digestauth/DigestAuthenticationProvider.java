@@ -2,6 +2,8 @@ package auth.digestauth;
 
 import Headers.Header;
 import auth.AuthenticationProvider;
+import requests.easyresponse.EasyHttpResponse;
+import requests.multirpart.simplerequest.EasyHttpRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -20,10 +22,9 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
         this.digestConfiguration = digestConfiguration;
     }
 
-    public DigestAuthenticationProvider(String username, String password) {
+    public DigestAuthenticationProvider(String username, String password, EasyHttpResponse<?> response, EasyHttpRequest request) {
         super(username, password);
-        this.digestConfiguration = new DigestResponse.DigestConfigBuilder()
-                .build();
+        this.digestConfiguration = DigestResponse.calculateDigestResponse(response, request);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
                     .concat(":")
                     .concat(this.digestConfiguration.getNonceCount())
                     .concat(":")
-                    .concat(this.digestConfiguration.getCnonce())
+                    .concat(this.createCnonce())
                     .concat(":")
                     .concat(digestConfiguration.getQop().stream()
                             .map(Enum::name)

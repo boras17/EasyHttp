@@ -127,8 +127,12 @@ public class EasyHttp {
                     headers,
                     "Server responded with client error status: " +responseStatus,
                     ErrorType.CLIENT,
-                    new String(errorStream.readAllBytes()));
-            this.operation.publish(Channels.CLIENT_ERROR_CHANNEL, new ErrorCommunicate(genericError));
+                    errorStream == null ? "No message from server": new String(errorStream.readAllBytes()));
+            boolean userSubscribedClientErrors = this.getSubscribedChannels()
+                    .containsKey(Channels.CLIENT_ERROR_CHANNEL);
+            if(userSubscribedClientErrors){
+                this.operation.publish(Channels.CLIENT_ERROR_CHANNEL, new ErrorCommunicate(genericError));
+            }
         }else if(responseStatus >= 500){
             InputStream errorStream = connection.getErrorStream();
             bodyHandler.setInputStream(errorStream);
@@ -302,5 +306,6 @@ public class EasyHttp {
         this.connectionInitializr = connectionInitializr;
     }
     public EasyHttp(){
+
     }
 }

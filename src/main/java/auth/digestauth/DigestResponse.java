@@ -1,5 +1,6 @@
 package auth.digestauth;
 
+import jdk.jfr.Frequency;
 import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
@@ -52,18 +53,31 @@ public class DigestResponse {
     }
 
 
-    public static DigestResponse calculateDigestResponse(EasyHttpResponse<?> response){
+    public static DigestResponse calculateDigestResponse(EasyHttpResponse<?> response, EasyHttpRequest request){
         DigestConfigBuilder digestConfigBuilder = new DigestConfigBuilder();
 
         response.getHeaderByName("WWW-Authenticate")
                 .ifPresent(wwwAuthHeader -> {
                     String headerVal = wwwAuthHeader.getValue();
-                    String digestVal = headerVal.substring(0,7);
-                    String[] digestParts = digestVal.split(",");
+                    String digestVal = headerVal.substring(7);
+
+                    String[] digestParts = digestVal.split(", ");
                     Map<String, Object> digestPropertyValueMap
                             = Arrays.stream(digestParts)
                             .collect(Collectors.toMap(part -> part.split("=")[0],
-                                    (Function<String, String>) part -> part.split("=")[1]));
+                                    (Function<String, String>) part -> {
+                                        String[] parts = part.split("=");
+                                        int len = parts.length;
+                                        if(len == 1){
+                                            return "";
+                                        }else{
+                                            return parts[1];
+                                        }
+                                    }));
+                    for(Map.Entry<String, Object> entreis: digestPropertyValueMap.entrySet()){
+                        System.out.println(entreis.getKey());
+                        System.out.println(entreis.getValue());
+                    }
 
                     if(digestPropertyValueMap.containsKey("realm")){
                         digestConfigBuilder.setRealm((String)digestPropertyValueMap.get("realm"));
@@ -97,6 +111,8 @@ public class DigestResponse {
                                 );
                     }
                 });
+        digestConfigBuilder.setMethod(request.getMethod().name());
+        digestConfigBuilder.setUri(request.getUrl().getPath());
         return digestConfigBuilder.build();
     }
 
