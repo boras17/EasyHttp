@@ -2,9 +2,7 @@ package auth.digestauth;
 
 import Headers.Header;
 import auth.AuthenticationProvider;
-import requests.multirpart.simplerequest.EasyHttpRequest;
 
-import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,16 +11,16 @@ import java.util.Optional;
 
 public class DigestAuthenticationProvider extends AuthenticationProvider {
 
-    private DigestConfiguration digestConfiguration;
+    private DigestResponse digestConfiguration;
 
-    public DigestAuthenticationProvider(String username, String password, DigestConfiguration digestConfiguration) {
+    public DigestAuthenticationProvider(String username, String password, DigestResponse digestConfiguration) {
         super(username, password);
         this.digestConfiguration = digestConfiguration;
     }
 
     public DigestAuthenticationProvider(String username, String password) {
         super(username, password);
-        this.digestConfiguration = new DigestConfiguration.DigestConfigBuilder()
+        this.digestConfiguration = new DigestResponse.DigestConfigBuilder()
                 .build();
     }
 
@@ -150,13 +148,13 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
                 "uri=\"" + this.digestConfiguration.getUri() + "\","+
                 "qop=auth,"+
                 "nc=00000001,"+ //Increment this each time.
-                "cnonce=\"" + createCnonce() + "\","+
+                "cnonce=\"" + this.digestConfiguration.getCnonce() + "\","+
                 "response=\"" + response + "\"");
         System.out.println(headerValue.toString());
         return digestAuthHeader;
     }
 
-     String encode(final byte[] binaryData) {
+     private String encode(final byte[] binaryData) {
         final char[] HEXADECIMAL = {
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
                 'e', 'f'
@@ -174,7 +172,7 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
         return new String(buffer);
     }
 
-    public  String createCnonce() {
+    private String createCnonce() {
         final SecureRandom rnd = new SecureRandom();
         final byte[] tmp = new byte[8];
         rnd.nextBytes(tmp);
