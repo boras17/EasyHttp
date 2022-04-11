@@ -8,6 +8,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DigestAuthenticationProvider extends AuthenticationProvider {
 
@@ -27,25 +29,35 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
     @Override
     public void calculate() throws NoSuchAlgorithmException {
         final MessageDigest md =
-                MessageDigest.getInstance(this.digestConfiguration.getHashAlgorithm().name());
+                MessageDigest.getInstance(this.digestConfiguration
+                        .getHashAlgorithm().getCompatibleNameWithMessageDigestAlgorithms());
 
         final String username = super.getUsername();
         final String password = super.getPassword();
         final String realm = this.digestConfiguration.getRealm();
 
-        String HA1 = username.concat(":").concat(realm).concat(":").concat(password);
-        byte[] HA1_byte_hash = HA1.getBytes(StandardCharsets.UTF_8);
-        String _HA1_hash = MD5Util.getMD5Hash(HA1_byte_hash);
 
-        String HA1_hash = MD5Util.getMD5Hash(_HA1_hash.concat(":")
-                .concat(digestConfiguration.getNonce())
-                .concat(":")
-                .concat(this.createCnonce()).getBytes(StandardCharsets.UTF_8));
+        String _HA1_hash = null;
+        String HA1 = username.concat(":").concat(realm).concat(":").concat(password);
+
+        if(this.digestConfiguration.getHashAlgorithm().name().contains("SESS")){
+            byte[] HA1_byte_hash = HA1.getBytes(StandardCharsets.UTF_8);
+
+            _HA1_hash = MD5Util.getMD5Hash(HA1_byte_hash);
+            _HA1_hash = MD5Util.getMD5Hash(_HA1_hash.concat(":")
+                    .concat(this.digestConfiguration.getNonce()
+                    .concat(":").concat(this.digestConfiguration.getCnonce()))
+                    .getBytes(StandardCharsets.UTF_8));
+        }
+        else{
+            _HA1_hash = MD5Util.getMD5Hash(HA1.getBytes(StandardCharsets.UTF_8));
+        }
+
 
         String HA2 = null;
-        String qop = this.digestConfiguration.getQop();
+        Set<Qop> qop = this.digestConfiguration.getQop();
 
-        if(qop == null || qop.equals("auth")) {
+        if(qop == null || qop.contains(Qop.AUTH)) {
             md.reset();
             String ha2_auth = this.digestConfiguration
                     .getMethod()
@@ -55,7 +67,7 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
             md.update(ha2_auth_bytes);
             HA2 =  new String(md.digest());
         }
-        if(qop != null && qop.equals("auth-int")) {
+        if(qop != null && qop.contains(Qop.AUTH_INT)) {
             String entity = this.digestConfiguration.getEntity();
             byte[] entity_bytes = entity.getBytes(StandardCharsets.UTF_8);
             md.update(entity_bytes);
@@ -80,22 +92,24 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
 
         String response = null;
 
-        if(qop == null){
+        if(digestConfiguration.isStale()){
             md.reset();
-            response = HA1_hash.concat(":")
+            response = _HA1_hash.concat(":")
                     .concat(this.digestConfiguration.getNonce())
                     .concat(":")
                     .concat(HA2_hash);
 
         }else{
-            response = HA1_hash.concat(":")
+            response = _HA1_hash.concat(":")
                     .concat(this.digestConfiguration.getNonce())
                     .concat(":")
                     .concat(this.digestConfiguration.getNonceCount())
                     .concat(":")
                     .concat(this.digestConfiguration.getCnonce())
                     .concat(":")
-                    .concat(digestConfiguration.getQop())
+                    .concat(digestConfiguration.getQop().stream()
+                            .map(Enum::name)
+                            .collect(Collectors.joining()))
                     .concat(":").concat(HA2_hash);
         }
         md.reset();
@@ -108,49 +122,26 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
     }
 
     private Header generateDigestAuthHeader(
-            String response) {
+            String response_hash) {
         String username = super.getUsername();
         Header digestAuthHeader = new Header();
 
         digestAuthHeader.setKey("Authorization");
 
-        StringBuilder headerValue = new StringBuilder("Digest username=\"")
-                .append(username)
-                .append("\", \n")
-                .append("realm=")
-                .append("\"")
-                .append(this.digestConfiguration.getRealm())
-                .append("\", ")
-                .append("nonce=\"")
-                .append(this.digestConfiguration.getNonce())
-                .append("\"")
-                .append(", \n")
-                .append("uri=")
-                .append("\"")
-                .append(this.digestConfiguration.getUri())
-                .append("\n")
-                .append("cnonce=\"").append(createCnonce())
-                .append("\", ").append("\n");
-
-        Optional<String> qop = Optional.ofNullable(this.digestConfiguration.getQop());
-
-        if(qop.isPresent()){
-            headerValue.append("qop=").append(this.digestConfiguration.getQop()).append(",").append("\n");
-        }
-
-        headerValue.append("nc=").append(this.digestConfiguration.getNonceCount()).append(",\n");
-        headerValue.append("response=\"").append(response).append("\"").append(",\n");
-
-        digestAuthHeader.setValue("Digest "+
-                "username=\"admin\","+
-                "realm=\"digest-realm\","+
-                "nonce=\"" + this.digestConfiguration.getNonce() + "\","+
-                "uri=\"" + this.digestConfiguration.getUri() + "\","+
-                "qop=auth,"+
-                "nc=00000001,"+ //Increment this each time.
-                "cnonce=\"" + this.digestConfiguration.getCnonce() + "\","+
-                "response=\"" + response + "\"");
-        System.out.println(headerValue.toString());
+        StringBuilder digestHeaderVal = new StringBuilder("Digest username=\"");
+        digestHeaderVal.append(username).append("\",");
+        digestHeaderVal.append("realm=\"").append(this.digestConfiguration.getRealm()).append("\",");
+        digestHeaderVal.append("nonce=\"").append(this.digestConfiguration.getNonce()).append("\",");
+        digestHeaderVal.append(this.digestConfiguration.getOpaque() != null ? "opaque=\"".concat(this.digestConfiguration.getOpaque()).concat("\",") : "");
+        digestHeaderVal.append("uri=\"").append(this.digestConfiguration.getUri()).append("\",");
+        digestHeaderVal.append(this.digestConfiguration.getHashAlgorithm() != null ? "algorithm=\"".concat(this.digestConfiguration.getHashAlgorithm().name()).concat("\","): "");
+        digestHeaderVal.append("response=\"").append(response_hash).append("\",");
+        digestHeaderVal.append(this.digestConfiguration.getQop().isEmpty() ? "" : "qop=".concat(this.digestConfiguration.getQop().stream()
+                .map(Enum::name)
+                        .collect(Collectors.joining(",")).concat(",")));
+        digestHeaderVal.append("nc=").append(this.digestConfiguration.getNonceCount()).append(",");
+        digestHeaderVal.append("cnonce=\"").append(this.digestConfiguration.getCnonce()).append("\",");
+        digestAuthHeader.setValue(digestHeaderVal.toString());
         return digestAuthHeader;
     }
 

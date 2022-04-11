@@ -4,7 +4,9 @@ import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -12,7 +14,7 @@ public class DigestResponse {
     private final HashAlgorithms hashAlgorithm;//
     private final String nonce;
     private final String realm; //
-    private final String qop;
+    private final Set<Qop> qop;
     private int nonceCount = 1;
     private final String method;
     private final String uri; //
@@ -21,18 +23,20 @@ public class DigestResponse {
     private final boolean stale;
     private final String opaque;
     private final String entity;
+    private final String authParam;
 
     public DigestResponse(String nonce,
                           HashAlgorithms hashAlgorithm,
                           String realm,
-                          String qop,
                           String method,
                           String uri,
                           String cnonce,
                           EasyHttpRequest easyHttpRequest,
                           boolean stale,
                           String opaque,
-                          String entity) {
+                          String entity,
+                          Set<Qop> qop,
+                          String authParam) {
         this.nonce = nonce;
         this.hashAlgorithm = hashAlgorithm;
         this.realm = realm;
@@ -44,6 +48,7 @@ public class DigestResponse {
         this.stale = stale;
         this.opaque = opaque;
         this.entity = entity;
+        this.authParam = authParam;
     }
 
 
@@ -66,14 +71,30 @@ public class DigestResponse {
                     if(digestPropertyValueMap.containsKey("nonce")) {
                         digestConfigBuilder.setNonce((String)digestPropertyValueMap.get("nonce"));
                     }
+                    if(digestPropertyValueMap.containsKey("auth-param")) {
+                        digestConfigBuilder.setAuthParam((String)digestPropertyValueMap.get("auth-param"));
+                    }
                     if(digestPropertyValueMap.containsKey("qop")){
-                        digestConfigBuilder.setQop((String)digestPropertyValueMap.get("qop"));
+                        String qopPart = (String)digestPropertyValueMap.get("qop");
+                        for(String qop: qopPart.split(",")){
+                            Qop enum_qop = switch (qop){
+                                case "auth-int" -> Qop.AUTH_INT;
+                                default -> Qop.AUTH;
+                            };
+                            digestConfigBuilder.addQop(enum_qop);
+                        }
                     }
                     if(digestPropertyValueMap.containsKey("opaque")){
                         digestConfigBuilder.setOpaque((String)digestPropertyValueMap.get("opaque"));
                     }
                     if(digestPropertyValueMap.containsKey("stale")) {
                         digestConfigBuilder.setStale((boolean) digestPropertyValueMap.get("stale"));
+                    }
+                    if(digestPropertyValueMap.containsKey("algorithm")) {
+                        digestConfigBuilder
+                                .setHashAlgorithm(
+                                        HashAlgorithms.getByName((String)digestPropertyValueMap.get("algorithm"))
+                                );
                     }
                 });
         return digestConfigBuilder.build();
@@ -84,7 +105,6 @@ public class DigestResponse {
     }
 
     public String getNonceCount(){
-        // 00000001
         String cnonce = String.valueOf(this.nonceCount);
         int size = cnonce.length();
         int maxSize = 8;
@@ -96,7 +116,7 @@ public class DigestResponse {
         private String nonce;
         private HashAlgorithms hashAlgorithm = HashAlgorithms.MD5;
         private String realm;
-        private String qop;
+        private Set<Qop> qop = new HashSet<>();
         private String method;
         private String uri;
         private String cnonce;
@@ -104,6 +124,7 @@ public class DigestResponse {
         private boolean stale;
         private String opaque;
         private String entity;
+        private String authParam;
 
         public DigestConfigBuilder setNonce(String nonce) {
             this.nonce = nonce;
@@ -118,6 +139,12 @@ public class DigestResponse {
             this.entity = entity;
             return this;
         }
+
+        public DigestConfigBuilder setAuthParam(String authParam){
+            this.authParam = authParam;
+            return this;
+        }
+
         public DigestConfigBuilder setHashAlgorithm(HashAlgorithms hashAlgorithm) {
             this.hashAlgorithm = hashAlgorithm;
             return this;
@@ -128,11 +155,6 @@ public class DigestResponse {
             return this;
         }
 
-        public DigestConfigBuilder setQop(String qop) {
-            this.qop = qop;
-            return this;
-        }
-
         public DigestConfigBuilder setMethod(String method) {
             this.method = method;
             return this;
@@ -140,6 +162,11 @@ public class DigestResponse {
 
         public DigestConfigBuilder setUri(String uri) {
             this.uri = uri;
+            return this;
+        }
+
+        public DigestConfigBuilder addQop(Qop qop) {
+            this.qop.add(qop);
             return this;
         }
 
@@ -162,14 +189,15 @@ public class DigestResponse {
             return new DigestResponse( nonce,
                     hashAlgorithm,
                     realm,
-                    qop,
                     method,
                     uri,
                     cnonce,
                     easyHttpRequest,
                     stale,
                     opaque,
-                    entity);
+                    entity,
+                    qop,
+                    authParam);
         }
     }
 
@@ -185,7 +213,7 @@ public class DigestResponse {
         return realm;
     }
 
-    public String getQop() {
+    public Set<Qop> getQop() {
         return qop;
     }
 
@@ -223,6 +251,10 @@ public class DigestResponse {
 
     public String getOpaque() {
         return opaque;
+    }
+
+    public String getAuthParam() {
+        return authParam;
     }
 
     public String getEntity() {
