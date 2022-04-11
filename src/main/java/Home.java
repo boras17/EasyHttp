@@ -24,10 +24,17 @@ public class Home {
 
         EasyHttpResponse<Void> response = easyHttp.send(request, new EmptyBodyHandler());
 
-        AuthenticationProvider authenticationProvider
-                = new DigestAuthenticationProvider("adam","kowalski",response,request);
+        DigestAuthenticationProvider authenticationProvider
+                = new DigestAuthenticationProvider("adam","kowalski");
+
+        authenticationProvider.setRequest(request);
+        authenticationProvider.setResponse(response);
+
         authenticationProvider.calculate();
-        int a = authenticationProvider.getAuthHeaders().size();
-        System.out.println(a);
+
+        authenticationProvider.getAuthHeaders()
+                .forEach(header-> {
+                    System.out.println(header.getValue());
+                });
     }
 }

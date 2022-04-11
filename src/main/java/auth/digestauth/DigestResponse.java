@@ -4,6 +4,7 @@ import jdk.jfr.Frequency;
 import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -80,16 +81,16 @@ public class DigestResponse {
                     }
 
                     if(digestPropertyValueMap.containsKey("realm")){
-                        digestConfigBuilder.setRealm((String)digestPropertyValueMap.get("realm"));
+                        digestConfigBuilder.setRealm(((String)digestPropertyValueMap.get("realm")).replace("\"",""));
                     }
                     if(digestPropertyValueMap.containsKey("nonce")) {
-                        digestConfigBuilder.setNonce((String)digestPropertyValueMap.get("nonce"));
+                        digestConfigBuilder.setNonce(((String)digestPropertyValueMap.get("nonce")).replace("\"",""));
                     }
                     if(digestPropertyValueMap.containsKey("auth-param")) {
-                        digestConfigBuilder.setAuthParam((String)digestPropertyValueMap.get("auth-param"));
+                        digestConfigBuilder.setAuthParam(((String)digestPropertyValueMap.get("auth-param")).replace("\"",""));
                     }
                     if(digestPropertyValueMap.containsKey("qop")){
-                        String qopPart = (String)digestPropertyValueMap.get("qop");
+                        String qopPart = ((String)digestPropertyValueMap.get("qop")).replace("\"","");
                         for(String qop: qopPart.split(",")){
                             Qop enum_qop = switch (qop){
                                 case "auth-int" -> Qop.AUTH_INT;
@@ -99,7 +100,7 @@ public class DigestResponse {
                         }
                     }
                     if(digestPropertyValueMap.containsKey("opaque")){
-                        digestConfigBuilder.setOpaque((String)digestPropertyValueMap.get("opaque"));
+                        digestConfigBuilder.setOpaque(((String)digestPropertyValueMap.get("opaque")).replace("\"",""));
                     }
                     if(digestPropertyValueMap.containsKey("stale")) {
                         digestConfigBuilder.setStale((boolean) digestPropertyValueMap.get("stale"));
@@ -115,9 +116,12 @@ public class DigestResponse {
         digestConfigBuilder.setUri(request.getUrl().getPath());
         return digestConfigBuilder.build();
     }
-
+    //-----------nonce part
     public void incrementNonceCounter() {
         this.nonceCount += 1;
+    }
+    public void resetNonceCounter() {
+        this.nonceCount = 1;
     }
 
     public String getNonceCount(){
@@ -127,6 +131,36 @@ public class DigestResponse {
         int zeroFill = maxSize - size;
         return "0".repeat(zeroFill).concat(cnonce);
     }
+
+    // --------- nonce part
+    // cnonce part
+
+    public String createCnonce() {
+        final SecureRandom rnd = new SecureRandom();
+        final byte[] tmp = new byte[8];
+        rnd.nextBytes(tmp);
+        return encode(tmp);
+    }
+
+    private String encode(final byte[] binaryData) {
+        final char[] HEXADECIMAL = {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
+                'e', 'f'
+        };
+
+        final int n = binaryData.length;
+        final char[] buffer = new char[n * 2];
+        for (int i = 0; i < n; i++) {
+            final int low = (binaryData[i] & 0x0f);
+            final int high = ((binaryData[i] & 0xf0) >> 4);
+            buffer[i * 2] = HEXADECIMAL[high];
+            buffer[(i * 2) + 1] = HEXADECIMAL[low];
+        }
+
+        return new String(buffer);
+    }
+    // cnonce part
+
 
     public static class DigestConfigBuilder{
         private String nonce;

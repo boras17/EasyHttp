@@ -16,19 +16,18 @@ import java.util.stream.Collectors;
 public class DigestAuthenticationProvider extends AuthenticationProvider {
 
     private DigestResponse digestConfiguration;
+    private EasyHttpResponse<?> response;
+    private EasyHttpRequest request;
 
-    public DigestAuthenticationProvider(String username, String password, DigestResponse digestConfiguration) {
+    public DigestAuthenticationProvider(String username, String password) {
         super(username, password);
-        this.digestConfiguration = digestConfiguration;
-    }
-
-    public DigestAuthenticationProvider(String username, String password, EasyHttpResponse<?> response, EasyHttpRequest request) {
-        super(username, password);
-        this.digestConfiguration = DigestResponse.calculateDigestResponse(response, request);
     }
 
     @Override
     public void calculate() throws NoSuchAlgorithmException {
+        this.digestConfiguration = DigestResponse.calculateDigestResponse(this.response , this.request);
+        this.handleResponse();
+
         final MessageDigest md =
                 MessageDigest.getInstance(this.digestConfiguration
                         .getHashAlgorithm().getCompatibleNameWithMessageDigestAlgorithms());
@@ -106,7 +105,7 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
                     .concat(":")
                     .concat(this.digestConfiguration.getNonceCount())
                     .concat(":")
-                    .concat(this.createCnonce())
+                    .concat(this.digestConfiguration.getNonceCount())
                     .concat(":")
                     .concat(digestConfiguration.getQop().stream()
                             .map(Enum::name)
@@ -141,33 +140,36 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
                 .map(Enum::name)
                         .collect(Collectors.joining(",")).concat(",")));
         digestHeaderVal.append("nc=").append(this.digestConfiguration.getNonceCount()).append(",");
-        digestHeaderVal.append("cnonce=\"").append(this.digestConfiguration.getCnonce()).append("\",");
+        digestHeaderVal.append("cnonce=\"").append(this.digestConfiguration.createCnonce()).append("\",");
         digestAuthHeader.setValue(digestHeaderVal.toString());
+        this.digestConfiguration.incrementNonceCounter();
         return digestAuthHeader;
     }
 
-     private String encode(final byte[] binaryData) {
-        final char[] HEXADECIMAL = {
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
-                'e', 'f'
-        };
+    private void handleResponse() {
+        int responseStatus = this.response.getStatus();
 
-        final int n = binaryData.length;
-        final char[] buffer = new char[n * 2];
-        for (int i = 0; i < n; i++) {
-            final int low = (binaryData[i] & 0x0f);
-            final int high = ((binaryData[i] & 0xf0) >> 4);
-            buffer[i * 2] = HEXADECIMAL[high];
-            buffer[(i * 2) + 1] = HEXADECIMAL[low];
+        if(responseStatus == 401){
+            this.digestConfiguration.createCnonce();
+            this.digestConfiguration.resetNonceCounter();
         }
-
-        return new String(buffer);
     }
 
-    private String createCnonce() {
-        final SecureRandom rnd = new SecureRandom();
-        final byte[] tmp = new byte[8];
-        rnd.nextBytes(tmp);
-        return encode(tmp);
+    public EasyHttpResponse<?> getResponse() {
+        return response;
     }
+
+    public void setResponse(EasyHttpResponse<?> response) {
+        this.response = response;
+    }
+
+    public EasyHttpRequest getRequest() {
+        return request;
+    }
+
+    public void setRequest(EasyHttpRequest request) {
+        this.request = request;
+    }
+
+
 }
