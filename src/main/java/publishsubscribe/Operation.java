@@ -31,7 +31,7 @@ public class Operation extends Event {
     }
 
     private void publishErrors(Object subscriberObj, GenericCommunicate<?> message){
-        GenericError genericError =  ((GenericError)message);
+        GenericError genericError =  ((GenericError)message.getCommunicate());
         ErrorType errorType = genericError.getErrorType();
         final Method[] methods = subscriberObj.getClass().getDeclaredMethods();
 
@@ -62,15 +62,18 @@ public class Operation extends Event {
             }
         }
         if (annotation != null) {
+
             deliverMessage(subscriberObj, method, message);
         }
     }
 
     public void publish(String channelName, GenericCommunicate<?> message) {
+
         WeakReference<?> subscriberRef = this.channels.get(channelName);
         Object subscriberObj = subscriberRef.get();
 
-        if(message instanceof GenericError && subscriberObj != null) {
+        if(message != null && subscriberObj != null) {
+            System.out.println("DATA");
             this.publishErrors(subscriberObj, message);
         }else{
             System.err.println("An attempt to publish error occured but you did not register any related Subscriber");

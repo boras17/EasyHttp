@@ -113,7 +113,6 @@ public class EasyHttp {
 
         if(responseStatus >= 200 && responseStatus < 300){
             bodyHandler.setInputStream(connection.getInputStream());
-        }else if(responseStatus == 401){
         }
         else if(responseStatus >= 400 && responseStatus < 500){
             InputStream errorStream = connection.getErrorStream();
@@ -296,6 +295,6 @@ public class EasyHttp {
         this.connectionInitializr = connectionInitializr;
     }
     public EasyHttp(){
-
+        this.operation = new Operation();
     }
 }

@@ -53,9 +53,8 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
                     .getBytes(StandardCharsets.UTF_8));
         }
         else{
-            _HA1_hash = MD5Util.getMD5Hash(HA1.getBytes(StandardCharsets.UTF_8));
+            _HA1_hash = MD5Util.getMD5Hash(HA1.getBytes(StandardCharsets.US_ASCII));
         }
-
 
         String HA2 = null;
         Set<Qop> qop = this.digestConfiguration.getQop();
@@ -66,13 +65,13 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
                     .getMethod()
                     .concat(":")
                     .concat(this.digestConfiguration.getUri());
-            byte[] ha2_auth_bytes = ha2_auth.getBytes(StandardCharsets.UTF_8);
+            byte[] ha2_auth_bytes = ha2_auth.getBytes(StandardCharsets.US_ASCII);
             md.update(ha2_auth_bytes);
-            HA2 =  new String(md.digest());
+            HA2 =MD5Util.getMD5Hash(md.digest());
         }
         if(qop != null && qop.contains(Qop.AUTH_INT)) {
             String entity = this.digestConfiguration.getEntity();
-            byte[] entity_bytes = entity.getBytes(StandardCharsets.UTF_8);
+            byte[] entity_bytes = entity.getBytes(StandardCharsets.US_ASCII);
             md.update(entity_bytes);
             String entityBodyHash = null;
             try {
@@ -88,7 +87,7 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
         }
 
         md.reset();
-        md.update(HA2.getBytes(StandardCharsets.UTF_8));
+        md.update(HA2.getBytes(StandardCharsets.US_ASCII));
         byte[] HA2_hash_bytes = md.digest();
 
         String HA2_hash = MD5Util.getMD5Hash(HA2_hash_bytes);
@@ -108,15 +107,15 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
                     .concat(":")
                     .concat(this.digestConfiguration.getNonceCount())
                     .concat(":")
-                    .concat(this.digestConfiguration.getNonceCount())
+                    .concat(this.digestConfiguration.createCnonce())
                     .concat(":")
                     .concat(digestConfiguration.getQop().stream()
                             .map(Enum::name)
-                            .collect(Collectors.joining()))
+                            .collect(Collectors.joining()).toLowerCase(Locale.ROOT))
                     .concat(":").concat(HA2_hash);
         }
         md.reset();
-        md.update(response.getBytes(StandardCharsets.UTF_8));
+        md.update(response.getBytes(StandardCharsets.US_ASCII));
         byte[] response_hash_bytes = md.digest();
         String response_hash = MD5Util.getMD5Hash(response_hash_bytes);
 
@@ -133,17 +132,17 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
 
         StringBuilder digestHeaderVal = new StringBuilder("Digest username=\"");
         digestHeaderVal.append(username).append("\",");
-        digestHeaderVal.append("realm=\"").append(this.digestConfiguration.getRealm()).append("\",");
-        digestHeaderVal.append("nonce=\"").append(this.digestConfiguration.getNonce()).append("\",");
-        digestHeaderVal.append(this.digestConfiguration.getOpaque() != null ? "opaque=\"".concat(this.digestConfiguration.getOpaque()).concat("\",") : "");
-        digestHeaderVal.append("uri=\"").append(this.digestConfiguration.getUri()).append("\",");
-        digestHeaderVal.append(this.digestConfiguration.getHashAlgorithm() != null ? "algorithm=\"".concat(this.digestConfiguration.getHashAlgorithm().name()).concat("\","): "");
-        digestHeaderVal.append("response=\"").append(response_hash).append("\",");
+        digestHeaderVal.append("realm=\"").append(this.digestConfiguration.getRealm()).append("\", ");
+        digestHeaderVal.append("nonce=\"").append(this.digestConfiguration.getNonce()).append("\", ");
+        digestHeaderVal.append(this.digestConfiguration.getOpaque() != null ? "opaque=\"".concat(this.digestConfiguration.getOpaque()).concat("\", ") : "");
+        digestHeaderVal.append("uri=\"").append(this.digestConfiguration.getUri()).append("\", ");
+        digestHeaderVal.append(this.digestConfiguration.getHashAlgorithm() != null ? "algorithm=".concat(this.digestConfiguration.getHashAlgorithm().name()).concat(", "): "");
+        digestHeaderVal.append("response=\"").append(response_hash).append("\", ");
         digestHeaderVal.append(this.digestConfiguration.getQop().isEmpty() ? "" : "qop=".concat(this.digestConfiguration.getQop().stream()
                 .map(Enum::name)
-                        .collect(Collectors.joining(",")).toLowerCase(Locale.ROOT).concat(",")));
-        digestHeaderVal.append("nc=").append(this.digestConfiguration.getNonceCount()).append(",");
-        digestHeaderVal.append("cnonce=\"").append(this.digestConfiguration.createCnonce()).append("\",");
+                        .collect(Collectors.joining(",")).toLowerCase(Locale.ROOT).concat(", ")));
+        digestHeaderVal.append("nc=").append(this.digestConfiguration.getNonceCount()).append(", ");
+        digestHeaderVal.append("cnonce=\"").append(this.digestConfiguration.createCnonce()).append("\"");
         digestAuthHeader.setValue(digestHeaderVal.toString());
         return digestAuthHeader;
     }
