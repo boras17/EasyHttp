@@ -6,7 +6,6 @@ import publishsubscribe.Channels;
 import publishsubscribe.Event;
 import redirect.ErrorType;
 import redirect.GenericError;
-import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
 import java.nio.charset.StandardCharsets;
@@ -14,6 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -141,12 +141,49 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
         digestHeaderVal.append("response=\"").append(response_hash).append("\",");
         digestHeaderVal.append(this.digestConfiguration.getQop().isEmpty() ? "" : "qop=".concat(this.digestConfiguration.getQop().stream()
                 .map(Enum::name)
-                        .collect(Collectors.joining(",")).concat(",")));
+                        .collect(Collectors.joining(",")).toLowerCase(Locale.ROOT).concat(",")));
         digestHeaderVal.append("nc=").append(this.digestConfiguration.getNonceCount()).append(",");
         digestHeaderVal.append("cnonce=\"").append(this.digestConfiguration.createCnonce()).append("\",");
         digestAuthHeader.setValue(digestHeaderVal.toString());
-        this.digestConfiguration.incrementNonceCounter();
         return digestAuthHeader;
+    }
+    @Override
+    public void on401Response(List<Header> responseHeaders, EasyHttpRequest request) {
+        this.digestConfiguration = DigestResponse.calculateDigestResponse(responseHeaders, request);
+        this.digestConfiguration.createCnonce();
+        this.digestConfiguration.resetNonceCounter();
+        this.setResponse(responseHeaders);
+        this.setRequest(request);
+        try{
+            this.calculate();
+        }catch (NoSuchAlgorithmException ex){
+            ex.printStackTrace();
+            //Event.operation.publish(Channels.APP_ERROR_CHANNEL,new GenericError(0, Collections.emptyList(),ex.getMessage(), ErrorType.APP));
+        }
+        Header authHeader = super.getAuthHeaders();
+        request.getHeaders().removeIf(header -> header.getKey().equals(authHeader.getKey()));
+        request.getHeaders().add(authHeader);
+    }
+
+    @Override
+    public void beforeRequest(EasyHttpRequest request) {
+        if(this.digestConfiguration == null) return;
+        try{
+            this.digestConfiguration.incrementNonceCounter();
+            this.calculate();
+        }catch (NoSuchAlgorithmException noSuchAlgorithmException){
+            noSuchAlgorithmException.printStackTrace();
+        }
+        Header authHeader = super.getAuthHeaders();
+        request.getHeaders().add(authHeader);
+    }
+
+    public DigestResponse getDigestConfiguration() {
+        return digestConfiguration;
+    }
+
+    public void setDigestConfiguration(DigestResponse digestConfiguration) {
+        this.digestConfiguration = digestConfiguration;
     }
 
     public List<Header> getResponseHeders() {
@@ -166,26 +203,7 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
     }
 
 
-    @Override
-    public void on401Response(List<Header> responseHeaders, EasyHttpRequest request) {
-        this.digestConfiguration.createCnonce();
-        this.digestConfiguration.resetNonceCounter();
-        this.setResponse(responseHeaders);
-        this.setRequest(request);
-        try{
-            this.calculate();
-        }catch (NoSuchAlgorithmException ex){
-            ex.printStackTrace();
-            Event.operation.publish(Channels.APP_ERROR_CHANNEL,new GenericError(0, Collections.emptyList(),ex.getMessage(), ErrorType.APP));
-        }
-        List<Header> authHeaders = super.getAuthHeaders();
-        request.getHeaders().addAll(authHeaders);
-    }
 
-    @Override
-    public void beforeRequest(EasyHttpRequest request) {
-        this.digestConfiguration.incrementNonceCounter();
-        List<Header> authHeader = super.getAuthHeaders();
-        request.getHeaders().addAll(authHeader);
-    }
+
+
 }

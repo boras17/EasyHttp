@@ -1,8 +1,6 @@
 package auth.digestauth;
 
 import Headers.Header;
-import jdk.jfr.Frequency;
-import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
 import java.security.SecureRandom;
@@ -74,11 +72,6 @@ public class DigestResponse {
                                             return parts[1];
                                         }
                                     }));
-                    for(Map.Entry<String, Object> entreis: digestPropertyValueMap.entrySet()){
-                        System.out.println(entreis.getKey());
-                        System.out.println(entreis.getValue());
-                    }
-
                     if(digestPropertyValueMap.containsKey("realm")){
                         digestConfigBuilder.setRealm(((String)digestPropertyValueMap.get("realm")).replace("\"",""));
                     }
@@ -118,17 +111,18 @@ public class DigestResponse {
     //-----------nonce part
     public void incrementNonceCounter() {
         this.nonceCount += 1;
+
     }
     public void resetNonceCounter() {
         this.nonceCount = 1;
     }
 
     public String getNonceCount(){
-        String cnonce = String.valueOf(this.nonceCount);
-        int size = cnonce.length();
+        String nonceCountStr = String.valueOf(this.nonceCount);
+        int size = nonceCountStr.length();
         int maxSize = 8;
         int zeroFill = maxSize - size;
-        return "0".repeat(zeroFill).concat(cnonce);
+        return "0".repeat(zeroFill).concat(nonceCountStr);
     }
 
     // --------- nonce part
@@ -308,5 +302,27 @@ public class DigestResponse {
 
     public String getEntity() {
         return entity;
+    }
+    public int getNonceCountInt(){
+        return nonceCount;
+    }
+
+    @Override
+    public String toString() {
+        return "DigestResponse{" +
+                "hashAlgorithm=" + hashAlgorithm +
+                ", nonce='" + nonce + '\'' +
+                ", realm='" + realm + '\'' +
+                ", qop=" + qop +
+                ", nonceCount=" + nonceCount +
+                ", method='" + method + '\'' +
+                ", uri='" + uri + '\'' +
+                ", cnonce='" + cnonce + '\'' +
+                ", request=" + request +
+                ", stale=" + stale +
+                ", opaque='" + opaque + '\'' +
+                ", entity='" + entity + '\'' +
+                ", authParam='" + authParam + '\'' +
+                '}';
     }
 }

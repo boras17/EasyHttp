@@ -32,7 +32,7 @@ public class BasicAuthenticationProvider extends AuthenticationProvider{
 
     @Override
     public void beforeRequest(EasyHttpRequest request) {
-        List<Header> headers = super.getAuthHeaders();
-        request.getHeaders().addAll(headers);
+        Header headers = super.getAuthHeaders();
+        request.getHeaders().add(headers);
     }
 }

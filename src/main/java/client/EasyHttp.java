@@ -4,6 +4,8 @@ import Headers.Header;
 import HttpEnums.HttpStatus;
 import auth.AuthenticationProvider;
 import auth.UnauthorizedRequestException;
+import auth.digestauth.DigestAuthenticationProvider;
+import auth.digestauth.DigestResponse;
 import exceptions.RequestObjectRequiredException;
 import exceptions.ResponseHandlerRequired;
 import intercepting.EasyRequestInterceptor;
@@ -112,10 +114,6 @@ public class EasyHttp {
         if(responseStatus >= 200 && responseStatus < 300){
             bodyHandler.setInputStream(connection.getInputStream());
         }else if(responseStatus == 401){
-            Optional.ofNullable(this.authenticationProvider)
-                    .ifPresentOrElse(authenticator -> {
-
-                    }, () ->  new UnauthorizedRequestException(""));
         }
         else if(responseStatus >= 400 && responseStatus < 500){
             InputStream errorStream = connection.getErrorStream();
@@ -142,7 +140,7 @@ public class EasyHttp {
         }
 
         EasyHttpResponse<T> _response = bodyHandler.getCalculatedResponse();
-
+        _response.setStatus(responseStatus);
         this.getResponseInterceptors()
                         .ifPresent(interceptorsWithOrderMap -> {
                             for(Map.Entry<Integer, EasyResponseInterceptor<?>> interceptorEntry:  interceptorsWithOrderMap.entrySet()) {
@@ -150,8 +148,6 @@ public class EasyHttp {
                                 interceptor.handle(_response);
                             }
                         });
-
-        _response.setStatus(responseStatus);
         if(responseStatus >= 300 && responseStatus < 400){
 
             this.operation.publish(Channels.REDIRECT_NOTIFICATION, new GenericNotification(LocalDateTime.now(),

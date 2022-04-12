@@ -9,7 +9,7 @@ import java.util.List;
 public abstract class AuthenticationProvider implements AuthenticateChannel{
     private final String password;
     private final String username;
-    private final List<Header> authHeaders = new ArrayList<>();
+    private Header authHeader;
 
     public AuthenticationProvider(String username, String password){
         this.username = username;
@@ -19,7 +19,7 @@ public abstract class AuthenticationProvider implements AuthenticateChannel{
     public abstract void calculate() throws NoSuchAlgorithmException;
 
     public void addAuthHeader(Header header) {
-        this.authHeaders.add(header);
+        this.authHeader = header;
     }
     public String getPassword() {
         return password;
@@ -27,7 +27,7 @@ public abstract class AuthenticationProvider implements AuthenticateChannel{
     public String getUsername() {
         return username;
     }
-    public List<Header> getAuthHeaders() {
-        return authHeaders;
+    public Header getAuthHeaders() {
+        return authHeader;
     }
 }

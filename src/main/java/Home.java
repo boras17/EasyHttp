@@ -2,11 +2,15 @@ import HttpEnums.Method;
 import auth.AuthenticateChannel;
 import auth.AuthenticationProvider;
 import auth.digestauth.DigestAuthenticationProvider;
+import auth.digestauth.DigestResponse;
 import client.EasyHttp;
 import client.EasyHttpBuilder;
+import intercepting.EasyRequestInterceptor;
+import intercepting.EasyResponseInterceptor;
 import intercepting.Interceptor;
 import redirect.redirectexception.RedirectionUnhandled;
 import requests.bodyhandlers.EmptyBodyHandler;
+import requests.bodyhandlers.StringBodyHandler;
 import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
@@ -17,7 +21,11 @@ import java.security.NoSuchAlgorithmException;
 public class Home {
 
     public static void main(String[] args) throws IOException, RedirectionUnhandled, IllegalAccessException, NoSuchAlgorithmException {
-        EasyHttp easyHttp = new EasyHttpBuilder().build();
+        DigestAuthenticationProvider authenticationProvider = new DigestAuthenticationProvider("adam", "password");
+
+        EasyHttp easyHttp = new EasyHttpBuilder()
+                .setAuthenticationProvider(authenticationProvider)
+                .build();
 
         EasyHttpRequest request = new EasyHttpRequest
                 .EasyHttpRequestBuilder()
@@ -25,19 +33,27 @@ public class Home {
                 .setMethod(Method.GET)
                 .build();
 
-        EasyHttpResponse<Void> response = easyHttp.send(request, new EmptyBodyHandler());
+        easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
+            @Override
+            public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
+                int status = stringEasyHttpResponse.getStatus();
+                    if(status == 401){
+                        authenticationProvider.on401Response(stringEasyHttpResponse.getResponseHeaders(), request);
+                    }
+                }
+            }
+        ,1);
 
-        DigestAuthenticationProvider authenticationProvider
-                = new DigestAuthenticationProvider("adam","kowalski");
 
-        authenticationProvider.setRequest(request);
-        authenticationProvider.setResponse(response.getResponseHeaders());
 
-        authenticationProvider.calculate();
+        EasyHttpResponse<String> response = easyHttp.send(request, new StringBodyHandler());
 
-        authenticationProvider.getAuthHeaders()
-                .forEach(header -> {
-                    System.out.println(header.getValue());
+        EasyHttpResponse<String> respon = easyHttp.send(request, new StringBodyHandler());
+        request.getHeaders()
+                .forEach(h -> {
+                    System.out.println(h.getValue());
                 });
+
+
     }
 }

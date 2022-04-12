@@ -21,7 +21,7 @@ public class AuthenticationProviderTest {
         AuthenticationProvider authenticationProvider = new BasicAuthenticationProvider(username, password);
         authenticationProvider.calculate();
 
-        List<Header> authHeaders = authenticationProvider.getAuthHeaders();
+        Header authHeaders = authenticationProvider.getAuthHeaders();
 
         Base64.Encoder encoder = Base64.getEncoder();
 
@@ -29,10 +29,9 @@ public class AuthenticationProviderTest {
         String base64Encoded = encoder.encodeToString(usernamePassword.getBytes(StandardCharsets.UTF_8));
         String expectedHeaderValue = "Basic ".concat(base64Encoded);
 
-        Assertions.assertEquals(authHeaders.size(), 1);
-        Header authHeader = authHeaders.get(0);
-        String headerName = authHeader.getKey();
-        String headerValue = authHeader.getValue();
+        Assertions.assertNotNull(authHeaders);
+        String headerName = authHeaders.getKey();
+        String headerValue = authHeaders.getValue();
         Assertions.assertEquals("Authorization", headerName);
         Assertions.assertEquals(headerValue, expectedHeaderValue);
     }

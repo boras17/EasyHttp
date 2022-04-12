@@ -16,15 +16,22 @@ public class StringBodyHandler extends AbstractBodyHandler<String>{
     private void calculateBody() throws IOException {
         StringBuilder stringContent = new StringBuilder();
         InputStream inputStream = super.getInputStream();
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        String line = null;
-        while((line = bufferedReader.readLine()) != null){
-            stringContent.append(line);
+
+        if(inputStream != null){
+            InputStreamReader inputStreamReader = inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            String line = null;
+            while((line = bufferedReader.readLine()) != null){
+                stringContent.append(line);
+            }
+
+            super.setBody(stringContent.toString());
+        }else{
+            super.setBody("");
         }
 
-        super.setBody(stringContent.toString());
     }
 
     @Override
