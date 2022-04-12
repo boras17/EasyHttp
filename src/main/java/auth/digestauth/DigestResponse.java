@@ -1,14 +1,12 @@
 package auth.digestauth;
 
+import Headers.Header;
 import jdk.jfr.Frequency;
 import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -54,10 +52,11 @@ public class DigestResponse {
     }
 
 
-    public static DigestResponse calculateDigestResponse(EasyHttpResponse<?> response, EasyHttpRequest request){
+    public static DigestResponse calculateDigestResponse(List<Header> responseHeaders, EasyHttpRequest request){
         DigestConfigBuilder digestConfigBuilder = new DigestConfigBuilder();
 
-        response.getHeaderByName("WWW-Authenticate")
+        responseHeaders.stream().filter(header-> header.getKey().equals("WWW-Authenticate"))
+                .findFirst()
                 .ifPresent(wwwAuthHeader -> {
                     String headerVal = wwwAuthHeader.getValue();
                     String digestVal = headerVal.substring(7);

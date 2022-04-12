@@ -3,6 +3,7 @@ package client;
 import Headers.Header;
 import HttpEnums.HttpStatus;
 import auth.AuthenticationProvider;
+import auth.UnauthorizedRequestException;
 import exceptions.RequestObjectRequiredException;
 import exceptions.ResponseHandlerRequired;
 import intercepting.EasyRequestInterceptor;
@@ -61,16 +62,6 @@ public class EasyHttp {
         });
     }
 
-    private void addAuthHeaderIfProviderPresent(EasyHttpRequest request){
-        Optional<AuthenticationProvider> provider = Optional.ofNullable(this.authenticationProvider);
-        if(provider.isPresent()){
-            AuthenticationProvider authenticationProvider = provider.get();
-            for(Header header: authenticationProvider.getAuthHeaders()){
-                request.getHeaders().add(header);
-            }
-        }
-    }
-
     public <T> EasyHttpResponse<T> send(requests.multirpart.simplerequest.EasyHttpRequest request,
                                  AbstractBodyHandler<T> bodyHandler)
             throws IOException, IllegalAccessException, RedirectionUnhandled {
@@ -100,8 +91,6 @@ public class EasyHttp {
             }
         }
 
-        this.addAuthHeaderIfProviderPresent(request);
-
         Optional<BodyProvider<?>> bodyConverter = request.getBody();
 
         if(bodyConverter.isPresent()){
@@ -117,8 +106,16 @@ public class EasyHttp {
         Map<String, List<String>> headersFields = connection.getHeaderFields();
         List<Header> headers = this.calculateHeaders(headersFields);
 
+        bodyHandler.setResponseStatus(getHttpStatus(responseStatus));
+        bodyHandler.setHeaders(headers);
+
         if(responseStatus >= 200 && responseStatus < 300){
             bodyHandler.setInputStream(connection.getInputStream());
+        }else if(responseStatus == 401){
+            Optional.ofNullable(this.authenticationProvider)
+                    .ifPresentOrElse(authenticator -> {
+
+                    }, () ->  new UnauthorizedRequestException(""));
         }
         else if(responseStatus >= 400 && responseStatus < 500){
             InputStream errorStream = connection.getErrorStream();
@@ -143,9 +140,6 @@ public class EasyHttp {
                     new String(errorStream.readAllBytes()));
             this.operation.publish(Channels.SERVER_ERROR_CHANNEL, new ErrorCommunicate(genericError));
         }
-
-        bodyHandler.setResponseStatus(getHttpStatus(responseStatus));
-        bodyHandler.setHeaders(headers);
 
         EasyHttpResponse<T> _response = bodyHandler.getCalculatedResponse();
 

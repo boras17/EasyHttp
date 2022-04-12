@@ -2,21 +2,25 @@ package auth.digestauth;
 
 import Headers.Header;
 import auth.AuthenticationProvider;
+import publishsubscribe.Channels;
+import publishsubscribe.Event;
+import redirect.ErrorType;
+import redirect.GenericError;
 import requests.easyresponse.EasyHttpResponse;
 import requests.multirpart.simplerequest.EasyHttpRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DigestAuthenticationProvider extends AuthenticationProvider {
 
     private DigestResponse digestConfiguration;
-    private EasyHttpResponse<?> response;
+    private List<Header> responseHeaders;
     private EasyHttpRequest request;
 
     public DigestAuthenticationProvider(String username, String password) {
@@ -25,8 +29,7 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
 
     @Override
     public void calculate() throws NoSuchAlgorithmException {
-        this.digestConfiguration = DigestResponse.calculateDigestResponse(this.response , this.request);
-        this.handleResponse();
+        this.digestConfiguration = DigestResponse.calculateDigestResponse(this.responseHeaders , this.request);
 
         final MessageDigest md =
                 MessageDigest.getInstance(this.digestConfiguration
@@ -146,21 +149,12 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
         return digestAuthHeader;
     }
 
-    private void handleResponse() {
-        int responseStatus = this.response.getStatus();
-
-        if(responseStatus == 401){
-            this.digestConfiguration.createCnonce();
-            this.digestConfiguration.resetNonceCounter();
-        }
+    public List<Header> getResponseHeders() {
+        return responseHeaders;
     }
 
-    public EasyHttpResponse<?> getResponse() {
-        return response;
-    }
-
-    public void setResponse(EasyHttpResponse<?> response) {
-        this.response = response;
+    public void setResponse(List<Header> response) {
+        this.responseHeaders = response;
     }
 
     public EasyHttpRequest getRequest() {
@@ -172,4 +166,26 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
     }
 
 
+    @Override
+    public void on401Response(List<Header> responseHeaders, EasyHttpRequest request) {
+        this.digestConfiguration.createCnonce();
+        this.digestConfiguration.resetNonceCounter();
+        this.setResponse(responseHeaders);
+        this.setRequest(request);
+        try{
+            this.calculate();
+        }catch (NoSuchAlgorithmException ex){
+            ex.printStackTrace();
+            Event.operation.publish(Channels.APP_ERROR_CHANNEL,new GenericError(0, Collections.emptyList(),ex.getMessage(), ErrorType.APP));
+        }
+        List<Header> authHeaders = super.getAuthHeaders();
+        request.getHeaders().addAll(authHeaders);
+    }
+
+    @Override
+    public void beforeRequest(EasyHttpRequest request) {
+        this.digestConfiguration.incrementNonceCounter();
+        List<Header> authHeader = super.getAuthHeaders();
+        request.getHeaders().addAll(authHeader);
+    }
 }

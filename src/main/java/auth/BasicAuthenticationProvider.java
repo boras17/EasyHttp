@@ -1,9 +1,12 @@
 package auth;
 
 import Headers.Header;
+import requests.easyresponse.EasyHttpResponse;
+import requests.multirpart.simplerequest.EasyHttpRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 
 public class BasicAuthenticationProvider extends AuthenticationProvider{
 
@@ -20,5 +23,16 @@ public class BasicAuthenticationProvider extends AuthenticationProvider{
         String headerValue = "Basic ".concat(base64EncodedCredentials);
         Header authHeader = new Header("Authorization", headerValue);
         super.addAuthHeader(authHeader);
+    }
+
+    @Override
+    public void on401Response(List<Header> responseHeaders, EasyHttpRequest request) {
+        System.out.println("Error: Server respond with 401 in basic auth");
+    }
+
+    @Override
+    public void beforeRequest(EasyHttpRequest request) {
+        List<Header> headers = super.getAuthHeaders();
+        request.getHeaders().addAll(headers);
     }
 }

@@ -6,7 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AuthenticationProvider {
+public abstract class AuthenticationProvider implements AuthenticateChannel{
     private final String password;
     private final String username;
     private final List<Header> authHeaders = new ArrayList<>();
