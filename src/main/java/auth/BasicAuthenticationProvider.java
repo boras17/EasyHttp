@@ -26,11 +26,6 @@ public class BasicAuthenticationProvider extends AuthenticationProvider{
     }
 
     @Override
-    public void on401Response(List<Header> responseHeaders, EasyHttpRequest request) {
-        System.out.println("Error: Server respond with 401 in basic auth");
-    }
-
-    @Override
     public void beforeRequest(EasyHttpRequest request) {
         Header headers = super.getAuthHeaders();
         request.getHeaders().add(headers);

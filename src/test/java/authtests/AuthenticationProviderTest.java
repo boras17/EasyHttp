@@ -1,11 +1,19 @@
 package authtests;
 
 import Headers.Header;
+import HttpEnums.Method;
 import auth.AuthenticationProvider;
 import auth.BasicAuthenticationProvider;
+import auth.digestauth.DigestAuthenticationProvider;
+import auth.digestauth.DigestResponse;
+import auth.digestauth.HashAlgorithms;
+import auth.digestauth.Qop;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import requests.multirpart.simplerequest.EasyHttpRequest;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -34,5 +42,36 @@ public class AuthenticationProviderTest {
         String headerValue = authHeaders.getValue();
         Assertions.assertEquals("Authorization", headerName);
         Assertions.assertEquals(headerValue, expectedHeaderValue);
+    }
+
+    @Test
+    public void digestTest() throws MalformedURLException {
+        DigestAuthenticationProvider digestAuthenticationProvider = new DigestAuthenticationProvider("admin","admin123");
+
+        EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
+                .setMethod(Method.GET)
+                .setUri(new URL("http://localhost:4545/hello"))
+                .build();
+        String expectedResponse = "6629fae49393a05397450978507c4ef1";
+
+        Header responseDigestHeader = new Header();
+        responseDigestHeader.setKey("WWW-Authenticate");
+        responseDigestHeader.setValue("Digest realm=\"digest-realm\", qop=\"auth\", nonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\"");
+
+        digestAuthenticationProvider.on401Response(List.of(responseDigestHeader), request);
+
+        request.getHeaders()
+                .stream()
+                .filter(header->header.getKey().equals("Authorization"))
+                .findFirst()
+                .ifPresent(header -> {
+                    System.out.println(header.getValue());
+                });
+        String data = "d3b9e975723c8666a9cec9bdb6f1bdd7";
+    }
+
+    @Test
+    public void testDigest() throws MalformedURLException {
+
     }
 }

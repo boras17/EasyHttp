@@ -2,14 +2,11 @@ package publishsubscribe.errorsubscriberimpl;
 
 import publishsubscribe.communcates.ErrorCommunicate;
 
-public class Subscriber<T> {
+public interface Subscriber<T> {
 
-    public Subscriber() {
-    }
+    default void onRedirectErrorCommunicate(T redirectError){}
 
-    public void onRedirectErrorCommunicate(T redirectError){}
+    default void onClientErrorCommunicate(T clientError){}
 
-    public void onClientErrorCommunicate(T clientError){}
-
-    public void onServerErrorCommunicate(T serverError){}
+    default void onServerErrorCommunicate(T serverError){}
 }

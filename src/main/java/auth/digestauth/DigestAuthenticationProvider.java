@@ -22,14 +22,22 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
     private DigestResponse digestConfiguration;
     private List<Header> responseHeaders;
     private EasyHttpRequest request;
+    private String response;
 
     public DigestAuthenticationProvider(String username, String password) {
         super(username, password);
     }
-
+    public DigestAuthenticationProvider(String username, String password, DigestResponse response){
+        super(username, password);
+        this.digestConfiguration = response;
+    }
     @Override
     public void calculate() throws NoSuchAlgorithmException {
-        this.digestConfiguration = DigestResponse.calculateDigestResponse(this.responseHeaders , this.request);
+        this.digestConfiguration = this.digestConfiguration == null
+                ?
+                DigestResponse.calculateDigestResponse(this.responseHeaders , this.request)
+                :
+                this.digestConfiguration;
 
         final MessageDigest md =
                 MessageDigest.getInstance(this.digestConfiguration
@@ -94,7 +102,7 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
 
         String response = null;
 
-        if(digestConfiguration.isStale()){
+        if(qop == null){
             md.reset();
             response = _HA1_hash.concat(":")
                     .concat(this.digestConfiguration.getNonce())
@@ -118,7 +126,7 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
         md.update(response.getBytes(StandardCharsets.US_ASCII));
         byte[] response_hash_bytes = md.digest();
         String response_hash = MD5Util.getMD5Hash(response_hash_bytes);
-
+        this.response = response_hash;
         Header digestAuthHeader = this.generateDigestAuthHeader(response_hash);
         super.addAuthHeader(digestAuthHeader);
     }
@@ -202,7 +210,11 @@ public class DigestAuthenticationProvider extends AuthenticationProvider {
     }
 
 
+    public String getResponse() {
+        return response;
+    }
 
-
-
+    public void setResponse(String response) {
+        this.response = response;
+    }
 }

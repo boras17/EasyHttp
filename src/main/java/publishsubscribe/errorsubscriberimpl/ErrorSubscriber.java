@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-public class ErrorSubscriber extends Subscriber<ErrorCommunicate>{
+public class ErrorSubscriber implements Subscriber<ErrorCommunicate>{
 
     private Properties properties;
 
@@ -46,19 +46,16 @@ public class ErrorSubscriber extends Subscriber<ErrorCommunicate>{
     }
 
     @OnRedirectError
-    @Override
     public void onRedirectErrorCommunicate(ErrorCommunicate message) {
         this.writeError(message, ErrorChannelConfigProp.REDIRECT_ERROR_FILE);
     }
 
     @OnClientError
-    @Override
     public void onClientErrorCommunicate(ErrorCommunicate communicate) {
         this.writeError(communicate, ErrorChannelConfigProp.CLIENT_ERROR_FILE);
     }
 
     @OnServerError
-    @Override
     public void onServerErrorCommunicate(ErrorCommunicate communicate) {
         this.writeError(communicate, ErrorChannelConfigProp.SERVER_ERROR_FILE);
     }
