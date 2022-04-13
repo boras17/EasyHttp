@@ -181,7 +181,7 @@ If you want create some bot running on VPS you can easli log some errors in file
 ```
 for that purpose you have to pass Map to setSubscribedChannles. The key of the map entry is Channel name. You can choose five diffrent channels:
 ```java
-Channels.SERVER_ERROR_CHANNE;
+Channels.SERVER_ERROR_CHANNEL;
 Channels.CLIENT_ERROR_CHANNEL;
 Channels.REDIRECT_ERROR_CHANNEL;
 Channels.APP_ERROR_CHANNEL;
