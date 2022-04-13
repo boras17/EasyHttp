@@ -145,32 +145,25 @@ CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request,
 ```
 Response and request interceptors can by provided via addAllInterceptors
 ```java
-        Map<Integer, EasyResponseInterceptor<?>> responseInterceptors = new TreeMap<>();
-        
-        responseInterceptors.put(1, new EasyResponseInterceptor<String>() {
-            @Override
-            public void handle(EasyHttpResponse<String> objectEasyHttpResponse) {
-                // some operations on resposne
-            }
-        });
-        responseInterceptors.put(2, new EasyResponseInterceptor<String>() {
-            @Override
-            public void handle(EasyHttpResponse<String> objectEasyHttpResponse) {
-                // second operratiopns on previously modified response
-            }
-        });
-        
-        Interceptor<EasyHttpRequest> requestInterceptor = new EasyRequestInterceptor(){
-
+        easyHttp.setRequestInterceptor(new EasyRequestInterceptor() {
             @Override
             public void handle(EasyHttpRequest request) {
                 
             }
-        };
+        });
         
-        EasyHttp client = new EasyHttpBuilder()
-                .addAllInterceptors(responseInterceptors)
-                .build();
+        easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
+            @Override
+            public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
+                
+            }
+        },1);
+        easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
+            @Override
+            public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
+
+            }
+        },2);
 ```
 If you want create some bot running on VPS you can easli log some errors in file using subscriber class:
 ```java
