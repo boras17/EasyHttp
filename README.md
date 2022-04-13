@@ -194,3 +194,6 @@ EasyHttp easyHttp = new EasyHttpBuilder()
         .setSubscribedChannels(subscriberMap)
         .build();
 ```
+// TODO add interceptor option for intercept onyl specified request which matches given pattern 
+// TOD and better support for addig interceptors,make it possible to add map of response interceptors
+// TODO: it is good choose to allow handling multiple request interceptors and give them specified paths to handle
