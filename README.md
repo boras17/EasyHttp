@@ -155,7 +155,32 @@ client.EasyHttp easyHttp
         })
         .build();
 ```
-TODO: better digest authentication support and oauth2 authentication provider
-DIgest authentication 401 response handler and params extractor for next auth request. Digest scheme
-TODO: change response status handler. two options enumerated status or int/ response status object wihch provide enumerated status and integer status
-TODO: testing subscriber
+If you want create some bot running on VPS you can easli log some errors in file using subscriber class:
+```java
+ EasyHttp easyHttp = new EasyHttpBuilder()
+                .setSubscribedChannels(Map.of(Channels.CLIENT_ERROR_CHANNEL,
+                        new ErrorSubscriber(properties)))
+                .build();
+```
+for that purpose you have to pass Map to setSubscribedChannles. The key of the map entry is Channel name. You can choose five diffrent channels:
+```java
+Channels.SERVER_ERROR_CHANNE;
+Channels.CLIENT_ERROR_CHANNEL;
+Channels.REDIRECT_ERROR_CHANNEL;
+Channels.APP_ERROR_CHANNEL;
+```
+The names of these channels are very intuitive SERVER_ERROR_CHANNEL will handle server errors, CLIENT_ERROR_CHANNEL will handle client errors etc.
+The most important thing of ErrorSubscriber is Properties object. In properties you have to specify the path to the file:
+```java
+Properties properties = new Properties();
+properties.put(ErrorChannelConfigProp.SERVER_ERROR_FILE, "errors/servererrors.txt")
+
+Subscriber<?> subscriber = new ErrorSubscriber(properties);
+
+Map<String, Subscriber<?>> subscriberMap = new HashMap<>();
+subscriberMap.put(Channels.CLIENT_ERROR_CHANNEL, subscriber);
+
+EasyHttp easyHttp = new EasyHttpBuilder()
+        .setSubscribedChannels(subscriberMap)
+        .build();
+```
