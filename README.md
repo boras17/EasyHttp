@@ -143,17 +143,34 @@ sendAsync method sending request asynchronously and returns CompleteableFuture:
 ```java
 CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request, new StringBodyHandler());
 ```
-Response and request interceptors can by provided via functional interface Interceptor
+Response and request interceptors can by provided via addAllInterceptors
 ```java
-client.EasyHttp easyHttp
-        = new client.EasyHttp.EasyHttpBuilder()
-        .setRequestInterceptor(request -> {
-            System.out.println("request: " + request.getUrl());
-        })
-        .setResponseInterceptor(easyHttpResponse -> {
-            System.out.println(easyHttpResponse.getBody());
-        })
-        .build();
+        Map<Integer, EasyResponseInterceptor<?>> responseInterceptors = new TreeMap<>();
+        
+        responseInterceptors.put(1, new EasyResponseInterceptor<String>() {
+            @Override
+            public void handle(EasyHttpResponse<String> objectEasyHttpResponse) {
+                // some operations on resposne
+            }
+        });
+        responseInterceptors.put(2, new EasyResponseInterceptor<String>() {
+            @Override
+            public void handle(EasyHttpResponse<String> objectEasyHttpResponse) {
+                // second operratiopns on previously modified response
+            }
+        });
+        
+        Interceptor<EasyHttpRequest> requestInterceptor = new EasyRequestInterceptor(){
+
+            @Override
+            public void handle(EasyHttpRequest request) {
+                
+            }
+        };
+        
+        EasyHttp client = new EasyHttpBuilder()
+                .addAllInterceptors(responseInterceptors)
+                .build();
 ```
 If you want create some bot running on VPS you can easli log some errors in file using subscriber class:
 ```java
