@@ -197,3 +197,4 @@ EasyHttp easyHttp = new EasyHttpBuilder()
 // TODO add interceptor option for intercept onyl specified request which matches given pattern 
 // TOD and better support for addig interceptors,make it possible to add map of response interceptors
 // TODO: it is good choose to allow handling multiple request interceptors and give them specified paths to handle
+//TODO add tests for body handlers and dbody publishers. multipart request type is not testsed
