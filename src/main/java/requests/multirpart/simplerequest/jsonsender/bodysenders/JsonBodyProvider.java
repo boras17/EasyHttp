@@ -23,7 +23,6 @@ public class JsonBodyProvider extends BodyProvider<Object> {
         JsonCreator jsonCreator = new JsonCreator();
         jsonCreator.generateJson(super.getRequest());
         String json = jsonCreator.getJson();
-        super.setInputStream(json.getBytes(StandardCharsets.UTF_8));
         printWriter.write(json);
         printWriter.flush();
     }

@@ -32,7 +32,6 @@ public class JsonCreator {
     }
 
     public void generateJson(Object object) throws IllegalAccessException {
-
         if(object instanceof Collection<?>){
             json.append("[");
             List<Object> list = (List<Object>)object;
@@ -66,7 +65,7 @@ public class JsonCreator {
     private void serializeObject(Object object) throws IllegalAccessException {
         Class<?> clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
-        System.out.println(fields.length);
+
         Class<?> fieldType = null;
         Object fieldValue = null;
         Field field = null;
@@ -76,6 +75,11 @@ public class JsonCreator {
             field = fields[i];
             fieldType = field.getType();
             fieldValue = ReflectionUtils.getValueForField(field, object);
+            if(fieldType.isNestmateOf(clazz)) {
+                int index = this.json.lastIndexOf(",");
+                this.json.replace(index, index+1,"");
+                continue;
+            }
             // serialize json property name
             json.append("\"");
             if(field.isAnnotationPresent(SerializedName.class)) {
@@ -131,13 +135,6 @@ public class JsonCreator {
             if(j < arr.length-1) json.append(",");
         }
         json.append("]");
-    }
-
-    private boolean isPrimitive(Object o) {
-        Class<?> oClass = o.getClass();
-        return oClass.isAssignableFrom(Integer.class) ||
-                oClass.isAssignableFrom(Double.class) ||
-                oClass.isAssignableFrom(Float.class) || oClass.isAssignableFrom(Boolean.class);
     }
 
     private void serializeToText(Object fieldValue){

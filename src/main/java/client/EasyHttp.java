@@ -294,6 +294,7 @@ public class EasyHttp {
         this.operation = operation;
         this.connectionInitializr = connectionInitializr;
     }
+
     public EasyHttp(){
         this.operation = new Operation();
     }

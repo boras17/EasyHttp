@@ -1,6 +1,7 @@
 package client;
 
 import auth.AuthenticationProvider;
+import intercepting.EasyResponseInterceptor;
 import publishsubscribe.Event;
 import publishsubscribe.errorsubscriberimpl.Subscriber;
 import redirect.RedirectionHandler;
@@ -55,6 +56,7 @@ public class EasyHttpBuilder{
         http.setConnectionTimeout(this.connectionTimeout);
         http.setSubscribedChannels(this.subscribedChannels);
         http.setConnectionInitializr(new ConnectionInitializr());
+
         return http;
     }
 

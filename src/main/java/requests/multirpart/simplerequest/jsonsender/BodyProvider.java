@@ -7,7 +7,6 @@ import java.io.OutputStream;
 public abstract class BodyProvider<T>{
     private T request;
     private OutputStream outputStream;
-    private byte[] content;
 
     protected BodyProvider(T request){
         this.request = request;
@@ -21,14 +20,6 @@ public abstract class BodyProvider<T>{
 
     public OutputStream getOutputStream() {
         return this.outputStream;
-    }
-
-    public byte[] getInputStream() {
-        return this.getInputStream();
-    }
-
-    public void setInputStream(byte[] bytes){
-        this.content = bytes;
     }
 
     public void setOutputStream(OutputStream outputStream) {

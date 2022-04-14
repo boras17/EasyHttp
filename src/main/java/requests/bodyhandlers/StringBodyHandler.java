@@ -16,7 +16,7 @@ public class StringBodyHandler extends AbstractBodyHandler<String>{
     private void calculateBody() throws IOException {
         StringBuilder stringContent = new StringBuilder();
         InputStream inputStream = super.getInputStream();
-
+        System.out.println(inputStream!=null);
 
         if(inputStream != null){
             InputStreamReader inputStreamReader = inputStreamReader = new InputStreamReader(inputStream);
@@ -39,7 +39,6 @@ public class StringBodyHandler extends AbstractBodyHandler<String>{
         this.calculateBody();
 
         EasyHttpResponse<String> easyStringResponse = new EasyHttpResponse<>();
-
         easyStringResponse.setBody(super.getBody());
         easyStringResponse.setResponseStatus(super.getResponseStatus());
         easyStringResponse.setResponseHeaders(super.getHeaders());
