@@ -143,19 +143,58 @@ sendAsync method sending request asynchronously and returns CompleteableFuture:
 ```java
 CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request, new StringBodyHandler());
 ```
-Response and request interceptors can by provided via functional interface Interceptor
+Response and request interceptors can by provided via addAllInterceptors
 ```java
-client.EasyHttp easyHttp
-        = new client.EasyHttp.EasyHttpBuilder()
-        .setRequestInterceptor(request -> {
-            System.out.println("request: " + request.getUrl());
-        })
-        .setResponseInterceptor(easyHttpResponse -> {
-            System.out.println(easyHttpResponse.getBody());
-        })
+        easyHttp.setRequestInterceptor(new EasyRequestInterceptor() {
+            @Override
+            public void handle(EasyHttpRequest request) {
+                
+            }
+        });
+        
+        easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
+            @Override
+            public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
+                
+            }
+        },1);
+        easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
+            @Override
+            public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
+
+            }
+        },2);
+```
+If you want create some bot running on VPS you can easli log some errors in file using subscriber class:
+```java
+ EasyHttp easyHttp = new EasyHttpBuilder()
+                .setSubscribedChannels(Map.of(Channels.CLIENT_ERROR_CHANNEL,
+                        new ErrorSubscriber(properties)))
+                .build();
+```
+for that purpose you have to pass Map to setSubscribedChannles. The key of the map entry is Channel name. You can choose five diffrent channels:
+```java
+Channels.SERVER_ERROR_CHANNEL;
+Channels.CLIENT_ERROR_CHANNEL;
+Channels.REDIRECT_ERROR_CHANNEL;
+Channels.APP_ERROR_CHANNEL;
+```
+The names of these channels are very intuitive SERVER_ERROR_CHANNEL will handle server errors, CLIENT_ERROR_CHANNEL will handle client errors etc.
+The most important thing of ErrorSubscriber is Properties object. In properties you have to specify the path to the file:
+```java
+Properties properties = new Properties();
+properties.put(ErrorChannelConfigProp.SERVER_ERROR_FILE, "errors/servererrors.txt")
+
+Subscriber<?> subscriber = new ErrorSubscriber(properties);
+
+Map<String, Subscriber<?>> subscriberMap = new HashMap<>();
+subscriberMap.put(Channels.CLIENT_ERROR_CHANNEL, subscriber);
+
+EasyHttp easyHttp = new EasyHttpBuilder()
+        .setSubscribedChannels(subscriberMap)
         .build();
 ```
-TODO: better digest authentication support and oauth2 authentication provider
-DIgest authentication 401 response handler and params extractor for next auth request. Digest scheme
-TODO: change response status handler. two options enumerated status or int/ response status object wihch provide enumerated status and integer status
-TODO: testing subscriber
+// TODO add interceptor option for intercept onyl specified request which matches given pattern 
+// TOD and better support for addig interceptors,make it possible to add map of response interceptors
+// TODO: it is good choose to allow handling multiple request interceptors and give them specified paths to handle
+//TODO add tests for body handlers and dbody publishers. multipart request type is not testsed
