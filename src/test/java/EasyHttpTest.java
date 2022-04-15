@@ -3,7 +3,6 @@ import exceptions.RequestObjectRequiredException;
 import exceptions.ResponseHandlerRequired;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -12,7 +11,7 @@ import publishsubscribe.Operation;
 import redirect.GenericError;
 import redirect.redirectexception.RedirectionUnhandled;
 import requests.bodyhandlers.EmptyBodyHandler;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.io.IOException;
 

@@ -9,7 +9,7 @@ import redirect.redirectexception.RedirectWithoutLocationException;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.UnsafeRedirectionException;
 import requests.easyresponse.EasyHttpResponse;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.net.*;
 

@@ -1,12 +1,10 @@
-package requests.multirpart.simplerequest.jsonsender.bodysenders;
+package Utils.simplerequest.jsonsender.bodysenders;
 
 import Parts.FilePart;
 import Parts.PartType;
 import Parts.TextPart;
-import publishsubscribe.Channels;
-import publishsubscribe.Event;
 import requests.easyrequest.MultipartBody;
-import requests.multirpart.simplerequest.jsonsender.BodyProvider;
+import Utils.simplerequest.jsonsender.BodyProvider;
 
 import java.io.*;
 import java.net.HttpURLConnection;

@@ -3,9 +3,6 @@ package client;
 import Headers.Header;
 import HttpEnums.HttpStatus;
 import auth.AuthenticationProvider;
-import auth.UnauthorizedRequestException;
-import auth.digestauth.DigestAuthenticationProvider;
-import auth.digestauth.DigestResponse;
 import exceptions.RequestObjectRequiredException;
 import exceptions.ResponseHandlerRequired;
 import intercepting.EasyRequestInterceptor;
@@ -23,8 +20,8 @@ import redirect.redirectexception.UnsafeRedirectionException;
 import requests.bodyhandlers.AbstractBodyHandler;
 import requests.cookies.CookieExtractor;
 import requests.easyresponse.EasyHttpResponse;
-import requests.multirpart.simplerequest.EasyHttpRequest;
-import requests.multirpart.simplerequest.jsonsender.BodyProvider;
+import Utils.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.jsonsender.BodyProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,8 +61,8 @@ public class EasyHttp {
         });
     }
 
-    public <T> EasyHttpResponse<T> send(requests.multirpart.simplerequest.EasyHttpRequest request,
-                                 AbstractBodyHandler<T> bodyHandler)
+    public <T> EasyHttpResponse<T> send(EasyHttpRequest request,
+                                        AbstractBodyHandler<T> bodyHandler)
             throws IOException, IllegalAccessException, RedirectionUnhandled {
         if(request == null) {
             throw new RequestObjectRequiredException("Request object can not be null");

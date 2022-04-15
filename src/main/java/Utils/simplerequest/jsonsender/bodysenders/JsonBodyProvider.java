@@ -1,17 +1,17 @@
-package requests.multirpart.simplerequest.jsonsender.bodysenders;
+package Utils.simplerequest.jsonsender.bodysenders;
 
-
+import Utils.simplerequest.jsonsender.BodyProvider;
 import jsonoperations.JsonCreator;
-import requests.multirpart.simplerequest.jsonsender.BodyProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
-public class TextBodyProvider extends BodyProvider<String> {
+public class JsonBodyProvider extends BodyProvider<Object> {
 
-    public TextBodyProvider(String request) {
+
+    public JsonBodyProvider(Object request) {
         super(request);
     }
 
@@ -19,7 +19,10 @@ public class TextBodyProvider extends BodyProvider<String> {
     public void prepareAndCopyToStream() throws IllegalAccessException, IOException {
         OutputStream outputStream = super.getOutputStream();
         PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(outputStream), true);
-        printWriter.write(super.getRequest());
+        JsonCreator jsonCreator = new JsonCreator();
+        jsonCreator.generateJson(super.getRequest());
+        String json = jsonCreator.getJson();
+        printWriter.write(json);
         printWriter.flush();
     }
 

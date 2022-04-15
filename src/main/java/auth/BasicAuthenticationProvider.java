@@ -1,12 +1,10 @@
 package auth;
 
 import Headers.Header;
-import requests.easyresponse.EasyHttpResponse;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 
 public class BasicAuthenticationProvider extends AuthenticationProvider{
 

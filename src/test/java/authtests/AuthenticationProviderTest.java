@@ -5,12 +5,9 @@ import HttpEnums.Method;
 import auth.AuthenticationProvider;
 import auth.BasicAuthenticationProvider;
 import auth.digestauth.DigestAuthenticationProvider;
-import auth.digestauth.DigestResponse;
-import auth.digestauth.HashAlgorithms;
-import auth.digestauth.Qop;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.net.MalformedURLException;
 import java.net.URL;

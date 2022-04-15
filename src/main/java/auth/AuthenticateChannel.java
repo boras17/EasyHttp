@@ -1,7 +1,7 @@
 package auth;
 
 import Headers.Header;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.util.List;
 

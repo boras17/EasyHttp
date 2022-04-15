@@ -1,4 +1,4 @@
-package requests.multirpart.simplerequest.jsonsender;
+package Utils.simplerequest.jsonsender;
 
 import java.io.IOException;
 import java.io.InputStream;

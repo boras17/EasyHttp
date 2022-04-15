@@ -1,7 +1,7 @@
 package auth.digestauth;
 
 import Headers.Header;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.security.SecureRandom;
 import java.util.*;

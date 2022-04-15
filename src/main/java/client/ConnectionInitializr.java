@@ -1,7 +1,6 @@
 package client;
 
-import org.junit.runner.RunWith;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;

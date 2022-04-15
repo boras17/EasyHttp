@@ -1,8 +1,8 @@
-package requests.multirpart.simplerequest;
+package Utils.simplerequest;
 
 import Headers.Header;
 import HttpEnums.Method;
-import requests.multirpart.simplerequest.jsonsender.BodyProvider;
+import Utils.simplerequest.jsonsender.BodyProvider;
 
 import java.net.Proxy;
 import java.net.URL;

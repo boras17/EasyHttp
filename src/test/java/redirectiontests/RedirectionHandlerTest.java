@@ -13,7 +13,7 @@ import org.powermock.reflect.internal.WhiteboxImpl;
 import redirect.RedirectionHandler;
 import redirect.redirectexception.RedirectWithoutLocationException;
 import requests.easyresponse.EasyHttpResponse;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.net.MalformedURLException;
 import java.net.URL;

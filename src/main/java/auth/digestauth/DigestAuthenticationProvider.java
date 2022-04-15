@@ -2,16 +2,11 @@ package auth.digestauth;
 
 import Headers.Header;
 import auth.AuthenticationProvider;
-import publishsubscribe.Channels;
-import publishsubscribe.Event;
-import redirect.ErrorType;
-import redirect.GenericError;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;

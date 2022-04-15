@@ -3,11 +3,10 @@ import Parts.PartType;
 import Parts.TextPart;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.powermock.api.mockito.PowerMockito;
 import requests.easyrequest.MultipartBody;
-import requests.multirpart.simplerequest.jsonsender.bodysenders.JsonBodyProvider;
-import requests.multirpart.simplerequest.jsonsender.bodysenders.MultipartBodyProvider;
-import requests.multirpart.simplerequest.jsonsender.bodysenders.TextBodyProvider;
+import Utils.simplerequest.jsonsender.bodysenders.JsonBodyProvider;
+import Utils.simplerequest.jsonsender.bodysenders.MultipartBodyProvider;
+import Utils.simplerequest.jsonsender.bodysenders.TextBodyProvider;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -140,7 +139,18 @@ public class BodyProviderTests {
         provider.setOutputStream(outputStream);
         provider.prepareAndCopyToStream();
 
+        String content = outputStream.toString();
+        System.out.println(content);
+        // -- expected parts
+        String beginBoundary = "--myboundary";
+        String endBoundary = "--myboundary--";
+        String fileContent ="hello world";
+        String contentDisposition = "Content-Disposition: form-data; name=\"someFile\" filename=\"somefile.txt\"";
+        String contentType = "Content-Type: text/plain";
+        // -- expected parts
 
-        // TODO: complete testing for multipart
+        Set<String> expectedPartsSet = Set.of(beginBoundary,endBoundary,fileContent,contentDisposition,contentType);
+        org.assertj.core.api.Assertions.assertThat(content)
+                .contains(expectedPartsSet);
     }
 }

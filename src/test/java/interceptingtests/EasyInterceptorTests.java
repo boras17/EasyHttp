@@ -20,7 +20,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import redirect.redirectexception.RedirectionUnhandled;
 import requests.bodyhandlers.StringBodyHandler;
 import requests.easyresponse.EasyHttpResponse;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

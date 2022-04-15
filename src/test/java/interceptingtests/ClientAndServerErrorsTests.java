@@ -23,7 +23,7 @@ import redirect.redirectexception.RedirectionUnhandled;
 import redirect.redirectexception.UnsafeRedirectionException;
 import requests.bodyhandlers.EmptyBodyHandler;
 import requests.easyresponse.EasyHttpResponse;
-import requests.multirpart.simplerequest.EasyHttpRequest;
+import Utils.simplerequest.EasyHttpRequest;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
