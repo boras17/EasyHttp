@@ -92,10 +92,12 @@ You can very easly send multipart request. Firstly you need to create MultipartB
 ```java
 MultipartBody multipartBody = new MultipartBody.MultiPartBodyBuilder()
                 .addPart(new FilePart(new File("file.txt"),"partName"))
+                .setPartType(PartType.FILE)
                 .build();
                 
 MultipartBody multipartBody = new MultipartBody.MultiPartBodyBuilder()
                 .addPart(new TextPart("Hello world","partName"))
+                .setPartType(PartType.TEXT)
                 .build();
 ```
 When you create MultipartBody it is time to pass it to MultipartBodyProvider as a constructor parameter:
@@ -135,9 +137,9 @@ HttpStatus status = response.getResponseStatus();
 and list of headers from server:
 ```java
 List<Header> status = response.getResponseHeaders();
-        Header header = status.get(0);
-        String headerKey = header.getKey();
-        String headerValue = header.getValue();
+Header header = status.get(0);
+String headerKey = header.getKey();
+String headerValue = header.getValue();
 ```
 sendAsync method sending request asynchronously and returns CompleteableFuture:
 ```java
@@ -145,25 +147,25 @@ CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request,
 ```
 Response and request interceptors can by provided via addAllInterceptors
 ```java
-        easyHttp.setRequestInterceptor(new EasyRequestInterceptor() {
-            @Override
-            public void handle(EasyHttpRequest request) {
-                
-            }
-        });
-        
-        easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
-            @Override
-            public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
-                
-            }
-        },1);
-        easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
-            @Override
-            public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
+easyHttp.setRequestInterceptor(new EasyRequestInterceptor() {
+    @Override
+    public void handle(EasyHttpRequest request) {
 
-            }
-        },2);
+    }
+});
+
+easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
+    @Override
+    public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
+
+    }
+},1);
+easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
+    @Override
+    public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
+
+    }
+},2);
 ```
 If you want create some bot running on VPS you can easli log some errors in file using subscriber class:
 ```java
@@ -194,7 +196,16 @@ EasyHttp easyHttp = new EasyHttpBuilder()
         .setSubscribedChannels(subscriberMap)
         .build();
 ```
-// TODO add interceptor option for intercept onyl specified request which matches given pattern 
-// TOD and better support for addig interceptors,make it possible to add map of response interceptors
-// TODO: it is good choose to allow handling multiple request interceptors and give them specified paths to handle
-//TODO add tests for body handlers and dbody publishers. multipart request type is not testsed
+
+
+// 50% TODO: it is good choose to allow handling multiple request interceptors and give them specified paths to handle
+//TODO try to generify subscriber 
+// todo more tests for error subscribe
+
+//TODO digest authenitcation provider support for response interceptor
+//Maybe it is good to provide some flag: isAfterChallenge
+if(isAfterchallenge){
+then beforeRequest)
+}else{
+    on401Response();
+}
