@@ -210,3 +210,5 @@ then beforeRequest)
     on401Response();
 }
 to do annotation based http client
+
+to do declarable interfaces for making creud request
