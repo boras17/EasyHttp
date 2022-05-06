@@ -145,6 +145,21 @@ sendAsync method sending request asynchronously and returns CompleteableFuture:
 ```java
 CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request, new StringBodyHandler());
 ```
+Declared Client example:
+```java
+public interface UserCrud {
+    @Headers(headers = {@Header(key = "content-type", value = "application/json")})
+    @PathAndMethod(method = "GET", path = "http://localhost:2323/hello/world")
+    @Body("some json")
+    List<String> data(@Method HttpEnums.Method method,
+                      @RequestParam(name="sort") String sorting,
+                      @Multipart MultipartBody multipartBody);
+}
+```
+Now you can easly create an proxy in order to make declared in UserCrud interface requests via DeclarativeClientParser:
+```java
+UserCrud userCrud = new DeclarativeClientParser<>(UserCrud.class).getImplementation();
+```
 Response and request interceptors can by provided via addAllInterceptors
 ```java
 easyHttp.setRequestInterceptor(new EasyRequestInterceptor() {
