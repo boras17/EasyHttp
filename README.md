@@ -2,12 +2,11 @@
 How to use?
 Firstly you must create new instance of EasyHtpp. You can do this with EasyHttpBuilder. Example how to create new instance with builder:
 ```java 
-    client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
-                .build();
+EasyHttp client = new client.EasyHttp.EasyHttpBuilder().build();
 ```
 EasyHTtpBuilder makes it possible among others to set user agent and authenticator for requests:
 ```java 
-client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
+EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
                 .setAuthenticationProvider(someAuthenticationProvider)
                 .setUserAgent(someUserAgent)
                 .setCookieExtractor(cookie extractor)
