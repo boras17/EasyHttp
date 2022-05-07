@@ -1,6 +1,6 @@
 package redirect;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import publishsubscribe.GenericCommunicate;
 
 import java.time.LocalDateTime;
@@ -16,24 +16,24 @@ public class GenericError extends GenericCommunicate<GenericError> {
     private String exceptionMg;
     private ErrorType errorType;
     private String serverMsg;
-    private List<Header> responseHeaders;
+    private List<HttpHeader> responseHttpHeaders;
 
     public GenericError(int status,
-                        List<Header> responseHeaders,
+                        List<HttpHeader> responseHttpHeaders,
                         String exceptionMg,
                         ErrorType errorType) {
         this.status = status;
-        this.responseHeaders = responseHeaders;
+        this.responseHttpHeaders = responseHttpHeaders;
         this.exceptionMg = exceptionMg;
         this.errorType = errorType;
     }
     public GenericError(int status,
-                        List<Header> responseHeaders,
+                        List<HttpHeader> responseHttpHeaders,
                         String exceptionMg,
                         ErrorType errorType,
                         String serverMsg) {
         this.status = status;
-        this.responseHeaders = responseHeaders;
+        this.responseHttpHeaders = responseHttpHeaders;
         this.exceptionMg = exceptionMg;
         this.errorType = errorType;
         this.serverMsg = serverMsg;
@@ -59,12 +59,12 @@ public class GenericError extends GenericCommunicate<GenericError> {
         content.append("Exception msg: ").append(genericError.getMsg()).append(newLine);
         content.append("Response status: ").append(genericError.getStatus()).append(newLine);
         content.append("Response headers: ").append(newLine).append(newLine);
-        for(Header header: genericError.getResponseHeaders()){
+        for(HttpHeader httpHeader : genericError.getResponseHeaders()){
             content.append("header key: ")
-                    .append(header.getKey())
+                    .append(httpHeader.getKey())
                     .append("\n")
                     .append("header value: ")
-                    .append(header.getValue())
+                    .append(httpHeader.getValue())
                     .append("\n")
                     .append("------------------------------")
                     .append("\n");
@@ -86,12 +86,12 @@ public class GenericError extends GenericCommunicate<GenericError> {
         this.status = status;
     }
 
-    public List<Header> getResponseHeaders() {
-        return responseHeaders;
+    public List<HttpHeader> getResponseHeaders() {
+        return responseHttpHeaders;
     }
 
-    public void setResponseHeaders(List<Header> responseHeaders) {
-        this.responseHeaders = responseHeaders;
+    public void setResponseHeaders(List<HttpHeader> responseHttpHeaders) {
+        this.responseHttpHeaders = responseHttpHeaders;
     }
 
     public String getMsg() {
@@ -118,7 +118,7 @@ public class GenericError extends GenericCommunicate<GenericError> {
                 "status=" + status +
                 ", msg='" + exceptionMg + '\'' +
                 ", errorType=" + errorType +
-                ", responseHeaders=" + responseHeaders +
+                ", responseHeaders=" + responseHttpHeaders +
                 '}';
     }
 }

@@ -1,6 +1,6 @@
 package publishsubscribertests;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ErrorSubscriberTest {
 
     private GenericError genericError = new GenericError(122,
-            List.of(new Header("key", "value")),
+            List.of(new HttpHeader("key", "value")),
             "some exception msg",
     ErrorType.REDIRECT);
 

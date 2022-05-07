@@ -1,16 +1,16 @@
 package Headers;
 
 public enum CommonHeaders {
-    APPLICATION_JSON_HEADER(new Header("Content-Type", "application/json")),
-    MULTIPART_FORM_DATA_HEADER(new Header("Content-Type", "multipart/form-data; boundary=myboundary"));
+    APPLICATION_JSON_HEADER(new HttpHeader("Content-Type", "application/json")),
+    MULTIPART_FORM_DATA_HEADER(new HttpHeader("Content-Type", "multipart/form-data; boundary=myboundary"));
 
-    private final Header header;
+    private final HttpHeader httpHeader;
 
-    CommonHeaders(Header header) {
-        this.header = header;
+    CommonHeaders(HttpHeader httpHeader) {
+        this.httpHeader = httpHeader;
     }
 
-    public Header getHeader(){
-        return this.header;
+    public HttpHeader getHeader(){
+        return this.httpHeader;
     }
 }

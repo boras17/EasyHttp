@@ -1,24 +1,23 @@
-import Utils.simplerequest.EasyHttpRequest;
-import intercepting.Interceptor;
-import intercepting.patternintercepting.Checker;
-import intercepting.patternintercepting.PathPatternChecker;
-import intercepting.patternintercepting.PatternRequestInterceptor;
+import HttpEnums.Method;
+import declarativeclient.DeclarativeClientParser;
+import declarativeclient.declarativeannotations.Path;
+import declarativeclient.declarativeannotations.PathVariable;
+import declarativeclient.declarativeannotations.RequestMethod;
+
+import java.io.IOException;
 
 public class Home {
 
-    static class PatternInterceptor extends PatternRequestInterceptor{
-
-        public PatternInterceptor(Checker checker) {
-            super(checker);
-        }
-
-        @Override
-        public void handle(EasyHttpRequest easyHttpRequest) {
-            boolean matcher = this.shouldIntercept(easyHttpRequest.getUrl());
-        }
+    interface UserCrud{
+        @RequestMethod(method = Method.GET)
+        @Path("https://jsonplaceholder.typicode.com/todos/{id}")
+        String getUserById(@PathVariable("id") int id);
     }
 
-    public static void main(String[] args) {
-        Interceptor<EasyHttpRequest> requestInterceptor = new PatternInterceptor(new PathPatternChecker("some pattern"));
+    public static void main(String[] args) throws IOException {
+        UserCrud userCrud = new DeclarativeClientParser<>(UserCrud.class).getImplementation();
+
+        String data = userCrud.getUserById(1);
+
     }
 }

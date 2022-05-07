@@ -46,6 +46,7 @@ public class MultipartBodyProvider extends BodyProvider<MultipartBody> {
                     printWriter.writeBytes(textPart.getContent());
                     printWriter.writeBytes(lineSeparator);
                 }catch (IOException e){
+                    e.printStackTrace();
                 }
 
 
@@ -88,7 +89,7 @@ public class MultipartBodyProvider extends BodyProvider<MultipartBody> {
             try{
                 printWriter.writeBytes(lineSeparator+"--" + boundary + "--" + lineSeparator);
             }catch (IOException i){
-
+                i.printStackTrace();
             }
 
         });

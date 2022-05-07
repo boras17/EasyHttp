@@ -1,8 +1,6 @@
 package client;
 
-import auth.AuthenticationProvider;
-import intercepting.EasyResponseInterceptor;
-import publishsubscribe.Event;
+import Utils.simplerequest.auth.AuthenticationProvider;
 import publishsubscribe.errorsubscriberimpl.Subscriber;
 import redirect.RedirectionHandler;
 import requests.cookies.CookieExtractor;

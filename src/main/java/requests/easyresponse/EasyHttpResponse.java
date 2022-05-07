@@ -1,6 +1,6 @@
 package requests.easyresponse;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import HttpEnums.HttpStatus;
 
 import java.util.List;
@@ -10,7 +10,7 @@ public class EasyHttpResponse<T> {
     private HttpStatus responseStatus;
     private int status;
     private T body;
-    private List<Header> responseHeaders;
+    private List<HttpHeader> responseHttpHeaders;
 
     public HttpStatus getResponseStatus() {
         return responseStatus;
@@ -36,17 +36,17 @@ public class EasyHttpResponse<T> {
         this.status = status;
     }
 
-    public List<Header> getResponseHeaders() {
-        return responseHeaders;
+    public List<HttpHeader> getResponseHeaders() {
+        return responseHttpHeaders;
     }
 
-    public Optional<Header> getHeaderByName(String headerName){
+    public Optional<HttpHeader> getHeaderByName(String headerName){
         return this.getResponseHeaders()
                 .stream()
                 .filter(header-> header.getKey().equals(headerName))
                 .findFirst();
     }
-    public void setResponseHeaders(List<Header> responseHeaders) {
-        this.responseHeaders = responseHeaders;
+    public void setResponseHeaders(List<HttpHeader> responseHttpHeaders) {
+        this.responseHttpHeaders = responseHttpHeaders;
     }
 }

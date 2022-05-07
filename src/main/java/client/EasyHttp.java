@@ -1,8 +1,8 @@
 package client;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import HttpEnums.HttpStatus;
-import auth.AuthenticationProvider;
+import Utils.simplerequest.auth.AuthenticationProvider;
 import exceptions.RequestObjectRequiredException;
 import exceptions.ResponseHandlerRequired;
 import intercepting.EasyRequestInterceptor;
@@ -82,11 +82,11 @@ public class EasyHttp {
             connection.setConnectTimeout(timeoutMillis);
         }, ()-> connection.setConnectTimeout(1000 * 30));
 
-        List<Header> requestHeaders = request.getHeaders();
+        List<HttpHeader> requestHttpHeaders = request.getHeaders();
 
-        if(requestHeaders.size() > 0){
-            for(Header header: requestHeaders){
-                connection.setRequestProperty(header.getKey(), header.getValue());
+        if(requestHttpHeaders.size() > 0){
+            for(HttpHeader httpHeader : requestHttpHeaders){
+                connection.setRequestProperty(httpHeader.getKey(), httpHeader.getValue());
             }
         }
 
@@ -103,10 +103,10 @@ public class EasyHttp {
         int responseStatus = connection.getResponseCode();
 
         Map<String, List<String>> headersFields = connection.getHeaderFields();
-        List<Header> headers = this.calculateHeaders(headersFields);
+        List<HttpHeader> httpHeaders = this.calculateHeaders(headersFields);
 
         bodyHandler.setResponseStatus(getHttpStatus(responseStatus));
-        bodyHandler.setHeaders(headers);
+        bodyHandler.setHeaders(httpHeaders);
 
         if(responseStatus >= 200 && responseStatus < 300){
             bodyHandler.setInputStream(connection.getInputStream());
@@ -115,7 +115,7 @@ public class EasyHttp {
             InputStream errorStream = connection.getErrorStream();
             bodyHandler.setInputStream(errorStream);
             GenericError genericError = new GenericError(responseStatus,
-                    headers,
+                    httpHeaders,
                     "Server responded with client error status: " +responseStatus,
                     ErrorType.CLIENT,
                     errorStream == null ? "No message from server": new String(errorStream.readAllBytes()));
@@ -128,7 +128,7 @@ public class EasyHttp {
             InputStream errorStream = connection.getErrorStream();
             bodyHandler.setInputStream(errorStream);
             GenericError genericError = new GenericError(responseStatus,
-                    headers,
+                    httpHeaders,
                     "Server responded with server error status: " +responseStatus,
                     ErrorType.SERVER,
                     new String(errorStream.readAllBytes()));
@@ -155,7 +155,7 @@ public class EasyHttp {
                     = this.getRedirectionHandler()
                     .orElseThrow(() -> {
                         GenericError genericError = new GenericError(responseStatus,
-                                headers, "Server respond with redirect status: " + responseStatus + "and you did not provide redirection handler",
+                                httpHeaders, "Server respond with redirect status: " + responseStatus + "and you did not provide redirection handler",
                                 ErrorType.REDIRECT,
                                 null);
                         this.operation.publish(Channels.REDIRECT_ERROR_CHANNEL, genericError);
@@ -183,7 +183,7 @@ public class EasyHttp {
         return _response; //bodyHandler.getCalculatedResponse();
     }
 
-    private List<Header> calculateHeaders(Map<String, List<String>> headersFields) {
+    private List<HttpHeader> calculateHeaders(Map<String, List<String>> headersFields) {
         return headersFields
                 .entrySet()
                 .stream()
@@ -191,7 +191,7 @@ public class EasyHttp {
                     return entry.getKey()!=null;
                 })
                 .map((entry) -> {
-                    return new Header(entry.getKey(), entry.getValue().get(0));
+                    return new HttpHeader(entry.getKey(), entry.getValue().get(0));
 
                 }).collect(Collectors.toList());
     }

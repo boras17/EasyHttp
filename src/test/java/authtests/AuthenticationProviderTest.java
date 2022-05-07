@@ -1,10 +1,10 @@
 package authtests;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import HttpEnums.Method;
-import auth.AuthenticationProvider;
-import auth.BasicAuthenticationProvider;
-import auth.digestauth.DigestAuthenticationProvider;
+import Utils.simplerequest.auth.AuthenticationProvider;
+import Utils.simplerequest.auth.BasicAuthenticationProvider;
+import Utils.simplerequest.auth.digestauth.DigestAuthenticationProvider;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import Utils.simplerequest.EasyHttpRequest;
@@ -26,7 +26,7 @@ public class AuthenticationProviderTest {
         AuthenticationProvider authenticationProvider = new BasicAuthenticationProvider(username, password);
         authenticationProvider.calculate();
 
-        Header authHeaders = authenticationProvider.getAuthHeaders();
+        HttpHeader authHeaders = authenticationProvider.getAuthHeaders();
 
         Base64.Encoder encoder = Base64.getEncoder();
 
@@ -51,11 +51,11 @@ public class AuthenticationProviderTest {
                 .build();
         String expectedResponse = "6629fae49393a05397450978507c4ef1";
 
-        Header responseDigestHeader = new Header();
-        responseDigestHeader.setKey("WWW-Authenticate");
-        responseDigestHeader.setValue("Digest realm=\"digest-realm\", qop=\"auth\", nonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\"");
+        HttpHeader responseDigestHttpHeader = new HttpHeader();
+        responseDigestHttpHeader.setKey("WWW-Authenticate");
+        responseDigestHttpHeader.setValue("Digest realm=\"digest-realm\", qop=\"auth\", nonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\"");
 
-        digestAuthenticationProvider.on401Response(List.of(responseDigestHeader), request);
+        digestAuthenticationProvider.on401Response(List.of(responseDigestHttpHeader), request);
 
         request.getHeaders()
                 .stream()

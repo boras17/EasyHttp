@@ -1,6 +1,6 @@
 package requests.bodyhandlers;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import HttpEnums.HttpStatus;
 import requests.easyresponse.EasyHttpResponse;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public abstract class AbstractBodyHandler<T> {
     private T body;
     private HttpStatus responseStatus;
-    private List<Header> headers;
+    private List<HttpHeader> httpHeaders;
     private EasyHttpResponse<T> easyResponse;
     private InputStream inputStream;
 
@@ -43,12 +43,12 @@ public abstract class AbstractBodyHandler<T> {
         this.responseStatus = responseStatus;
     }
 
-    public List<Header> getHeaders() {
-        return headers;
+    public List<HttpHeader> getHeaders() {
+        return httpHeaders;
     }
 
-    public void setHeaders(List<Header> headers) {
-        this.headers = headers;
+    public void setHeaders(List<HttpHeader> httpHeaders) {
+        this.httpHeaders = httpHeaders;
     }
 
     public EasyHttpResponse<T> getEasyResponse() {

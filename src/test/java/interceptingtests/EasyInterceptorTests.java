@@ -1,7 +1,7 @@
 package interceptingtests;
 
 
-import Headers.Header;
+import Headers.HttpHeader;
 import client.ConnectionInitializr;
 import client.EasyHttp;
 import intercepting.EasyRequestInterceptor;
@@ -84,14 +84,14 @@ public class EasyInterceptorTests {
                                                                                       RedirectionUnhandled,
                                                                                       IllegalAccessException {
         Mockito.when(connectionInitializr.openConnection(Mockito.any())).thenReturn(new DumbConnection());
-        Header authHeader = new Header();
-        authHeader.setKey("Authorization");
-        authHeader.setValue("Bearer knsivbnsodifyba98sdhv9as8dvxkcj");
+        HttpHeader authHttpHeader = new HttpHeader();
+        authHttpHeader.setKey("Authorization");
+        authHttpHeader.setValue("Bearer knsivbnsodifyba98sdhv9as8dvxkcj");
 
         EasyRequestInterceptor jwtHeaderInterceptor = new EasyRequestInterceptor() {
             @Override
             public void handle(EasyHttpRequest request) {
-                request.getHeaders().add(authHeader);
+                request.getHeaders().add(authHttpHeader);
             }
         };
 
@@ -100,13 +100,13 @@ public class EasyInterceptorTests {
         this.easyHttp.send(this.emptyRequest, new StringBodyHandler());
 
         Assertions.assertEquals(1,this.emptyRequest.getHeaders().size());
-        Header addedHeader = this.emptyRequest.getHeaders().get(0);
-        org.assertj.core.api.Assertions.assertThat(addedHeader).has(new Condition<>(){
+        HttpHeader addedHttpHeader = this.emptyRequest.getHeaders().get(0);
+        org.assertj.core.api.Assertions.assertThat(addedHttpHeader).has(new Condition<>(){
             @Override
-            public boolean matches(Header header) {
-                return header.getKey().equals(authHeader.getKey())
+            public boolean matches(HttpHeader httpHeader) {
+                return httpHeader.getKey().equals(authHttpHeader.getKey())
                         &&
-                       header.getValue().equals(authHeader.getValue());
+                       httpHeader.getValue().equals(authHttpHeader.getValue());
             }
         });
     }

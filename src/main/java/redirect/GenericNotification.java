@@ -1,8 +1,7 @@
 package redirect;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import publishsubscribe.GenericCommunicate;
-import publishsubscribe.communcates.ErrorCommunicate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,17 +13,17 @@ import java.util.Locale;
 public class GenericNotification extends GenericCommunicate<GenericNotification> {
     private LocalDateTime dateTime;
     private String msg;
-    private List<Header> responseHeaders;
+    private List<HttpHeader> responseHttpHeaders;
     private String resourceAddress;
     private NotificationTypes notificationType;
 
 
-    public GenericNotification(LocalDateTime dateTime, String msg, List<Header> responseHeaders, String resourceAddress, NotificationTypes notificationType){
+    public GenericNotification(LocalDateTime dateTime, String msg, List<HttpHeader> responseHttpHeaders, String resourceAddress, NotificationTypes notificationType){
         super();
         this.dateTime = dateTime;
         this.msg = msg;
         this.resourceAddress = resourceAddress;
-        this.responseHeaders = responseHeaders;
+        this.responseHttpHeaders = responseHttpHeaders;
         this.notificationType = notificationType;
     }
 
@@ -43,12 +42,12 @@ public class GenericNotification extends GenericCommunicate<GenericNotification>
         content.append("Log date time: ").append(date).append(newLine);
         content.append("Notification msg: ").append(genericNotification.getMsg()).append(newLine);
         content.append("Response headers: ").append(newLine).append(newLine);
-        for(Header header: genericNotification.getResponseHeaders()){
+        for(HttpHeader httpHeader : genericNotification.getResponseHeaders()){
             content.append("header key: ")
-                    .append(header.getKey())
+                    .append(httpHeader.getKey())
                     .append("\n")
                     .append("header value: ")
-                    .append(header.getValue())
+                    .append(httpHeader.getValue())
                     .append("\n")
                     .append("------------------------------")
                     .append("\n");
@@ -65,12 +64,12 @@ public class GenericNotification extends GenericCommunicate<GenericNotification>
         this.notificationType = notificationType;
     }
 
-    public List<Header> getResponseHeaders() {
-        return responseHeaders;
+    public List<HttpHeader> getResponseHeaders() {
+        return responseHttpHeaders;
     }
 
-    public void setResponseHeaders(List<Header> responseHeaders) {
-        this.responseHeaders = responseHeaders;
+    public void setResponseHeaders(List<HttpHeader> responseHttpHeaders) {
+        this.responseHttpHeaders = responseHttpHeaders;
     }
 
     public String getResourceAddress() {

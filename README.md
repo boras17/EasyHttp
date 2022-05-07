@@ -62,7 +62,7 @@ Ok when we have configured Client the next step is creating requests. If you wan
                 .addHeader(new Header("name","value"))
                 .build();
 ```
-the builder make it possible to set Proxy, URL, Headers (yes you can invoke add header a lot of times or pass List of Header's), Http method which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
+the builder make it possible to set Proxy, URL, Headers (yes you can invoke add httpHeader a lot of times or pass List of Header's), Http method which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
 ```java
     public class Person{
         String name;
@@ -132,12 +132,12 @@ With response object you can get response status:
 ```java
 HttpStatus status = response.getResponseStatus();
 ```
-and list of headers from server:
+and list of httpHeaders from server:
 ```java
 List<Header> status = response.getResponseHeaders();
-        Header header = status.get(0);
-        String headerKey = header.getKey();
-        String headerValue = header.getValue();
+        Header httpHeader = status.get(0);
+        String headerKey = httpHeader.getKey();
+        String headerValue = httpHeader.getValue();
 ```
 sendAsync method sending request asynchronously and returns CompleteableFuture:
 ```java

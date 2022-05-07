@@ -1,6 +1,6 @@
 package redirect;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import HttpEnums.Method;
 import publishsubscribe.Channels;
 import publishsubscribe.Event;
@@ -33,13 +33,13 @@ public class RedirectionHandler {
                               final EasyHttpResponse<?> response) throws
             UnsafeRedirectionException, RedirectionCanNotBeHandledException {
         int responseStatus = response.getStatus();
-        final Header locationHeader = response.getResponseHeaders()
+        final HttpHeader locationHttpHeader = response.getResponseHeaders()
                 .stream()
                 .filter(header -> header.getKey().equalsIgnoreCase("location"))
                 .findFirst()
                 .orElseThrow(() -> new RedirectWithoutLocationException("Redirection occurred but there is no Location"));
 
-        final String resourceLocation = locationHeader.getValue();
+        final String resourceLocation = locationHttpHeader.getValue();
         final boolean isLocationURLAbsolute = URI.create(resourceLocation).isAbsolute();
 
         try{
@@ -87,7 +87,7 @@ public class RedirectionHandler {
         final int statusCode = response.getStatus();
         final Method method = request.getMethod();
 
-        final Header locationHeader = response.getResponseHeaders()
+        final HttpHeader locationHttpHeader = response.getResponseHeaders()
                 .stream()
                 .filter(header -> header.getKey().equalsIgnoreCase("location"))
                 .findFirst()
@@ -95,7 +95,7 @@ public class RedirectionHandler {
 
         return switch (statusCode){
             case HttpURLConnection.HTTP_MOVED_PERM, 307,
-                 HttpURLConnection.HTTP_MOVED_TEMP -> isRedirectable(method) && locationHeader!=null;
+                 HttpURLConnection.HTTP_MOVED_TEMP -> isRedirectable(method) && locationHttpHeader !=null;
             case HttpURLConnection.HTTP_SEE_OTHER -> isRedirectable(method) && method.equals(Method.GET);
             default -> false;
         };

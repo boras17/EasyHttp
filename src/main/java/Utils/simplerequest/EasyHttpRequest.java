@@ -1,6 +1,6 @@
 package Utils.simplerequest;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import HttpEnums.Method;
 import Utils.simplerequest.jsonsender.BodyProvider;
 
@@ -14,14 +14,14 @@ public class EasyHttpRequest {
     private URL url;
     private final Method method;
     private final BodyProvider<?> body;
-    private final List<Header> headers;
+    private final List<HttpHeader> httpHeaders;
     private Proxy proxy;
 
-    public EasyHttpRequest(URL url, Method method, BodyProvider<?> body, List<Header> headers, Proxy proxy) {
+    public EasyHttpRequest(URL url, Method method, BodyProvider<?> body, List<HttpHeader> httpHeaders, Proxy proxy) {
         this.url = url;
         this.method = method;
         this.body = body;
-        this.headers = headers;
+        this.httpHeaders = httpHeaders;
         this.proxy = proxy;
     }
 
@@ -29,7 +29,7 @@ public class EasyHttpRequest {
         private URL url;
         private Method method;
         private BodyProvider<?> body;
-        private final List<Header> headers = new ArrayList<>();
+        private final List<HttpHeader> httpHeaders = new ArrayList<>();
         private Proxy proxy;
 
         public EasyHttpRequestBuilder setUri(URL url) {
@@ -37,13 +37,13 @@ public class EasyHttpRequest {
             return this;
         }
 
-        public EasyHttpRequestBuilder addHeader(Header header){
-            this.headers.add(header);
+        public EasyHttpRequestBuilder addHeader(HttpHeader httpHeader){
+            this.httpHeaders.add(httpHeader);
             return this;
         }
 
-        public EasyHttpRequestBuilder addHeaders(List<Header> headers){
-            this.headers.addAll(headers);
+        public EasyHttpRequestBuilder addHeaders(List<HttpHeader> httpHeaders){
+            this.httpHeaders.addAll(httpHeaders);
             return this;
         }
 
@@ -64,7 +64,7 @@ public class EasyHttpRequest {
         }
 
         public EasyHttpRequest build(){
-            return new EasyHttpRequest(url, method, body, headers, proxy);
+            return new EasyHttpRequest(url, method, body, httpHeaders, proxy);
         }
     }
 
@@ -72,8 +72,8 @@ public class EasyHttpRequest {
         return url;
     }
 
-    public List<Header> getHeaders() {
-        return headers;
+    public List<HttpHeader> getHeaders() {
+        return httpHeaders;
     }
 
     public Method getMethod() {

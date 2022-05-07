@@ -1,6 +1,6 @@
 package cookieextractortests;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -28,7 +28,7 @@ public class CookieExtractorTest {
         EasyHttpResponse<String> mockedResponse = new EasyHttpResponse<>();
         mockedResponse.setStatus(200);
 
-        Header cookie = new Header();
+        HttpHeader cookie = new HttpHeader();
         cookie.setKey("Set-Cookie");
         cookie.setValue("id=a3fWa; Expires=Wed, 21 Oct 2015 07:28:00 GMT");
 
@@ -68,11 +68,11 @@ public class CookieExtractorTest {
     public void givenCookieHeaderWithHttpOnlyAndSecuredFlagShouldReturnParsedCookieObject() {
         EasyHttpResponse<Void> responseWitCookie = new EasyHttpResponse<>();
 
-        Header cookieHeader = new Header();
-        cookieHeader.setKey("Set-Cookie");
-        cookieHeader.setValue("GAPS=1:4gDZvK5g:o5fM52umoiFpi0So;HttpOnly;Secure");
+        HttpHeader cookieHttpHeader = new HttpHeader();
+        cookieHttpHeader.setKey("Set-Cookie");
+        cookieHttpHeader.setValue("GAPS=1:4gDZvK5g:o5fM52umoiFpi0So;HttpOnly;Secure");
 
-        responseWitCookie.setResponseHeaders(List.of(cookieHeader));
+        responseWitCookie.setResponseHeaders(List.of(cookieHttpHeader));
 
         this.cookieExtractor.setCookies(responseWitCookie);
 
@@ -90,12 +90,12 @@ public class CookieExtractorTest {
 
     @Test
     public void givenCookieWithDomainPathShouldReturnParsedCookieObject() {
-        Header cookieHeader = new Header();
-        cookieHeader.setKey("Set-Cookie");
-        cookieHeader.setValue("qwerty=219ffwef9w0f; Domain=somecompany.co.uk");
+        HttpHeader cookieHttpHeader = new HttpHeader();
+        cookieHttpHeader.setKey("Set-Cookie");
+        cookieHttpHeader.setValue("qwerty=219ffwef9w0f; Domain=somecompany.co.uk");
 
         EasyHttpResponse<Void> response = new EasyHttpResponse<>();
-        response.setResponseHeaders(List.of(cookieHeader));
+        response.setResponseHeaders(List.of(cookieHttpHeader));
 
         this.cookieExtractor.setCookies(response);
 
@@ -107,12 +107,12 @@ public class CookieExtractorTest {
 
     @Test
     public void givenCookieWithMaxAgeShouldReturnParsedCookie() {
-        Header cookieHeader = new Header();
-        cookieHeader.setKey("Set-Cookie");
-        cookieHeader.setValue("id=a3fWa; Max-Age=2592000");
+        HttpHeader cookieHttpHeader = new HttpHeader();
+        cookieHttpHeader.setKey("Set-Cookie");
+        cookieHttpHeader.setValue("id=a3fWa; Max-Age=2592000");
 
         EasyHttpResponse<Void> response = new EasyHttpResponse<>();
-        response.setResponseHeaders(List.of(cookieHeader));
+        response.setResponseHeaders(List.of(cookieHttpHeader));
 
         this.cookieExtractor.setCookies(response);
 

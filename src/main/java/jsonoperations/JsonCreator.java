@@ -100,11 +100,9 @@ public class JsonCreator {
                 } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
-            } else if (fieldType.equals(String.class) || fieldType.equals(Character.class)) {
+            } else if (ReflectionUtils.checkIfCharOrStr(fieldType)) {
                 serializeToText(fieldValue);
-            } else if (fieldType.equals(Integer.class) || fieldType.equals(float.class) ||
-                    fieldType.equals(Double.class) || fieldType.equals(double.class)
-                    ||fieldType.equals(Float.class) || fieldType.equals(int.class)) {
+            } else if (ReflectionUtils.checkIfNumeric(fieldType)) {
                 serializeToNums(fieldValue);
             } else if (isJavaCollection(fieldType)) {
                 Object[] objects = ((Collection<Object>) field.get(object)).toArray();
@@ -112,7 +110,7 @@ public class JsonCreator {
             } else if (fieldType.isArray()) {
                 Object[] arr = (Object[]) field.get(object);
                 serializeToArray(arr);
-            } else if (fieldType.equals(Boolean.class) || fieldType.equals(boolean.class)) {
+            } else if (ReflectionUtils.checkIfBoolean(fieldType)) {
                 json.append(fieldValue);
             } else {
                 generateJson(field.get(object));

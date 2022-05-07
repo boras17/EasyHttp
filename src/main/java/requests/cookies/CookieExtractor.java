@@ -1,9 +1,8 @@
 package requests.cookies;
 
-import Headers.Header;
+import Headers.HttpHeader;
 import requests.easyresponse.EasyHttpResponse;
 
-import java.net.HttpURLConnection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -22,8 +21,8 @@ public class CookieExtractor {
     }
 
     public void setCookies(EasyHttpResponse<?> response) {
-        List<Header> responseHeaders = response.getResponseHeaders();
-        this.cookies = responseHeaders
+        List<HttpHeader> responseHttpHeaders = response.getResponseHeaders();
+        this.cookies = responseHttpHeaders
                 .stream()
                 .filter(x -> Optional.ofNullable(x.getKey()).orElse("").equals("Set-Cookie"))
                 .map((cookie) -> {

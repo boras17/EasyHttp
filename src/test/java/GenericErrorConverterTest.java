@@ -1,13 +1,11 @@
-import Headers.Header;
+import Headers.HttpHeader;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.junit.Test;
 
-import org.mockito.Mockito;
 import redirect.ErrorType;
 import redirect.GenericError;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class GenericErrorConverterTest {
@@ -16,7 +14,7 @@ public class GenericErrorConverterTest {
     @Test
     public void givenGenericErrorShouldReturnConvertedIntoStringError() {
         GenericError genericError = new GenericError(100,
-                List.of(new Header("some header", "some value"), new Header("second header", "second ehader value")),
+                List.of(new HttpHeader("some header", "some value"), new HttpHeader("second header", "second ehader value")),
                 "SomeExceptionMessage",
                 ErrorType.REDIRECT);
         String converted = GenericError.formattedGenericError(genericError);
