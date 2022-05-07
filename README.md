@@ -27,23 +27,23 @@ List<Cookie> cookies = cookieExtractor.getCookies();
 ```
 Now let me explain you how to use 'Authenticator'. We have three options. First one is basic auth:
 ```java
-        AuthenticationProvider authenticationProvider
-                = new BasicAuthenticationProvider("username","password");
-        
-        client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
-                .setAuthenticationProvider(authenticationProvider)
-                .build();
+AuthenticationProvider authenticationProvider
+        = new BasicAuthenticationProvider("username","password");
+
+client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
+        .setAuthenticationProvider(authenticationProvider)
+        .build();
 ```
 I thing it is very clear. There is AuthenticationProvider which is asbtract class and BasicAuthenticationProvider class which inherits from AuthenticationProvider. In AuthenticationProvider abstract class we have two parameters constructors which accepts two paramters. First parameter is username and second one is password.
 
 Ok when we have configured Client the next step is creating requests. If you want create new request you can use EasyHttpRequest class and her bulder just like below:
 ```java
-        EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
-                .setUri(new URL("someurl"))
-                .setMethod(Method.POST)
-                .setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("178.212.54.137",8080)))
-                .addHeader(new Header("name","value"))
-                .build();
+EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
+        .setUri(new URL("someurl"))
+        .setMethod(Method.POST)
+        .setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("178.212.54.137",8080)))
+        .addHeader(new Header("name","value"))
+        .build();
 ```
 or create interface with interface like in Feign Client:
 Declared Client example:
@@ -59,15 +59,15 @@ String user = userCrud.getUserById(1);
 ```
 the builder make it possible to set Proxy, URL, Headers (yes you can invoke add header a lot of times or pass List of Header's), Http method which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
 ```java
-    public class Person{
-        String name;
-        String surname;
+public class Person{
+    String name;
+    String surname;
 
-        public Person(String name, String surname){
-            this.name = name;
-            this.surname = surname;
-        }
+    public Person(String name, String surname){
+        this.name = name;
+        this.surname = surname;
     }
+}
 ```
 now let's create instance of this class:
 ```java
