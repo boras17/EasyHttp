@@ -36,23 +36,7 @@ Now let me explain you how to use 'Authenticator'. We have three options. First 
                 .build();
 ```
 I thing it is very clear. There is AuthenticationProvider which is asbtract class and BasicAuthenticationProvider class which inherits from AuthenticationProvider. In AuthenticationProvider abstract class we have two parameters constructors which accepts two paramters. First parameter is username and second one is password.
-Let's move on to Digest Authentication support for this purpose you can use DigestAuthenticaionProvider which have constructor with three parameters. First and second parameter wroks as same as in BasicAuthenticationProvider but the third parameter is pointer for instance of DigestConfigurationClass which provide extra data for this type of authentication.
-```java
-    DigestConfiguration digestConfiguration = new DigestConfiguration.DigestConfigBuilder()
-        .setQop(qop)
-        .setNonce(none)
-        .setMethod(method) 
-        .setRealm(realm)
-        .setHashAlgorithm(alg)
-        .setCnonce(cnonce)
-        .build();
 
-    AuthenticationProvider authenticationProvider = new DigestAuthenticationProvider("username","password", digestConfiguration);
-
-    client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
-        .setAuthenticationProvider(authenticationProvider)
-        .build();
-```
 Ok when we have configured Client the next step is creating requests. If you want create new request you can use EasyHttpRequest class and her bulder just like below:
 ```java
         EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
@@ -61,6 +45,18 @@ Ok when we have configured Client the next step is creating requests. If you wan
                 .setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("178.212.54.137",8080)))
                 .addHeader(new Header("name","value"))
                 .build();
+```
+or create interface with interface like in Feign Client:
+Declared Client example:
+```java
+interface UserCrud{
+    @RequestMethod(method = Method.GET)
+    @Path("https://jsonplaceholder.typicode.com/todos/{id}")
+    String getUserById(@PathVariable("id") int id);
+}
+
+UserCrud userCrud = new DeclarativeClientParser<>(UserCrud.class).getImplementation();
+String user = userCrud.getUserById(1);
 ```
 the builder make it possible to set Proxy, URL, Headers (yes you can invoke add header a lot of times or pass List of Header's), Http method which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
 ```java
@@ -145,17 +141,7 @@ sendAsync method sending request asynchronously and returns CompleteableFuture:
 ```java
 CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request, new StringBodyHandler());
 ```
-Declared Client example:
-```java
-public interface UserCrud {
-    @Headers(headers = {@Header(key = "content-type", value = "application/json")})
-    @PathAndMethod(method = "GET", path = "http://localhost:2323/hello/world")
-    @Body("some json")
-    List<String> data(@Method HttpEnums.Method method,
-                      @RequestParam(name="sort") String sorting,
-                      @Multipart MultipartBody multipartBody);
-}
-```
+
 Now you can easly create an proxy in order to make declared in UserCrud interface requests via DeclarativeClientParser:
 ```java
 UserCrud userCrud = new DeclarativeClientParser<>(UserCrud.class).getImplementation();
