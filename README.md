@@ -1,4 +1,4 @@
-# EasyHttp - It was created in order to boost my java and http skills
+# EasyHttp - It was created in order to boost my skills in java mechanizms and http mechanisms
 How to use?
 Firstly you must create new instance of EasyHtpp. You can do this with EasyHttpBuilder. Example how to create new instance with builder:
 ```java 
