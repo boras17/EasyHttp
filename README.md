@@ -1,4 +1,4 @@
-# client.EasyHttp
+# client.EasyHttp - It was created in order boost my java and http skills
 How to use?
 Firstly you must create new instance of EasyHtpp. You can do this with EasyHttpBuilder. Example how to create new instance with builder:
 ```java 
