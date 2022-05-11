@@ -2,7 +2,7 @@ package client.refractorredclient.responsestatushandling;
 
 import client.refractorredclient.connectiondata.ConnectionData;
 import client.refractorredclient.EasyHttpClient;
-import redirect.RedirectionHandler;
+import redirect.AbstractRedirectionHandler;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.UnsafeRedirectionException;
 import requests.EasyHttpRequest;
@@ -33,10 +33,10 @@ public abstract class ResponseStatusHandler {
     }
 
     public void defaultRedirectionLogic(EasyHttpRequest request, EasyHttpClient client, EasyHttpResponse response) throws MalformedURLException, UnsafeRedirectionException, RedirectionCanNotBeHandledException {
-        Optional<RedirectionHandler> redirectionHandlerOptional = client.getRedirectionHandler();
+        Optional<AbstractRedirectionHandler> redirectionHandlerOptional = client.getRedirectionHandler();
         boolean redirectionHandlerPresent = redirectionHandlerOptional.isPresent();
         if(redirectionHandlerPresent) {
-            RedirectionHandler redirectionHandler = redirectionHandlerOptional.get();
+            AbstractRedirectionHandler redirectionHandler = redirectionHandlerOptional.get();
             redirectionHandler.modifyRequest(request, response);
         }
     }

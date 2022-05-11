@@ -9,6 +9,7 @@ import client.refractorredclient.clients.interceptingmodel.ResponseInterceptors;
 import client.refractorredclient.responsestatushandling.ResponseStatusHandler;
 import cookies.CookieExtractor;
 import intercepting.EasyRequestInterceptor;
+import redirect.RedirectionHandler;
 import requests.EasyHttpRequest;
 import requests.EasyHttpResponse;
 import requests.bodyhandlers.AbstractBodyHandler;
@@ -23,8 +24,9 @@ public class InterceptableClient extends DefaultClient {
                                AuthenticationProvider authenticationProvider,
                                ConnectionInitializr connectionInitializr,
                                Duration connectionTimeout,
-                               ResponseStatusHandler responseStatusHandler) {
-        super(cookieExtractor, authenticationProvider, connectionInitializr, connectionTimeout, responseStatusHandler);
+                               ResponseStatusHandler responseStatusHandler,
+                               RedirectionHandler redirectionHandler) {
+        super(cookieExtractor, authenticationProvider, connectionInitializr, connectionTimeout, responseStatusHandler, redirectionHandler);
     }
 
     public <T> EasyHttpResponse<T> sendAndIntercept(EasyHttpRequest request, AbstractBodyHandler<T> bodyHandler,

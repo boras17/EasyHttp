@@ -11,7 +11,8 @@ public class InterceptableClientBuilder extends AbstractClientBuilder {
                 super.getAuthenticationProvider(),
                 super.getConnectionInitializr() == null ? new ConnectionInitializr() : super.getConnectionInitializr(),
                 super.getConnectionTimeout(),
-                super.getResponseStatusHandler());
+                super.getResponseStatusHandler(), super
+                .getAbstractRedirectionHandler());
         interceptableClient.setResponseStatusHandler(new DefaultClientResponseStatusHandler(interceptableClient));
         return interceptableClient;
     }

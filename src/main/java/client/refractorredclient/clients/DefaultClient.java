@@ -8,6 +8,7 @@ import client.refractorredclient.AbstractClientBuilder;
 import client.refractorredclient.EasyHttpClient;
 import client.refractorredclient.responsestatushandling.ResponseStatusHandler;
 import cookies.CookieExtractor;
+import redirect.AbstractRedirectionHandler;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.UnsafeRedirectionException;
 import requests.EasyHttpRequest;
@@ -62,14 +63,16 @@ public class DefaultClient extends EasyHttpClient {
                          AuthenticationProvider authenticationProvider,
                          ConnectionInitializr connectionInitializr,
                          Duration connectionTimeout,
-                         ResponseStatusHandler responseStatusHandler) {
-        super(cookieExtractor, authenticationProvider, connectionInitializr, connectionTimeout, responseStatusHandler);
+                         ResponseStatusHandler responseStatusHandler,
+                         AbstractRedirectionHandler abstractRedirectionHandler) {
+        super(cookieExtractor, authenticationProvider, connectionInitializr, connectionTimeout, responseStatusHandler, abstractRedirectionHandler);
     }
     public DefaultClient(CookieExtractor cookieExtractor,
                          AuthenticationProvider authenticationProvider,
                          ConnectionInitializr connectionInitializr,
-                         Duration connectionTimeout) {
-        super(cookieExtractor, authenticationProvider, connectionInitializr, connectionTimeout);
+                         Duration connectionTimeout,
+                         AbstractRedirectionHandler abstractRedirectionHandler) {
+        super(cookieExtractor, authenticationProvider, connectionInitializr, connectionTimeout, abstractRedirectionHandler);
     }
 
     public static AbstractClientBuilder newBuilder() {

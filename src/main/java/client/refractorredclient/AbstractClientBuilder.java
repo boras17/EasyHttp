@@ -5,6 +5,8 @@ import client.ConnectionInitializr;
 import client.refractorredclient.clients.DefaultClient;
 import client.refractorredclient.responsestatushandling.ResponseStatusHandler;
 import cookies.CookieExtractor;
+import redirect.AbstractRedirectionHandler;
+import redirect.RedirectionHandler;
 
 import java.time.Duration;
 
@@ -14,6 +16,7 @@ public class AbstractClientBuilder {
     private ConnectionInitializr connectionInitializr;
     private Duration connectionTimeout;
     private ResponseStatusHandler responseStatusHandler;
+    private RedirectionHandler abstractRedirectionHandler;
 
     public AbstractClientBuilder cookieExtractor(CookieExtractor cookieExtractor) {
         this.cookieExtractor = cookieExtractor;
@@ -40,12 +43,17 @@ public class AbstractClientBuilder {
         return this;
     }
 
+    public AbstractClientBuilder clientBuilder(RedirectionHandler abstractRedirectionHandler){
+        this.abstractRedirectionHandler = abstractRedirectionHandler;
+        return this;
+    }
+
     protected EasyHttpClient build() {
         return new DefaultClient(this.cookieExtractor,
                 this.authenticationProvider,
                 this.connectionInitializr == null ? new ConnectionInitializr() : this.connectionInitializr,
                 this.connectionTimeout,
-                this.responseStatusHandler);
+                this.responseStatusHandler, abstractRedirectionHandler);
     }
 
     public CookieExtractor getCookieExtractor() {
@@ -66,5 +74,9 @@ public class AbstractClientBuilder {
 
     public ResponseStatusHandler getResponseStatusHandler() {
         return responseStatusHandler;
+    }
+
+    public RedirectionHandler getAbstractRedirectionHandler() {
+        return abstractRedirectionHandler;
     }
 }

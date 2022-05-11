@@ -9,13 +9,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class DigestResponse {
-    private final HashAlgorithms hashAlgorithm;//
+    private final HashAlgorithms hashAlgorithm;
     private final String nonce;
-    private final String realm; //
+    private final String realm;
     private final Set<Qop> qop;
     private int nonceCount = 1;
     private final String method;
-    private final String uri; //
+    private final String uri;
     private final String cnonce;
     private EasyHttpRequest request;
     private final boolean stale;

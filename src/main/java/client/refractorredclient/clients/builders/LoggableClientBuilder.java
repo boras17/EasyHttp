@@ -3,7 +3,7 @@ package client.refractorredclient.clients.builders;
 import client.ConnectionInitializr;
 import client.refractorredclient.clients.LoggableClient;
 import client.refractorredclient.clients.loggingmodel.ClientSubscribers;
-import client.refractorredclient.responsestatushandling.LoggableClientResponseStatusHandler;
+import redirect.LoggableRedirectionHandlerDecoreator;
 
 public class LoggableClientBuilder extends DefaultClientBuilder {
     private ClientSubscribers clientSubscribers;
@@ -12,11 +12,11 @@ public class LoggableClientBuilder extends DefaultClientBuilder {
         this.clientSubscribers = clientSubscribers;
         return this;
     }
-
-    public LoggableClient buildNew() {
+    @Override
+    public LoggableClient build() {
         return new LoggableClient(super.getCookieExtractor(),
                 super.getAuthenticationProvider(),
                 new ConnectionInitializr(),
-                super.getConnectionTimeout(), this.clientSubscribers);
+                super.getConnectionTimeout(), this.clientSubscribers,new LoggableRedirectionHandlerDecoreator(super.getAbstractRedirectionHandler()));
     }
 }

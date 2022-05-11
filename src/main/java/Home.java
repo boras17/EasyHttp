@@ -1,4 +1,3 @@
-import client.ConnectionInitializr;
 import client.refractorredclient.clients.LoggableClient;
 import client.refractorredclient.clients.loggingmodel.ClientSubscribers;
 import httpenums.HttpMethod;
@@ -25,7 +24,7 @@ public class Home {
 
         LoggableClient client = LoggableClient.newBuilder()
                 .subscribers(clientSubscribers)
-                .buildNew();
+                .build();
 
         EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
                 .setMethod(HttpMethod.GET)

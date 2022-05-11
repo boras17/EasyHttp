@@ -11,7 +11,7 @@ import exceptions.RequestObjectRequiredException;
 import exceptions.ResponseHandlerRequired;
 import headers.HttpHeader;
 import httpenums.HttpStatus;
-import redirect.RedirectionHandler;
+import redirect.AbstractRedirectionHandler;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.UnsafeRedirectionException;
 import requests.EasyHttpRequest;
@@ -37,7 +37,7 @@ public abstract class EasyHttpClient {
     private AuthenticationProvider authenticationProvider;
     private ConnectionInitializr connectionInitializr;
     private Duration connectionTimeout;
-    private RedirectionHandler redirectionHandler;
+    private AbstractRedirectionHandler redirectionHandler;
     private ResponseStatusHandler responseStatusHandler;
 
     public abstract <T> EasyHttpResponse<T> send(EasyHttpRequest request, AbstractBodyHandler<T> bodyHandler);
@@ -127,21 +127,25 @@ public abstract class EasyHttpClient {
                           AuthenticationProvider authenticationProvider,
                           ConnectionInitializr connectionInitializr,
                           Duration connectionTimeout,
-                          ResponseStatusHandler responseStatusHandler) {
+                          ResponseStatusHandler responseStatusHandler,
+                          AbstractRedirectionHandler abstractRedirectionHandler) {
         this.cookieExtractor = cookieExtractor;
         this.authenticationProvider = authenticationProvider;
         this.connectionInitializr = connectionInitializr;
         this.connectionTimeout = connectionTimeout;
         this.responseStatusHandler = responseStatusHandler;
+        this.redirectionHandler = abstractRedirectionHandler;
     }
     public EasyHttpClient(CookieExtractor cookieExtractor,
                           AuthenticationProvider authenticationProvider,
                           ConnectionInitializr connectionInitializr,
-                          Duration connectionTimeout) {
+                          Duration connectionTimeout,
+                          AbstractRedirectionHandler abstractRedirectionHandler) {
         this.cookieExtractor = cookieExtractor;
         this.authenticationProvider = authenticationProvider;
         this.connectionInitializr = connectionInitializr;
         this.connectionTimeout = connectionTimeout;
+        this.redirectionHandler = abstractRedirectionHandler;
     }
 
     public Optional<CookieExtractor> getCookieExtractor() {
@@ -176,11 +180,11 @@ public abstract class EasyHttpClient {
         this.connectionTimeout = connectionTimeout;
     }
 
-    public Optional<RedirectionHandler> getRedirectionHandler() {
+    public Optional<AbstractRedirectionHandler> getRedirectionHandler() {
         return Optional.ofNullable(this.redirectionHandler);
     }
 
-    public void setRedirectionHandler(RedirectionHandler redirectionHandler) {
+    public void setRedirectionHandler(AbstractRedirectionHandler redirectionHandler) {
         this.redirectionHandler = redirectionHandler;
     }
 

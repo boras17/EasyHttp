@@ -7,6 +7,7 @@ import client.refractorredclient.clients.loggingmodel.ClientSubscribers;
 import client.refractorredclient.responsestatushandling.LoggableClientResponseStatusHandler;
 import cookies.CookieExtractor;
 import publishsubscribe.Operation;
+import redirect.AbstractRedirectionHandler;
 import requests.EasyHttpRequest;
 import requests.EasyHttpResponse;
 import requests.bodyhandlers.AbstractBodyHandler;
@@ -22,8 +23,8 @@ public class LoggableClient extends DefaultClient {
     public LoggableClient(CookieExtractor cookieExtractor,
                           AuthenticationProvider authenticationProvider,
                           ConnectionInitializr connectionInitializr,
-                          Duration connectionTimeout, ClientSubscribers subscribers) {
-        super(cookieExtractor, authenticationProvider, connectionInitializr, connectionTimeout);
+                          Duration connectionTimeout, ClientSubscribers subscribers, AbstractRedirectionHandler abstractRedirectionHandler) {
+        super(cookieExtractor, authenticationProvider, connectionInitializr, connectionTimeout, abstractRedirectionHandler);
         this.operation = new Operation();
         this.subscribers = subscribers;
         this.subscribers.initOperation(this.operation);
