@@ -48,14 +48,30 @@ EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
 or create interface with interface like in Feign Client:
 Declared Client example:
 ```java
-interface UserCrud{
-    @RequestMethod(method = Method.GET)
-    @Path("https://jsonplaceholder.typicode.com/todos/{id}")
-    String getUserById(@PathVariable("id") int id);
-}
+interface Crud{
+        @Get("https://jsonplaceholder.typicode.com/todos/{id}")
+        String getToDoJson(@PathVariable("id") int id);
+        
+        @Get("http://localhost:4545/users")
+        @Headers(headers = {@Header(key = "accept", value = "application/json")})
+        @RequestProxy(proxyServer = @ProxyHostAndPort(host = "localhost", port = 2323), type = Proxy.Type.HTTP)
+        String getJsonResponse(@RequestParam("page") int page);
 
-UserCrud userCrud = new DeclarativeClientParser<>(UserCrud.class).getImplementation();
-String user = userCrud.getUserById(1);
+        @Post("http://localhost:4545/users/{userId}/avatar")
+        void uploadAvatar(@Multipart MultipartBody multipartBody);
+
+        @Post("http://localhost:4545/users")
+        void addNewUser(@RequestJsonBody User newUser);
+
+        @Post("http://localhost:4545/users")
+        void addNewUserViaBodyProvider(@RequestBodyProvider JsonBodyProvider userJson);
+    }
+
+Crud crud = new DeclarativeClientParser<>(Crud.class, client).getImplementation();
+```
+or you can use DefaultClient:
+```java
+Crud crud = new DeclarativeClientParser<>(Crud.class).getImplementation();
 ```
 the builder make it possible to set Proxy, URL, Headers (yes you can invoke add header a lot of times or pass List of Header's), Http method which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
 ```java
