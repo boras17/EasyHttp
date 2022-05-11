@@ -1,6 +1,6 @@
 package client;
 
-import Utils.simplerequest.EasyHttpRequest;
+import requests.EasyHttpRequest;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -14,20 +14,25 @@ public class ConnectionInitializr {
 
     }
 
-    public HttpURLConnection openConnection(EasyHttpRequest request) throws IOException {
+    public HttpURLConnection openConnection(EasyHttpRequest request) {
         HttpURLConnection connection = null;
         Optional<Proxy> proxyOptional = request.getProxy();
         URL url = request.getUrl();
-        if(proxyOptional.isPresent()) {
-            connection = (HttpURLConnection)url.openConnection(proxyOptional.get());
-        }else{
-            connection = (HttpURLConnection)url.openConnection();
+        try{
+            if(proxyOptional.isPresent()) {
+                connection = (HttpURLConnection)url.openConnection(proxyOptional.get());
+            }else{
+                connection = (HttpURLConnection)url.openConnection();
+            }
+            connection.setRequestMethod(request.getMethod().name());
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setUseCaches(false);
+            return connection;
+        }catch (IOException e){
+            throw new RuntimeException(e);
         }
-        connection.setRequestMethod(request.getMethod().name());
-        connection.setDoOutput(true);
-        connection.setDoInput(true);
-        connection.setUseCaches(false);
-        return connection;
+
     }
 
 }

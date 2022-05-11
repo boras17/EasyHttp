@@ -1,27 +1,27 @@
 package client;
 
-import Headers.HttpHeader;
-import HttpEnums.HttpStatus;
-import Utils.simplerequest.auth.AuthenticationProvider;
+import headers.HttpHeader;
+import httpenums.HttpStatus;
+import auth.AuthenticationProvider;
 import exceptions.RequestObjectRequiredException;
 import exceptions.ResponseHandlerRequired;
 import intercepting.EasyRequestInterceptor;
 import intercepting.EasyResponseInterceptor;
 import intercepting.Interceptor;
-import publishsubscribe.Channels;
-import publishsubscribe.Event;
-import publishsubscribe.Operation;
-import publishsubscribe.communcates.ErrorCommunicate;
+import publishsubscribe.*;
+import publishsubscribe.communcates.notifications.GenericHttpError;
+import publishsubscribe.communcates.notifications.GenericHttpNotification;
+import publishsubscribe.constants.Channels;
 import publishsubscribe.errorsubscriberimpl.Subscriber;
 import redirect.*;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.RedirectionUnhandled;
 import redirect.redirectexception.UnsafeRedirectionException;
 import requests.bodyhandlers.AbstractBodyHandler;
-import requests.cookies.CookieExtractor;
-import requests.easyresponse.EasyHttpResponse;
-import Utils.simplerequest.EasyHttpRequest;
-import Utils.simplerequest.jsonsender.BodyProvider;
+import cookies.CookieExtractor;
+import requests.EasyHttpResponse;
+import requests.EasyHttpRequest;
+import requests.bodyproviders.BodyProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
+/*
 public class EasyHttp {
     private String userAgent;
     private CookieExtractor cookieExtractor;
@@ -114,7 +114,7 @@ public class EasyHttp {
         else if(responseStatus >= 400 && responseStatus < 500){
             InputStream errorStream = connection.getErrorStream();
             bodyHandler.setInputStream(errorStream);
-            GenericError genericError = new GenericError(responseStatus,
+            GenericHttpError genericHttpError = new GenericHttpError(responseStatus,
                     httpHeaders,
                     "Server responded with client error status: " +responseStatus,
                     ErrorType.CLIENT,
@@ -122,17 +122,17 @@ public class EasyHttp {
             boolean userSubscribedClientErrors = this.getSubscribedChannels()
                     .containsKey(Channels.CLIENT_ERROR_CHANNEL);
             if(userSubscribedClientErrors){
-                this.operation.publish(Channels.CLIENT_ERROR_CHANNEL, new ErrorCommunicate(genericError));
+                this.operation.publish(Channels.CLIENT_ERROR_CHANNEL, new ErrorCommunicate(genericHttpError));
             }
         }else if(responseStatus >= 500){
             InputStream errorStream = connection.getErrorStream();
             bodyHandler.setInputStream(errorStream);
-            GenericError genericError = new GenericError(responseStatus,
+            GenericHttpError genericHttpError = new GenericHttpError(responseStatus,
                     httpHeaders,
                     "Server responded with server error status: " +responseStatus,
                     ErrorType.SERVER,
                     new String(errorStream.readAllBytes()));
-            this.operation.publish(Channels.SERVER_ERROR_CHANNEL, new ErrorCommunicate(genericError));
+            this.operation.publish(Channels.SERVER_ERROR_CHANNEL, new ErrorCommunicate(genericHttpError));
         }
 
         EasyHttpResponse<T> _response = bodyHandler.getCalculatedResponse();
@@ -146,7 +146,7 @@ public class EasyHttp {
                         });
         if(responseStatus >= 300 && responseStatus < 400){
 
-            this.operation.publish(Channels.REDIRECT_NOTIFICATION, new GenericNotification(LocalDateTime.now(),
+            this.operation.publish(Channels.REDIRECT_NOTIFICATION, new GenericHttpNotification(LocalDateTime.now(),
                     "An redirection occured",
                     _response.getResponseHeaders(),
                     request.getUrl().toString(), NotificationTypes.REDIRECT));
@@ -154,18 +154,18 @@ public class EasyHttp {
             RedirectionHandler redirectionHandler
                     = this.getRedirectionHandler()
                     .orElseThrow(() -> {
-                        GenericError genericError = new GenericError(responseStatus,
+                        GenericHttpError genericHttpError = new GenericHttpError(responseStatus,
                                 httpHeaders, "Server respond with redirect status: " + responseStatus + "and you did not provide redirection handler",
                                 ErrorType.REDIRECT,
                                 null);
-                        this.operation.publish(Channels.REDIRECT_ERROR_CHANNEL, genericError);
+                        this.operation.publish(Channels.REDIRECT_ERROR_CHANNEL, genericHttpError);
                         try{
-                            genericError.setServerMsg(new String(connection.getErrorStream().readAllBytes()));
+                            genericHttpError.setServerMsg(new String(connection.getErrorStream().readAllBytes()));
                         }catch (java.io.IOException e){
                             e.printStackTrace();
                         }
 
-                        return new RedirectionUnhandled(genericError);
+                        return new RedirectionUnhandled(genericHttpError);
                     });
             try{
                 redirectionHandler.modifyRequest(request, _response);
@@ -296,3 +296,4 @@ public class EasyHttp {
         this.operation = new Operation();
     }
 }
+*/

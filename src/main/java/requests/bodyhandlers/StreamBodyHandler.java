@@ -1,6 +1,6 @@
 package requests.bodyhandlers;
 
-import requests.easyresponse.EasyHttpResponse;
+import requests.EasyHttpResponse;
 
 import java.io.IOException;
 import java.io.InputStream;

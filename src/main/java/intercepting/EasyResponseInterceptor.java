@@ -1,6 +1,6 @@
 package intercepting;
 
-import requests.easyresponse.EasyHttpResponse;
+import requests.EasyHttpResponse;
 
 public interface EasyResponseInterceptor<T> extends Interceptor<EasyHttpResponse<T>>{
 }

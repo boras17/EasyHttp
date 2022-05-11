@@ -1,7 +1,7 @@
 package intercepting.patternintercepting;
 
 import intercepting.Interceptor;
-import Utils.simplerequest.EasyHttpRequest;
+import requests.EasyHttpRequest;
 
 import java.net.URL;
 

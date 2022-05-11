@@ -1,20 +1,18 @@
 package requests.easyrequest;
 
-import Parts.Part;
-import Parts.PartType;
+import parts.Part;
+import parts.PartType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultipartBody extends EasyHttpRequest {
+public class MultipartBody {
     private final String bodySeparator = "\r\n";
     private final String boundary = "myboundary";
     private PartType partType;
 
     private List<Part> parts = new ArrayList<>();
     private String encoding;
-
-    public MultipartBody() {}
 
     public static class MultiPartBodyBuilder{
 

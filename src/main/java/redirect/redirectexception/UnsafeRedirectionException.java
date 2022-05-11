@@ -1,14 +1,14 @@
 package redirect.redirectexception;
 
-import redirect.GenericError;
+import publishsubscribe.communcates.notifications.GenericHttpError;
 
 public class UnsafeRedirectionException extends Exception{
-    private GenericError genericError;
-    public UnsafeRedirectionException(GenericError genericError) {
-        super(genericError.getMsg());
+    private GenericHttpError genericHttpError;
+    public UnsafeRedirectionException(GenericHttpError genericHttpError) {
+        super(genericHttpError.getMsg());
     }
 
-    public GenericError getGenericError() {
-        return this.genericError;
+    public GenericHttpError getGenericError() {
+        return this.genericHttpError;
     }
 }

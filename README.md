@@ -41,7 +41,7 @@ Let's move on to Digest Authentication support for this purpose you can use Dige
     DigestConfiguration digestConfiguration = new DigestConfiguration.DigestConfigBuilder()
         .setQop(qop)
         .setNonce(none)
-        .setMethod(method) 
+        .setMethod(httpMethod) 
         .setRealm(realm)
         .setHashAlgorithm(alg)
         .setCnonce(cnonce)
@@ -62,7 +62,7 @@ Ok when we have configured Client the next step is creating requests. If you wan
                 .addHeader(new Header("name","value"))
                 .build();
 ```
-the builder make it possible to set Proxy, URL, Headers (yes you can invoke add header a lot of times or pass List of Header's), Http method which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
+the builder make it possible to set Proxy, URL, headers (yes you can invoke add header a lot of times or pass List of Header's), Http httpMethod which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
 ```java
     public class Person{
         String name;
@@ -114,7 +114,7 @@ If you want you can send text with simple TextBodyProvider:
 ```java
 TextBodyProvider textBodyProvider = new TextBodyProvider("some text");
 ```
-When you create request you can send it to server by calling send or sendAsync method which is provided by EasyClient. First parameter of method send/sendAsync is EasyHttpRequest object and second one is BodyHandler:
+When you create request you can send it to server by calling send or sendAsync httpMethod which is provided by EasyClient. First parameter of httpMethod send/sendAsync is EasyHttpRequest object and second one is BodyHandler:
 
 Now it is time to handle response from server. For handling responses you can use EasyHttpResponse class: 
 ```java
@@ -141,18 +141,19 @@ Header header = status.get(0);
 String headerKey = header.getKey();
 String headerValue = header.getValue();
 ```
-sendAsync method sending request asynchronously and returns CompleteableFuture:
+sendAsync httpMethod sending request asynchronously and returns CompleteableFuture:
 ```java
 CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request, new StringBodyHandler());
 ```
 Declared Client example:
+
 ```java
-public interface UserCrud {
-    @Headers(headers = {@Header(key = "content-type", value = "application/json")})
-    @PathAndMethod(method = "GET", path = "http://localhost:2323/hello/world")
+import httpenums.HttpMethod;public interface UserCrud {
+    @headers(headers = {@Header(key = "content-type", value = "application/json")})
+    @PathAndMethod(httpMethod = "GET", path = "http://localhost:2323/hello/world")
     @Body("some json")
-    List<String> data(@Method HttpEnums.Method method,
-                      @RequestParam(name="sort") String sorting,
+    List<String> data(@Method httpenums.HttpMethod httpMethod,
+                      @RequestParam(name = "sort") String sorting,
                       @Multipart MultipartBody multipartBody);
 }
 ```

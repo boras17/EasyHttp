@@ -1,6 +1,6 @@
 package requests.bodyhandlers;
 
-import requests.easyresponse.EasyHttpResponse;
+import requests.EasyHttpResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,10 +16,10 @@ public class StringBodyHandler extends AbstractBodyHandler<String>{
     private void calculateBody() throws IOException {
         StringBuilder stringContent = new StringBuilder();
         InputStream inputStream = super.getInputStream();
-        System.out.println(inputStream!=null);
+
 
         if(inputStream != null){
-            InputStreamReader inputStreamReader = inputStreamReader = new InputStreamReader(inputStream);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             String line = null;

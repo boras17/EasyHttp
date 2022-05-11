@@ -1,15 +1,15 @@
 package redirect.redirectexception;
 
-import redirect.GenericError;
+import publishsubscribe.communcates.notifications.GenericHttpError;
 
 public class RedirectionCanNotBeHandledException extends Exception{
-    private GenericError genericError;
+    private GenericHttpError genericHttpError;
 
-    public RedirectionCanNotBeHandledException(GenericError genericError) {
-        super(genericError.getMsg());
+    public RedirectionCanNotBeHandledException(GenericHttpError genericHttpError) {
+        super(genericHttpError.getMsg());
     }
 
-    public GenericError getGenericError() {
-        return this.genericError;
+    public GenericHttpError getGenericError() {
+        return this.genericHttpError;
     }
 }

@@ -1,6 +1,6 @@
 package intercepting;
 
-import Utils.simplerequest.EasyHttpRequest;
+import requests.EasyHttpRequest;
 
 public interface EasyRequestInterceptor extends Interceptor<EasyHttpRequest> {
 }

@@ -1,15 +1,15 @@
 package client;
 
-import Utils.simplerequest.auth.AuthenticationProvider;
+import auth.AuthenticationProvider;
 import publishsubscribe.errorsubscriberimpl.Subscriber;
 import redirect.RedirectionHandler;
-import requests.cookies.CookieExtractor;
+import cookies.CookieExtractor;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-
+/*
 public class EasyHttpBuilder{
     private String userAgent;
     private CookieExtractor cookieExtractor;
@@ -59,3 +59,4 @@ public class EasyHttpBuilder{
     }
 
 }
+*/

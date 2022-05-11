@@ -1,12 +1,12 @@
-import Parts.FilePart;
-import Parts.PartType;
-import Parts.TextPart;
+import parts.FilePart;
+import parts.PartType;
+import parts.TextPart;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import requests.easyrequest.MultipartBody;
-import Utils.simplerequest.jsonsender.bodysenders.JsonBodyProvider;
-import Utils.simplerequest.jsonsender.bodysenders.MultipartBodyProvider;
-import Utils.simplerequest.jsonsender.bodysenders.TextBodyProvider;
+import requests.bodyproviders.JsonBodyProvider;
+import requests.bodyproviders.MultipartBodyProvider;
+import requests.bodyproviders.TextBodyProvider;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

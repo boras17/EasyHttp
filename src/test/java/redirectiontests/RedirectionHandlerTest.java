@@ -1,6 +1,6 @@
 package redirectiontests;
 
-import HttpEnums.Method;
+import httpenums.HttpMethod;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.junit.Test;
@@ -12,8 +12,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.internal.WhiteboxImpl;
 import redirect.RedirectionHandler;
 import redirect.redirectexception.RedirectWithoutLocationException;
-import requests.easyresponse.EasyHttpResponse;
-import Utils.simplerequest.EasyHttpRequest;
+import requests.EasyHttpResponse;
+import requests.EasyHttpRequest;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -26,14 +26,14 @@ public class RedirectionHandlerTest {
 
     @Test
     public void givenRedirectableMethod_To_isRedirectable_ShouldReturnTrue() throws Exception {
-        RedirectionHandler redirectionHandler = new RedirectionHandler(Set.of(Method.GET, Method.POST));
+        RedirectionHandler redirectionHandler = new RedirectionHandler(Set.of(HttpMethod.GET, HttpMethod.POST));
 
         RedirectionHandler spyHandler = PowerMockito.spy(redirectionHandler);
 
         PowerMockito.doCallRealMethod()
-                .when(spyHandler, "isRedirectable", Mockito.isA(Method.class));
+                .when(spyHandler, "isRedirectable", Mockito.isA(HttpMethod.class));
 
-        boolean result = WhiteboxImpl.invokeMethod(redirectionHandler, "isRedirectable",  Method.GET);
+        boolean result = WhiteboxImpl.invokeMethod(redirectionHandler, "isRedirectable",  HttpMethod.GET);
 
         Assertions.assertThat(result)
                 .isTrue();
@@ -41,14 +41,14 @@ public class RedirectionHandlerTest {
 
     @Test
     public void givenRedirectableMethod_To_isRedirectable_ShouldReturnFalse() throws Exception {
-        RedirectionHandler redirectionHandler = new RedirectionHandler(Set.of(Method.GET, Method.POST));
+        RedirectionHandler redirectionHandler = new RedirectionHandler(Set.of(HttpMethod.GET, HttpMethod.POST));
 
         RedirectionHandler spyHandler = PowerMockito.spy(redirectionHandler);
 
         PowerMockito.doCallRealMethod()
-                .when(spyHandler, "isRedirectable", Mockito.isA(Method.class));
+                .when(spyHandler, "isRedirectable", Mockito.isA(HttpMethod.class));
 
-        boolean result = WhiteboxImpl.invokeMethod(redirectionHandler, "isRedirectable",  Method.HEAD);
+        boolean result = WhiteboxImpl.invokeMethod(redirectionHandler, "isRedirectable",  HttpMethod.HEAD);
 
         Assertions.assertThat(result)
                 .isFalse();

@@ -1,8 +1,9 @@
 package requests.bodyhandlers;
 
-import Headers.HttpHeader;
-import HttpEnums.HttpStatus;
-import requests.easyresponse.EasyHttpResponse;
+import client.ResponseStatusLine;
+import headers.HttpHeader;
+import httpenums.HttpStatus;
+import requests.EasyHttpResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,10 +15,27 @@ public abstract class AbstractBodyHandler<T> {
     private List<HttpHeader> httpHeaders;
     private EasyHttpResponse<T> easyResponse;
     private InputStream inputStream;
+    private ResponseStatusLine responseStatusLine;
 
     protected AbstractBodyHandler(){}
 
     public abstract EasyHttpResponse<T> getCalculatedResponse() throws IOException;
+
+    public List<HttpHeader> getHttpHeaders() {
+        return httpHeaders;
+    }
+
+    public void setHttpHeaders(List<HttpHeader> httpHeaders) {
+        this.httpHeaders = httpHeaders;
+    }
+
+    public ResponseStatusLine getResponseStatusLine() {
+        return responseStatusLine;
+    }
+
+    public void setResponseStatusLine(ResponseStatusLine responseStatusLine) {
+        this.responseStatusLine = responseStatusLine;
+    }
 
     public T getBody() {
         return body;

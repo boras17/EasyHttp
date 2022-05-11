@@ -1,15 +1,13 @@
 package redirect;
 
-import Headers.HttpHeader;
-import HttpEnums.Method;
-import publishsubscribe.Channels;
-import publishsubscribe.Event;
-import publishsubscribe.communcates.ErrorCommunicate;
+import headers.HttpHeader;
+import httpenums.HttpMethod;
+import publishsubscribe.communcates.notifications.GenericHttpError;
 import redirect.redirectexception.RedirectWithoutLocationException;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.UnsafeRedirectionException;
-import requests.easyresponse.EasyHttpResponse;
-import Utils.simplerequest.EasyHttpRequest;
+import requests.EasyHttpResponse;
+import requests.EasyHttpRequest;
 
 import java.net.*;
 
@@ -17,21 +15,24 @@ import java.util.Set;
 
 
 public class RedirectionHandler {
-    private final Set<Method> redirectableMethods;
+    private final Set<HttpMethod> redirectableHttpMethods;
     private final RedirectSafety redirectSafety;
 
-    public RedirectionHandler(final Set<Method> redirectableMethods, RedirectSafety redirectSafety){
-        this.redirectableMethods = redirectableMethods;
+    public RedirectionHandler(final Set<HttpMethod> redirectableHttpMethods, RedirectSafety redirectSafety){
+        this.redirectableHttpMethods = redirectableHttpMethods;
         this.redirectSafety = redirectSafety;
     }
 
-    public RedirectionHandler(final Set<Method> redirectableMethods){
-        this(redirectableMethods, RedirectSafety.ALWAYS);
+    public RedirectionHandler(final Set<HttpMethod> redirectableHttpMethods){
+        this(redirectableHttpMethods, RedirectSafety.ALWAYS);
     }
 
     public void modifyRequest(final EasyHttpRequest request,
                               final EasyHttpResponse<?> response) throws
-            UnsafeRedirectionException, RedirectionCanNotBeHandledException {
+            UnsafeRedirectionException,
+            RedirectionCanNotBeHandledException,
+            MalformedURLException {
+
         int responseStatus = response.getStatus();
         final HttpHeader locationHttpHeader = response.getResponseHeaders()
                 .stream()
@@ -48,9 +49,9 @@ public class RedirectionHandler {
             if(locationURL.getProtocol().equals("http") &&
                     this.redirectSafety.equals(RedirectSafety.ALWAYS)){
                 String msg = "Redirection blocked because switching to http from https occurred";
-                GenericError error = new GenericError(responseStatus,response.getResponseHeaders(),msg, ErrorType.APP);
-                Event.operation.publish(Channels.REDIRECT_ERROR_CHANNEL, error);
-                throw new UnsafeRedirectionException(error);
+                //TODO
+                //GenericHttpError error = new GenericHttpError(responseStatus,response.getResponseHeaders(),msg);
+                //throw new UnsafeRedirectionException(error);
             }
 
             if(!isLocationURLAbsolute){
@@ -58,20 +59,19 @@ public class RedirectionHandler {
                 locationURL = this.createLocationURL(requestUrl, resourceLocation);
             }
 
-            boolean isRedirectdable = this.checkIfRedirectCanBeHandled(response, request) &&
+            boolean isRedirectable = this.checkIfRedirectCanBeHandled(response, request) &&
                     this.redirectSafety.equals(RedirectSafety.ALWAYS);
 
-            if(isRedirectdable){
+            if(isRedirectable){
                 request.setUrl(locationURL);
             }else{
-                GenericError genericError = new GenericError(responseStatus,
-                        response.getResponseHeaders(),"Unsuccessful attempting to handle redirect", ErrorType.REDIRECT);
-                Event.operation.publish(Channels.REDIRECT_ERROR_CHANNEL, genericError);
-                throw new RedirectionCanNotBeHandledException(genericError);
+                // TODO
+                //GenericHttpError genericHttpError = new GenericHttpError(responseStatus,
+                //        response.getResponseHeaders(),"Unsuccessful attempting to handle redirect");
+                //throw new RedirectionCanNotBeHandledException(genericHttpError);
             }
         }catch (MalformedURLException e){
-            GenericError genericError = new GenericError(responseStatus, response.getResponseHeaders(), e.getMessage(), ErrorType.APP);
-            Event.operation.publish(Channels.APP_ERROR_CHANNEL, new ErrorCommunicate(genericError));
+            throw new MalformedURLException(e.getMessage());
         }
     }
 
@@ -85,7 +85,7 @@ public class RedirectionHandler {
     private boolean checkIfRedirectCanBeHandled(final EasyHttpResponse<?> response,
                                      final EasyHttpRequest request) {
         final int statusCode = response.getStatus();
-        final Method method = request.getMethod();
+        final HttpMethod httpMethod = request.getMethod();
 
         final HttpHeader locationHttpHeader = response.getResponseHeaders()
                 .stream()
@@ -95,14 +95,14 @@ public class RedirectionHandler {
 
         return switch (statusCode){
             case HttpURLConnection.HTTP_MOVED_PERM, 307,
-                 HttpURLConnection.HTTP_MOVED_TEMP -> isRedirectable(method) && locationHttpHeader !=null;
-            case HttpURLConnection.HTTP_SEE_OTHER -> isRedirectable(method) && method.equals(Method.GET);
+                 HttpURLConnection.HTTP_MOVED_TEMP -> isRedirectable(httpMethod) && locationHttpHeader !=null;
+            case HttpURLConnection.HTTP_SEE_OTHER -> isRedirectable(httpMethod) && httpMethod.equals(HttpMethod.GET);
             default -> false;
         };
     }
 
-    private boolean isRedirectable(final Method method) {
-        return this.redirectableMethods.contains(method);
+    private boolean isRedirectable(final HttpMethod httpMethod) {
+        return this.redirectableHttpMethods.contains(httpMethod);
     }
 
     private URL createLocationURL(final URL requestUrl, final String resourceLocation) throws MalformedURLException {

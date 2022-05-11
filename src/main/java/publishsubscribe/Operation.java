@@ -1,12 +1,7 @@
 package publishsubscribe;
 
-import publishsubscribe.annotations.OnAppError;
-import publishsubscribe.annotations.OnClientError;
-import publishsubscribe.annotations.OnRedirectError;
-import publishsubscribe.annotations.OnServerError;
-import publishsubscribe.communcates.ErrorCommunicate;
-import redirect.ErrorType;
-import redirect.GenericError;
+import publishsubscribe.annotations.*;
+import publishsubscribe.communcates.GenericCommunicate;
 
 import java.lang.annotation.Annotation;
 import java.lang.ref.WeakReference;
@@ -14,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class Operation extends Event {
+public class Operation {
 
     ConcurrentHashMap<String, WeakReference<Object>> channels;
 
@@ -31,23 +26,24 @@ public class Operation extends Event {
     }
 
     private void publishErrors(Object subscriberObj, GenericCommunicate<?> message){
-        GenericError genericError =  ((GenericError)message.getCommunicate());
-        ErrorType errorType = genericError.getErrorType();
+        ChannelMessageType channelMessageType = message.getErrorType();
+        System.out.println(channelMessageType);
         final Method[] methods = subscriberObj.getClass().getDeclaredMethods();
 
         Method method = Stream.of(methods)
                 .filter(_method -> {
-                    return switch (errorType) {
+                    return switch (channelMessageType) {
                         case REDIRECT -> _method.isAnnotationPresent(OnRedirectError.class);
                         case CLIENT -> _method.isAnnotationPresent(OnClientError.class);
                         case SERVER -> _method.isAnnotationPresent(OnServerError.class);
                         case APP -> _method.isAnnotationPresent(OnAppError.class);
+                        case NOTIFICATION -> _method.isAnnotationPresent(OnNotification.class);
                     };
                 }).findFirst().orElseThrow();
 
         Annotation annotation = null;
 
-        switch (errorType){
+        switch (channelMessageType){
             case REDIRECT -> {
                 annotation = method.getAnnotation(OnRedirectError.class);
             }
@@ -60,9 +56,11 @@ public class Operation extends Event {
             case APP -> {
                 annotation = method.getAnnotation(OnAppError.class);
             }
+            case NOTIFICATION -> {
+                annotation = method.getAnnotation(OnNotification.class);
+            }
         }
         if (annotation != null) {
-
             deliverMessage(subscriberObj, method, message);
         }
     }
@@ -73,7 +71,6 @@ public class Operation extends Event {
         Object subscriberObj = subscriberRef.get();
 
         if(message != null && subscriberObj != null) {
-            System.out.println("DATA");
             this.publishErrors(subscriberObj, message);
         }else{
             System.err.println("An attempt to publish error occured but you did not register any related Subscriber");
@@ -82,18 +79,8 @@ public class Operation extends Event {
 
     private  <T> void deliverMessage(T subscriber, Method method, GenericCommunicate<?> message) {
         try {
-            boolean methodFound = false;
-            for (final Class<?> paramClass : method.getParameterTypes()) {
-                if (paramClass.equals(message.getClass())) {
-                    methodFound = true;
-                    break;
-                }
-            }
-            if (methodFound) {
                 method.setAccessible(true);
                 method.invoke(subscriber, message);
-            }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

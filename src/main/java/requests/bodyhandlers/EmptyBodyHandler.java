@@ -1,8 +1,6 @@
 package requests.bodyhandlers;
 
-import requests.easyresponse.EasyHttpResponse;
-
-import java.io.IOException;
+import requests.EasyHttpResponse;
 
 public class EmptyBodyHandler extends AbstractBodyHandler<Void>{
 

@@ -1,5 +1,5 @@
-import Headers.HttpHeader;
-import HttpEnums.HttpStatus;
+import headers.HttpHeader;
+import httpenums.HttpStatus;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,7 +10,7 @@ import requests.bodyhandlers.AbstractBodyHandler;
 import requests.bodyhandlers.EmptyBodyHandler;
 import requests.bodyhandlers.StreamBodyHandler;
 import requests.bodyhandlers.StringBodyHandler;
-import requests.easyresponse.EasyHttpResponse;
+import requests.EasyHttpResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

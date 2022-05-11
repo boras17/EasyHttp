@@ -1,20 +1,14 @@
 package authtests;
 
-import Headers.HttpHeader;
-import HttpEnums.Method;
-import Utils.simplerequest.auth.AuthenticationProvider;
-import Utils.simplerequest.auth.BasicAuthenticationProvider;
-import Utils.simplerequest.auth.digestauth.DigestAuthenticationProvider;
+import headers.HttpHeader;
+import auth.AuthenticationProvider;
+import auth.BasicAuthenticationProvider;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import Utils.simplerequest.EasyHttpRequest;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.List;
 
 public class AuthenticationProviderTest {
 
@@ -37,10 +31,11 @@ public class AuthenticationProviderTest {
         Assertions.assertNotNull(authHeaders);
         String headerName = authHeaders.getKey();
         String headerValue = authHeaders.getValue();
+
         Assertions.assertEquals("Authorization", headerName);
         Assertions.assertEquals(headerValue, expectedHeaderValue);
     }
-
+/*
     @Test
     public void digestTest() throws MalformedURLException {
         DigestAuthenticationProvider digestAuthenticationProvider = new DigestAuthenticationProvider("admin","admin123");
@@ -71,4 +66,6 @@ public class AuthenticationProviderTest {
     public void testDigest() throws MalformedURLException {
 
     }
+    */
+
 }

@@ -1,13 +1,13 @@
 package cookieextractortests;
 
-import Headers.HttpHeader;
+import headers.HttpHeader;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import redirect.redirectexception.RedirectionUnhandled;
-import requests.cookies.Cookie;
-import requests.cookies.CookieExtractor;
-import requests.easyresponse.EasyHttpResponse;
+import cookies.Cookie;
+import cookies.CookieExtractor;
+import requests.EasyHttpResponse;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
