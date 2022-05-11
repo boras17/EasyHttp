@@ -1,13 +1,12 @@
-# client.EasyHttp
+# EasyHttp - It was created in order to boost my skills in java mechanizms and http mechanisms
 How to use?
 Firstly you must create new instance of EasyHtpp. You can do this with EasyHttpBuilder. Example how to create new instance with builder:
 ```java 
-    client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
-                .build();
+EasyHttp client = new client.EasyHttp.EasyHttpBuilder().build();
 ```
 EasyHTtpBuilder makes it possible among others to set user agent and authenticator for requests:
 ```java 
-client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
+EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
                 .setAuthenticationProvider(someAuthenticationProvider)
                 .setUserAgent(someUserAgent)
                 .setCookieExtractor(cookie extractor)
@@ -28,51 +27,47 @@ List<Cookie> cookies = cookieExtractor.getCookies();
 ```
 Now let me explain you how to use 'Authenticator'. We have three options. First one is basic auth:
 ```java
-        AuthenticationProvider authenticationProvider
-                = new BasicAuthenticationProvider("username","password");
-        
-        client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
-                .setAuthenticationProvider(authenticationProvider)
-                .build();
-```
-I thing it is very clear. There is AuthenticationProvider which is asbtract class and BasicAuthenticationProvider class which inherits from AuthenticationProvider. In AuthenticationProvider abstract class we have two parameters constructors which accepts two paramters. First parameter is username and second one is password.
-Let's move on to Digest Authentication support for this purpose you can use DigestAuthenticaionProvider which have constructor with three parameters. First and second parameter wroks as same as in BasicAuthenticationProvider but the third parameter is pointer for instance of DigestConfigurationClass which provide extra data for this type of authentication.
-```java
-    DigestConfiguration digestConfiguration = new DigestConfiguration.DigestConfigBuilder()
-        .setQop(qop)
-        .setNonce(none)
-        .setMethod(httpMethod) 
-        .setRealm(realm)
-        .setHashAlgorithm(alg)
-        .setCnonce(cnonce)
-        .build();
+AuthenticationProvider authenticationProvider
+        = new BasicAuthenticationProvider("username","password");
 
-    AuthenticationProvider authenticationProvider = new DigestAuthenticationProvider("username","password", digestConfiguration);
-
-    client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
+client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
         .setAuthenticationProvider(authenticationProvider)
         .build();
 ```
+I thing it is very clear. There is AuthenticationProvider which is asbtract class and BasicAuthenticationProvider class which inherits from AuthenticationProvider. In AuthenticationProvider abstract class we have two parameters constructors which accepts two paramters. First parameter is username and second one is password.
+
 Ok when we have configured Client the next step is creating requests. If you want create new request you can use EasyHttpRequest class and her bulder just like below:
 ```java
-        EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
-                .setUri(new URL("someurl"))
-                .setMethod(Method.POST)
-                .setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("178.212.54.137",8080)))
-                .addHeader(new Header("name","value"))
-                .build();
+EasyHttpRequest request = new EasyHttpRequest.EasyHttpRequestBuilder()
+        .setUri(new URL("someurl"))
+        .setMethod(Method.POST)
+        .setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("178.212.54.137",8080)))
+        .addHeader(new Header("name","value"))
+        .build();
 ```
-the builder make it possible to set Proxy, URL, headers (yes you can invoke add header a lot of times or pass List of Header's), Http httpMethod which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
+or create interface with interface like in Feign Client:
+Declared Client example:
 ```java
-    public class Person{
-        String name;
-        String surname;
+interface UserCrud{
+    @RequestMethod(method = Method.GET)
+    @Path("https://jsonplaceholder.typicode.com/todos/{id}")
+    String getUserById(@PathVariable("id") int id);
+}
 
-        public Person(String name, String surname){
-            this.name = name;
-            this.surname = surname;
-        }
+UserCrud userCrud = new DeclarativeClientParser<>(UserCrud.class).getImplementation();
+String user = userCrud.getUserById(1);
+```
+the builder make it possible to set Proxy, URL, Headers (yes you can invoke add header a lot of times or pass List of Header's), Http method which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
+```java
+public class Person{
+    String name;
+    String surname;
+
+    public Person(String name, String surname){
+        this.name = name;
+        this.surname = surname;
     }
+}
 ```
 now let's create instance of this class:
 ```java
@@ -114,7 +109,7 @@ If you want you can send text with simple TextBodyProvider:
 ```java
 TextBodyProvider textBodyProvider = new TextBodyProvider("some text");
 ```
-When you create request you can send it to server by calling send or sendAsync httpMethod which is provided by EasyClient. First parameter of httpMethod send/sendAsync is EasyHttpRequest object and second one is BodyHandler:
+When you create request you can send it to server by calling send or sendAsync method which is provided by EasyClient. First parameter of method send/sendAsync is EasyHttpRequest object and second one is BodyHandler:
 
 Now it is time to handle response from server. For handling responses you can use EasyHttpResponse class: 
 ```java
@@ -141,22 +136,11 @@ Header header = status.get(0);
 String headerKey = header.getKey();
 String headerValue = header.getValue();
 ```
-sendAsync httpMethod sending request asynchronously and returns CompleteableFuture:
+sendAsync method sending request asynchronously and returns CompleteableFuture:
 ```java
 CompletableFuture<EasyHttpResponse<String>> response = client.sendAsync(request, new StringBodyHandler());
 ```
-Declared Client example:
 
-```java
-import httpenums.HttpMethod;public interface UserCrud {
-    @headers(headers = {@Header(key = "content-type", value = "application/json")})
-    @PathAndMethod(httpMethod = "GET", path = "http://localhost:2323/hello/world")
-    @Body("some json")
-    List<String> data(@Method httpenums.HttpMethod httpMethod,
-                      @RequestParam(name = "sort") String sorting,
-                      @Multipart MultipartBody multipartBody);
-}
-```
 Now you can easly create an proxy in order to make declared in UserCrud interface requests via DeclarativeClientParser:
 ```java
 UserCrud userCrud = new DeclarativeClientParser<>(UserCrud.class).getImplementation();
@@ -228,3 +212,5 @@ then beforeRequest)
 to do annotation based http client
 
 to do declarable interfaces for making creud request
+
+TODO: encoding request parameters
