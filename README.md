@@ -168,6 +168,8 @@ Channels.SERVER_ERROR_CHANNEL;
 Channels.CLIENT_ERROR_CHANNEL;
 Channels.REDIRECT_ERROR_CHANNEL;
 Channels.APP_ERROR_CHANNEL;
+Channels.REDIRECT_NOTIFICATION;
+Channels.REQUEST_NOTIFICATION;
 ```
 The names of these channels are very intuitive SERVER_ERROR_CHANNEL will handle server errors, CLIENT_ERROR_CHANNEL will handle client errors etc.
 The most important thing of ErrorSubscriber is Properties object. In properties you have to specify the path to the file:
