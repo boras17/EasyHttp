@@ -222,6 +222,19 @@ ResponseInterceptorWrapper<EasyHttpResponseType> has only one constructor:
 ResponseInterceptorWrapper(EasyResponseInterceptor<T> responseInterceptor, int responseInterceptorOrder) 
  ```
 where first parameter is EasyResponseInterceptor and second parameter int define interceptor order 
+If you want register EasyRequestInterceptor you can do that via RequestInterceptors class like below:
+  ```java
+EasyHttpClient defaultClient = DefaultClient.newBuilder().build();
+  EasyRequestInterceptor jwtInterceptor = new EasyRequestInterceptor() {
+      @Override
+      public void handle(EasyHttpRequest request) {
+
+      }
+  };
+RequestInterceptors requestInterceptors = new RequestInterceptors(Arrays.asList(jwtInterceptor));
+
+InterceptableClientDecorator client = new InterceptableClientDecorator(defaultClient, requestInterceptors);
+   ```
 It is possible to create interceptable and loggable client at the same time. For this purpose, firstly you have to create LoggableClient:
 ```java
 LoggableClientDecorator loggableClientDecorator =  new LoggableClientDecorator(DefaultClient.newBuilder().build());
