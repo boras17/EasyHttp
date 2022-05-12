@@ -191,7 +191,37 @@ loggableClientDecorator.configureClientSubscribers(clientSubscribers);
 
 Crud crud = new DeclarativeClientParser<>(Crud.class,loggableClientDecorator).getImplementation();
 ```
+If you want intercept requests and responses you can use InterceptableClientDecorator:
+```java
+EasyHttpClient defaultClient = DefaultClient.newBuilder().build();
+  ResponseInterceptorWrapper<String> responseInterceptorWrapper = new ResponseInterceptorWrapper<>(new EasyResponseInterceptor<String>() {
+      @Override
+      public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
 
+          stringEasyHttpResponse.setBody(stringEasyHttpResponse.getBody().toUpperCase(Locale.ROOT));
+      }
+  }, 1);
+
+ResponseInterceptors<String> responseInterceptors = new ResponseInterceptors<>(Arrays.asList(responseInterceptorWrapper));
+
+InterceptableClientDecorator client = new InterceptableClientDecorator(defaultClient, responseInterceptors);
+```
+InterceptableClientDecorator has three different constructors
+```java
+InterceptableClientDecorator(EasyHttpClient defaultClient, RequestInterceptors requestInterceptors)
+InterceptableClientDecorator(EasyHttpClient defaultClient, ResponseInterceptors<?> responseInterceptors)
+InterceptableClientDecorator(EasyHttpClient defaultClient,ResponseInterceptors<?> responseInterceptors, RequestInterceptors requestInterceptors)
+```
+Use:
+  first constructor in order to handle on requests
+  second constructor for handling only responses
+  or third constructor for both responses and requests
+Before you regsiter ResponseInterceptors you have to create new instance of ResponseInterceptors class and pass list of your interceptor wrappers into the constructor.
+ResponseInterceptorWrapper<EasyHttpResponseType> has only one constructor:
+```java
+ResponseInterceptorWrapper(EasyResponseInterceptor<T> responseInterceptor, int responseInterceptorOrder) 
+ ```
+where first parameter is EasyResponseInterceptor and second parameter int define interceptor order 
 It is possible to create interceptable and loggable client at the same time. For this purpose, firstly you have to create LoggableClient:
 ```java
 LoggableClientDecorator loggableClientDecorator =  new LoggableClientDecorator(DefaultClient.newBuilder().build());
