@@ -1,6 +1,6 @@
 # EasyHttp - It was created in order to boost my skills in java mechanizms and http mechanisms
 How to use?
-Firstly you must create new instance of EasyHtpp. You can do this with EasyHttpBuilder. Example how to create new instance with builder:
+Firstly you must create new instance of EasyHttpClient. You can do this with DefaultClietn builder. Example how to create new instance with builder:
 ```java 
 EasyHttpClient client = DefaultClient.newBuilder().build();
 ```
