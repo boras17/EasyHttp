@@ -161,35 +161,7 @@ Now you can easly create an proxy in order to make declared in UserCrud interfac
 ```java
 UserCrud userCrud = new DeclarativeClientParser<>(UserCrud.class).getImplementation();
 ```
-Response and request interceptors can by provided via addAllInterceptors
-```java
-easyHttp.setRequestInterceptor(new EasyRequestInterceptor() {
-    @Override
-    public void handle(EasyHttpRequest request) {
-
-    }
-});
-
-easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
-    @Override
-    public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
-
-    }
-},1);
-easyHttp.addResponseInterceptor(new EasyResponseInterceptor<String>() {
-    @Override
-    public void handle(EasyHttpResponse<String> stringEasyHttpResponse) {
-
-    }
-},2);
-```
-If you want create some bot running on VPS you can easli log some errors in file using subscriber class:
-```java
- EasyHttp easyHttp = new EasyHttpBuilder()
-                .setSubscribedChannels(Map.of(Channels.CLIENT_ERROR_CHANNEL,
-                        new ErrorSubscriber(properties)))
-                .build();
-```
+Loggable Client
 for that purpose you have to pass Map to setSubscribedChannles. The key of the map entry is Channel name. You can choose five diffrent channels:
 ```java
 Channels.SERVER_ERROR_CHANNEL;
