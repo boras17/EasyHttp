@@ -2,22 +2,22 @@
 How to use?
 Firstly you must create new instance of EasyHtpp. You can do this with EasyHttpBuilder. Example how to create new instance with builder:
 ```java 
-EasyHttp client = new client.EasyHttp.EasyHttpBuilder().build();
+EasyHttpClient client = DefaultClient.newBuilder().build();
 ```
 EasyHTtpBuilder makes it possible among others to set user agent and authenticator for requests:
 ```java 
-EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
-                .setAuthenticationProvider(someAuthenticationProvider)
-                .setUserAgent(someUserAgent)
-                .setCookieExtractor(cookie extractor)
+EasyHttpClient client = DefaultClient.newBuilder()
+                .authenticationProvider(someAuthenticationProvider)
+                .connectionTimeout(Duration.ofSeconds(10))
+                .cookieExtractor(cookie extractor)
                 .build();
 ```
 As you can see, EasyHttpBuilder provide mechanism for easy extracting cookies from response via "cookie extractor".
 How to create cookie extractor? 
 ```java 
 CookieExtractor cookieExtractor = new CookieExtractor();
-        client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
-                .setCookieExtractor(cookieExtractor)
+EasyHttpClient client = DefaultClient.newBuilder()
+                .cookieExtractor(cookieExtractor)
                 .build();
 ```
 As you can see it is very simple you only need create new instance of CookieExtractor and then paste it to .setCookieExtractor().
@@ -30,8 +30,8 @@ Now let me explain you how to use 'Authenticator'. We have three options. First 
 AuthenticationProvider authenticationProvider
         = new BasicAuthenticationProvider("username","password");
 
-client.EasyHttp client = new client.EasyHttp.EasyHttpBuilder()
-        .setAuthenticationProvider(authenticationProvider)
+EasyHttpClient client = DefaultClient.newBuilder()
+        .authenticationProvider(authenticationProvider)
         .build();
 ```
 I thing it is very clear. There is AuthenticationProvider which is asbtract class and BasicAuthenticationProvider class which inherits from AuthenticationProvider. In AuthenticationProvider abstract class we have two parameters constructors which accepts two paramters. First parameter is username and second one is password.
