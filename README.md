@@ -201,16 +201,23 @@ The names of these channels are very intuitive SERVER_ERROR_CHANNEL will handle 
 The most important thing of ErrorSubscriber is Properties object. In properties you have to specify the path to the file:
 ```java
 Properties properties = new Properties();
-properties.put(ErrorChannelConfigProp.SERVER_ERROR_FILE, "errors/servererrors.txt")
+properties.put(ErrorChannelConfigProp.REQUEST_NOTIFICATION_FILE, "C:\\Users\\miko7\\IdeaProjects\\EasyHttp\\notification.txt");
+```
+and then pass properties to DefaulSubscriber constructor:
+```java
+DefaultSubscriber subscriber = new DefaultSubscriber(properties);
+```
+When you already have Subscriber Instance you can register this subscriber via ClientSubscribers class:
+```java
+ClientSubscribers clientSubscribers = new ClientSubscribers();
+clientSubscribers.registerHttpNotificationChannel(Channels.REQUEST_NOTIFICATION, subscriber);
+```
+In order to create Loggable client use LoggableClientDecorator:
+```java
+LoggableClientDecorator loggableClientDecorator =  new LoggableClientDecorator(DefaultClient.newBuilder().build());
+loggableClientDecorator.configureClientSubscribers(clientSubscribers);
 
-Subscriber<?> subscriber = new ErrorSubscriber(properties);
-
-Map<String, Subscriber<?>> subscriberMap = new HashMap<>();
-subscriberMap.put(Channels.CLIENT_ERROR_CHANNEL, subscriber);
-
-EasyHttp easyHttp = new EasyHttpBuilder()
-        .setSubscribedChannels(subscriberMap)
-        .build();
+Crud crud = new DeclarativeClientParser<>(Crud.class,loggableClientDecorator).getImplementation();
 ```
 
 
