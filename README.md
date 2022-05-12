@@ -192,20 +192,14 @@ loggableClientDecorator.configureClientSubscribers(clientSubscribers);
 Crud crud = new DeclarativeClientParser<>(Crud.class,loggableClientDecorator).getImplementation();
 ```
 
-
-// 50% TODO: it is good choose to allow handling multiple request interceptors and give them specified paths to handle
-//TODO try to generify subscriber 
-// todo more tests for error subscribe
-
-//TODO digest authenitcation provider support for response interceptor
-//Maybe it is good to provide some flag: isAfterChallenge
-if(isAfterchallenge){
-then beforeRequest)
-}else{
-    on401Response();
-}
-to do annotation based http client
-
-to do declarable interfaces for making creud request
+It is possible to create interceptable and loggable client at the same time. For this purpose, firstly you have to create LoggableClient:
+```java
+LoggableClientDecorator loggableClientDecorator =  new LoggableClientDecorator(DefaultClient.newBuilder().build());
+        loggableClientDecorator.configureClientSubscribers(clientSubscribers);
+```
+and then use Interceptable client decorator and pass loggable clien via constructor:
+```java
+InterceptableClientDecorator client = new InterceptableClientDecorator(loggableClientDecorator, responseInterceptors);
+```
 
 TODO: encoding request parameters
