@@ -1,10 +1,10 @@
-package client.refractorredclient.clients.builders;
+package client.clients.builders;
 
 import client.ConnectionInitializr;
-import client.refractorredclient.AbstractClientBuilder;
-import client.refractorredclient.EasyHttpClient;
-import client.refractorredclient.clients.DefaultClient;
-import client.refractorredclient.responsestatushandling.DefaultClientResponseStatusHandler;
+import client.AbstractClientBuilder;
+import client.EasyHttpClient;
+import client.clients.DefaultClient;
+import client.responsestatushandling.DefaultClientResponseStatusHandler;
 
 public class DefaultClientBuilder extends AbstractClientBuilder {
     public DefaultClient build(){

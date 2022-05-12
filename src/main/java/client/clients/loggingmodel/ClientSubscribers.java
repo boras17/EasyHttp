@@ -1,4 +1,4 @@
-package client.refractorredclient.clients.loggingmodel;
+package client.clients.loggingmodel;
 
 import publishsubscribe.Operation;
 import publishsubscribe.communcates.notifications.GenericAppError;

@@ -1,7 +1,7 @@
-package client.refractorredclient.responsestatushandling;
+package client.responsestatushandling;
 
-import client.refractorredclient.connectiondata.ConnectionData;
-import client.refractorredclient.EasyHttpClient;
+import client.connectiondata.ConnectionData;
+import client.EasyHttpClient;
 import redirect.AbstractRedirectionHandler;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
 import redirect.redirectexception.UnsafeRedirectionException;

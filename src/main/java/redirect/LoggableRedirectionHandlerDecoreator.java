@@ -1,6 +1,6 @@
 package redirect;
 
-import client.refractorredclient.clients.loggingmodel.ClientSubscribers;
+import client.clients.loggingmodel.ClientSubscribers;
 import publishsubscribe.ChannelMessageType;
 import publishsubscribe.Operation;
 import publishsubscribe.communcates.notifications.GenericAppError;

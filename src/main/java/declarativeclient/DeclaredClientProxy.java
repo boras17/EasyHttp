@@ -1,6 +1,6 @@
 package declarativeclient;
 
-import client.refractorredclient.EasyHttpClient;
+import client.EasyHttpClient;
 import requests.bodyproviders.JsonBodyProvider;
 import requests.bodyproviders.MultipartBodyProvider;
 import declarativeclient.declarativeannotations.httprequests.*;
@@ -27,18 +27,15 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 
 public class DeclaredClientProxy implements InvocationHandler {
 
     private EasyHttpClient easyHttp;
-    private Consumer<EasyHttpResponse<?>> responseConsumer;
 
-    public DeclaredClientProxy(EasyHttpClient easyHttp, Consumer<EasyHttpResponse<?>> responseConsumer){
+    public DeclaredClientProxy(EasyHttpClient easyHttp){
         this.easyHttp = easyHttp;
-        this.responseConsumer = responseConsumer;
     }
 
     public DeclaredClientProxy(){}

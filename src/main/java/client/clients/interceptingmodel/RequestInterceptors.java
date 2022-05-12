@@ -1,4 +1,4 @@
-package client.refractorredclient.clients.interceptingmodel;
+package client.clients.interceptingmodel;
 
 import intercepting.EasyRequestInterceptor;
 

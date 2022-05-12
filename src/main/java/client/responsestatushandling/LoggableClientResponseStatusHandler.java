@@ -1,8 +1,8 @@
-package client.refractorredclient.responsestatushandling;
+package client.responsestatushandling;
 
-import client.refractorredclient.clients.loggingmodel.ClientSubscribers;
-import client.refractorredclient.connectiondata.ConnectionData;
-import client.refractorredclient.clients.LoggableClient;
+import client.clients.loggingmodel.ClientSubscribers;
+import client.connectiondata.ConnectionData;
+import client.clients.LoggableClientDecorator;
 import publishsubscribe.*;
 import publishsubscribe.communcates.notifications.GenericAppError;
 import publishsubscribe.communcates.notifications.GenericHttpError;
@@ -22,12 +22,13 @@ import java.time.LocalDateTime;
 public class LoggableClientResponseStatusHandler extends ResponseStatusHandler{
 
 
-    public LoggableClientResponseStatusHandler(LoggableClient client) {
+    public LoggableClientResponseStatusHandler(LoggableClientDecorator client) {
         super(client);
     }
 
     @Override
     public <T> void handle2xxResponse(ConnectionData<T> connectionData) {
+        System.out.println("DATA");
         try {
             super.default2xxStatusLogic(connectionData.getConnection(), connectionData.getBodyHandler());
             boolean requestNotificationChannelPresent = this.getClientSubscribers().checkIfSubscriberRegistered(Channels.REQUEST_NOTIFICATION, ClientSubscribers.ChannelScope.NOTIFICATION_CHANNELS);
@@ -117,8 +118,8 @@ public class LoggableClientResponseStatusHandler extends ResponseStatusHandler{
         }
     }
 
-    private LoggableClient convertClientToLoggableClient() {
-        return (LoggableClient) super.getClient();
+    private LoggableClientDecorator convertClientToLoggableClient() {
+        return (LoggableClientDecorator) super.getClient();
     }
 
     private Operation getOperation(){

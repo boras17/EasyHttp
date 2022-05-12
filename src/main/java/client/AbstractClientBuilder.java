@@ -1,11 +1,9 @@
-package client.refractorredclient;
+package client;
 
 import auth.AuthenticationProvider;
-import client.ConnectionInitializr;
-import client.refractorredclient.clients.DefaultClient;
-import client.refractorredclient.responsestatushandling.ResponseStatusHandler;
+import client.clients.DefaultClient;
+import client.responsestatushandling.ResponseStatusHandler;
 import cookies.CookieExtractor;
-import redirect.AbstractRedirectionHandler;
 import redirect.RedirectionHandler;
 
 import java.time.Duration;

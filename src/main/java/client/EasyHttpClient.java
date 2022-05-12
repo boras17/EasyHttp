@@ -1,11 +1,9 @@
-package client.refractorredclient;
+package client;
 
 import auth.AuthenticationProvider;
-import client.ConnectionInitializr;
-import client.ResponseStatusLine;
-import client.refractorredclient.connectiondata.ConnectionData;
-import client.refractorredclient.responsestatushandling.ResponseStatusHandler;
-import client.refractorredclient.responsestatushandling.ResponseStatusStrategySwitcher;
+import client.connectiondata.ConnectionData;
+import client.responsestatushandling.ResponseStatusHandler;
+import client.responsestatushandling.ResponseStatusStrategySwitcher;
 import cookies.CookieExtractor;
 import exceptions.RequestObjectRequiredException;
 import exceptions.ResponseHandlerRequired;
@@ -42,7 +40,7 @@ public abstract class EasyHttpClient {
 
     public abstract <T> EasyHttpResponse<T> send(EasyHttpRequest request, AbstractBodyHandler<T> bodyHandler);
     public abstract <T> CompletableFuture<EasyHttpResponse<T>> sendAsync(EasyHttpRequest request, AbstractBodyHandler<T> bodyHandler, ExecutorService service);
-
+    public EasyHttpClient(){}
     protected void addHeadersToRequestObject(HttpURLConnection connection, EasyHttpRequest request){
         List<HttpHeader> headers = request.getHeaders();
         this.getAuthenticationProvider().ifPresent(provider -> {
@@ -193,6 +191,7 @@ public abstract class EasyHttpClient {
     }
 
     public void setResponseStatusHandler(ResponseStatusHandler responseStatusHandler) {
+
         this.responseStatusHandler = responseStatusHandler;
     }
 }

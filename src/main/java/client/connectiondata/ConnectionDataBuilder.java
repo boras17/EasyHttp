@@ -1,4 +1,4 @@
-package client.refractorredclient.connectiondata;
+package client.connectiondata;
 
 import requests.EasyHttpRequest;
 import requests.EasyHttpResponse;

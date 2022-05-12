@@ -1,12 +1,13 @@
-package client.refractorredclient.clients;
+package client.clients;
 
 import auth.AuthenticationProvider;
 import client.ConnectionInitializr;
-import client.refractorredclient.connectiondata.ConnectionData;
-import client.refractorredclient.connectiondata.ConnectionDataBuilder;
-import client.refractorredclient.AbstractClientBuilder;
-import client.refractorredclient.EasyHttpClient;
-import client.refractorredclient.responsestatushandling.ResponseStatusHandler;
+import client.GenericClientBuilder;
+import client.connectiondata.ConnectionData;
+import client.connectiondata.ConnectionDataBuilder;
+import client.EasyHttpClient;
+import client.responsestatushandling.DefaultClientResponseStatusHandler;
+import client.responsestatushandling.ResponseStatusHandler;
 import cookies.CookieExtractor;
 import redirect.AbstractRedirectionHandler;
 import redirect.redirectexception.RedirectionCanNotBeHandledException;
@@ -20,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
 public class DefaultClient extends EasyHttpClient {
 
@@ -75,7 +77,15 @@ public class DefaultClient extends EasyHttpClient {
         super(cookieExtractor, authenticationProvider, connectionInitializr, connectionTimeout, abstractRedirectionHandler);
     }
 
-    public static AbstractClientBuilder newBuilder() {
-        return new AbstractClientBuilder();
+    public static  GenericClientBuilder<DefaultClient> newBuilder() {
+        GenericClientBuilder<DefaultClient> defaultClientGenericClientBuilder = new GenericClientBuilder<>(DefaultClient.class);
+        defaultClientGenericClientBuilder.setDecorator(new Function<DefaultClient, DefaultClient>() {
+            @Override
+            public DefaultClient apply(DefaultClient defaultClient) {
+                 defaultClient.setResponseStatusHandler(new DefaultClientResponseStatusHandler(defaultClient));
+                 return defaultClient;
+            }
+        });
+        return defaultClientGenericClientBuilder;
     }
 }

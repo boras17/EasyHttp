@@ -1,4 +1,4 @@
-package client.refractorredclient.clients.interceptingmodel;
+package client.clients.interceptingmodel;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -13,10 +13,6 @@ public class ResponseInterceptors<T> implements Iterable<ResponseInterceptorWrap
         this.maxsize = responseInterceptors.size();
         this.offset = 0;
         this.responseInterceptors = responseInterceptors;
-    }
-
-    public void addInterceptor() {
-
     }
 
     @Override
@@ -45,5 +41,15 @@ public class ResponseInterceptors<T> implements Iterable<ResponseInterceptorWrap
     @Override
     public void removeInterceptor(ResponseInterceptorWrapper<T> interceptor) {
         this.responseInterceptors.remove(interceptor);
+    }
+
+    @Override
+    public void addAllInterceptors(List<ResponseInterceptorWrapper<T>> interceptors) {
+        this.responseInterceptors.addAll(interceptors);
+    }
+
+    @Override
+    public void removeAllInterceptors(List<ResponseInterceptorWrapper<T>> interceptors) {
+        this.responseInterceptors.removeAll(interceptors);
     }
 }
