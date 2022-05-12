@@ -202,6 +202,22 @@ loggableClientDecorator.configureClientSubscribers(clientSubscribers);
 
 Crud crud = new DeclarativeClientParser<>(Crud.class,loggableClientDecorator).getImplementation();
 ```
+You can implement your own Subscriber via Suibscriber abastract class as below:
+```java
+public class AppErrorSubscriberTest extends Subscriber<GenericAppError> {
+
+    public AppErrorSubscriberTest(Properties properties) {
+        super(properties);
+    }
+
+    @OnAppError
+    public void onAppError(GenericAppError applicationError) {
+        super.writeError(applicationError.formatGenericCommunicate(), ErrorChannelConfigProp.APP_ERROR_FILE, super.getProperties(), StandardOpenOption.WRITE);
+    }
+    
+}
+```
+Subscriber abstract class has one constructor With Properties so inside your own subscriber class constructor you have to invoke constructor from Subscriber via super keyword.
 If you want intercept requests and responses you can use InterceptableClientDecorator:
 ```java
 EasyHttpClient defaultClient = DefaultClient.newBuilder().build();
