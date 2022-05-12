@@ -177,6 +177,15 @@ The most important thing of ErrorSubscriber is Properties object. In properties 
 Properties properties = new Properties();
 properties.put(ErrorChannelConfigProp.REQUEST_NOTIFICATION_FILE, "C:\\Users\\miko7\\IdeaProjects\\EasyHttp\\notification.txt");
 ```
+Possile ErrorChannelConfigProp properties:
+```java
+ErrorChannelConfigProp.REQUEST_NOTIFICATION_FILE
+ErrorChannelConfigProp.SERVER_ERROR_FILE
+ErrorChannelConfigProp.CLIENT_ERROR_FILE
+ErrorChannelConfigProp.REDIRECT_ERROR_FILE
+ErrorChannelConfigProp.APP_ERROR_FILE
+ErrorChannelConfigProp.REDIRECT_NOTIFICATION_FILE
+```
 and then pass properties to DefaulSubscriber constructor:
 ```java
 DefaultSubscriber subscriber = new DefaultSubscriber(properties);
