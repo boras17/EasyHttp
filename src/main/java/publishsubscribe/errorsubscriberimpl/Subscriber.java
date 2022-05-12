@@ -1,14 +1,40 @@
 package publishsubscribe.errorsubscriberimpl;
 
-public interface Subscriber<T> {
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.Properties;
 
-     default void onRedirectErrorCommunicate(T redirectError){}
+public abstract class Subscriber<T> {
 
-     default void onClientErrorCommunicate(T clientError){}
+     private Properties properties;
 
-     default void onServerErrorCommunicate(T serverError){}
+     public Subscriber(Properties properties){
+          this.properties = properties;
+     }
 
-     default void onAppError(T applicationError){}
+     void onRedirectErrorCommunicate(T redirectError){}
 
-     default void onNotification(T notification){}
+     void onClientErrorCommunicate(T clientError){}
+
+     void onServerErrorCommunicate(T serverError){}
+
+     void onAppError(T applicationError){}
+
+     void onNotification(T notification){}
+
+     protected void writeError(String communicate, String errorFile, Properties properties, StandardOpenOption fileOpenOption){
+          Path path = Paths.get(errorFile);
+          try{
+               Files.writeString(path, communicate.concat(System.lineSeparator()), fileOpenOption);
+          } catch (IOException fileNotFoundException) {
+               fileNotFoundException.printStackTrace();
+          }
+     }
+
+     public Properties getProperties() {
+          return properties;
+     }
 }

@@ -12,36 +12,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 
-public class DefaultSubscriber implements Subscriber<GenericHttpNotification>{
-
-    private Properties properties;
+public class DefaultSubscriber extends Subscriber<GenericHttpNotification>{
 
     public DefaultSubscriber(Properties properties){
-        super();
-        this.properties = properties;
+        super(properties);
     }
-
-    private Path extractFile(String errorFile) {
-        String path_str = this.properties.getProperty(errorFile);
-        return Paths.get(path_str);
-    }
-
-    private void writeErrorToFile(String errorFile, String errorCommunicate) {
-        try{
-            Files.writeString(this.extractFile(errorFile), errorCommunicate.concat(System.lineSeparator()), StandardOpenOption.APPEND);
-        } catch (IOException fileNotFoundException) {
-            fileNotFoundException.printStackTrace();
-        }
-    }
-
-    private void writeError(String communicate, String errorFile){
-        this.writeErrorToFile(errorFile, communicate);
-    }
-
 
     @OnNotification
     public void onNotification(GenericHttpNotification notification) {
-        this.writeError(notification.formatGenericCommunicate(), ErrorChannelConfigProp.REQUEST_NOTIFICATION_FILE);
-
+        this.writeError(notification.formatGenericCommunicate(), ErrorChannelConfigProp.REQUEST_NOTIFICATION_FILE, super.getProperties(), StandardOpenOption.APPEND);
     }
 }

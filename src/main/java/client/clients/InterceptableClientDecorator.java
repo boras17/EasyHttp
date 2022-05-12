@@ -37,6 +37,7 @@ public class InterceptableClientDecorator extends EasyHttpClient {
 
     @Override
     public <ResponseType> EasyHttpResponse<ResponseType> send(EasyHttpRequest request, AbstractBodyHandler<ResponseType> bodyHandler) {
+        System.out.println(request);
         for (EasyRequestInterceptor requestInterceptor : requestInterceptors) {
             requestInterceptor.handle(request);
         }
