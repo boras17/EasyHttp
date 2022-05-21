@@ -73,6 +73,7 @@ or you can use DefaultClient:
 ```java
 Crud crud = new DeclarativeClientParser<>(Crud.class).getImplementation();
 ```
+
 the builder make it possible to set Proxy, URL, Headers (yes you can invoke add header a lot of times or pass List of Header's), Http method which is delivered by 'Mothod' enum. Very important part of this section is BodyProvider which allow you to pass body for this request. I created a few diffrent body providers. First body provider allows to send json body. If you want send json body you have to specify what you want to send for example i want send json representation of my Person class instance: 
 ```java
 public class Person{
@@ -92,6 +93,26 @@ now let's create instance of this class:
 now when you have your body it is time to create instance of JsonBodyProvider and give him our body as a paramaeter of his constructor:
 ```java
     JsonBodyProvider jsonBodyProvider = new JsonBodyProvider(person);
+```
+If you want serialize custom property name you can use SerializedName annotation on field level:
+```java
+@SerializedName(name="is_user_alive")
+private boolean alive;
+```
+And you can use custom field serialization too via EasySerializer<FieldType> 
+```java
+
+public class LocalDateTimeSerializer extends EasySerializer<LocalDateTime>{
+    @Override
+    public String serialize(LocalDateTime date) {
+        return String.valueOf("do you remember".concat(String.valueOf(date.get(ChronoField.DAY_OF_WEEK))).concat("\""));
+    }
+}
+```
+And then register custom field serializer via EasySerialize annotation:
+```java
+@EasySerialize(use=LocalDateTimeSerializer.class)
+private LocalDateTime birthDate;
 ```
 and the final step is passing jsonBodyProvider to our Request:
 ```java
